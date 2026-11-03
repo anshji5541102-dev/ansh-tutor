@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     // ==============================================================
     if (textbeeApiKey && textbeeDeviceId) {
       try {
-        const textbeeUrl = `https://api.textbee.dev/api/v1/gateway/devices/${textbeeDeviceId}/sendSMS`
+        const textbeeUrl = 'https://api.textbee.dev/api/v1/gateway/send-sms'
         const res = await fetch(textbeeUrl, {
           method: 'POST',
           headers: {
@@ -45,6 +45,7 @@ export async function POST(request: Request) {
           body: JSON.stringify({
             recipients: [`+91${digits}`],
             message: `Your Ansh Tutor verification code is ${generatedOtp}. Do not share this OTP with anyone.`,
+            deviceId: textbeeDeviceId,
           }),
         })
 
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
             success: true,
             provider: 'textbee-android',
             sessionId: digits,
-            message: `Real SMS OTP sent to +91 ${digits}`,
+            message: `Real SMS OTP dispatched to +91 ${digits}`,
           })
         } else {
           console.error('Textbee error:', textbeeData)
