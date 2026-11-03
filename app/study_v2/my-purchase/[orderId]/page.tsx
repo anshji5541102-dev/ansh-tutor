@@ -18,17 +18,32 @@ function OrderDetailsContent() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [order, setOrder] = useState<PurchaseItem | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
-  const rawId = (params?.orderId as string) || "jee-prep-2027";
-  // Match by id or orderId or substring
-  const order: PurchaseItem =
-    purchasesList.find(
-      (p) =>
-        p.id === rawId ||
-        p.orderId === rawId ||
-        rawId.includes(p.orderId) ||
-        rawId.includes(p.id)
-    ) || purchasesList[0];
+  const rawId = (params?.orderId as string) || "";
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored: PurchaseItem[] = JSON.parse(
+          localStorage.getItem("ansh_purchases") || "[]"
+        );
+        const match = stored.find(
+          (p) =>
+            p.id === rawId ||
+            p.orderId === rawId ||
+            (rawId && p.orderId && rawId.includes(p.orderId)) ||
+            (rawId && p.id && rawId.includes(p.id))
+        );
+        setOrder(match || stored[0] || null);
+      } catch {
+        setOrder(null);
+      } finally {
+        setLoaded(true);
+      }
+    }
+  }, [rawId]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -78,7 +93,23 @@ function OrderDetailsContent() {
           )}
 
           {/* Main 2-Column Grid matching Screenshot media_1793631690824_657f0f5e.png */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-6xl pb-12">
+          {!order && loaded ? (
+            <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center max-w-lg mx-auto shadow-xs my-8 space-y-4">
+              <h3 className="text-lg font-bold text-gray-900">Order Not Found</h3>
+              <p className="text-xs text-gray-500">
+                This order record does not exist or has been removed.
+              </p>
+              <button
+                onClick={() => router.push("/study_v2/my-purchase")}
+                className="px-6 py-2.5 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
+              >
+                Back to My Purchases
+              </button>
+            </div>
+          ) : !order ? (
+            <div className="text-center py-12 text-xs text-gray-400">Loading Order Details...</div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-6xl pb-12">
             {/* LEFT COLUMN: Payment Successful Card + Batch Card */}
             <div className="lg:col-span-8 space-y-6">
               {/* Card 1: Payment Successful Box */}
@@ -345,6 +376,7 @@ function OrderDetailsContent() {
               </div>
             </div>
           </div>
+          )}
         </main>
       </div>
     </div>

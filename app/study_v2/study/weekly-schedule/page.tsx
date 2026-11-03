@@ -28,67 +28,8 @@ interface ScheduledClass {
   chapter: string;
 }
 
-// Mock scheduled classes by day in Nov 2026
-const scheduledClassesData: Record<number, ScheduledClass[]> = {
-  2: [
-    {
-      id: "live-math-1",
-      subject: "Mathematics",
-      chapter: "Quadratic Equations",
-      title: "Live Problem Solving & Doubt Clearing Drill",
-      educator: "Anurag Sir",
-      time: "05:00 PM - 06:30 PM",
-      duration: "90 Mins",
-      isLiveNow: true,
-    },
-    {
-      id: "live-sci-1",
-      subject: "Science",
-      chapter: "Force & Pressure",
-      title: "Concepts & NCERT Exemplar Numericals",
-      educator: "Pooja Ma'am",
-      time: "07:00 PM - 08:15 PM",
-      duration: "75 Mins",
-      isLiveNow: false,
-    },
-  ],
-  3: [
-    {
-      id: "live-eng-1",
-      subject: "English",
-      chapter: "Active & Passive Voice",
-      title: "Master Grammar & Reading Comprehension Drill",
-      educator: "Rashmi Ma'am",
-      time: "04:30 PM - 05:45 PM",
-      duration: "75 Mins",
-      isLiveNow: false,
-    },
-  ],
-  4: [
-    {
-      id: "live-math-2",
-      subject: "Mathematics",
-      chapter: "Understanding Quadrilaterals",
-      title: "Geometric Properties & Proofs in 3D",
-      educator: "Anurag Sir",
-      time: "05:00 PM - 06:30 PM",
-      duration: "90 Mins",
-      isLiveNow: false,
-    },
-  ],
-  6: [
-    {
-      id: "live-sci-2",
-      subject: "Science",
-      chapter: "Chemical Effects of Electric Current",
-      title: "Electroplating & Electrolytes Live Lab",
-      educator: "Pooja Ma'am",
-      time: "06:00 PM - 07:30 PM",
-      duration: "90 Mins",
-      isLiveNow: false,
-    },
-  ],
-};
+// Scheduled classes by day (populated when classes are published by admin)
+const scheduledClassesData: Record<number, ScheduledClass[]> = {};
 
 function WeeklyScheduleContent() {
   const router = useRouter();

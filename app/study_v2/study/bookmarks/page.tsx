@@ -28,45 +28,6 @@ interface BookmarkedQuestion {
   bookmarkedAt?: string;
 }
 
-const defaultSampleBookmarks: BookmarkedQuestion[] = [
-  {
-    id: 1,
-    questionNumber: 1,
-    testId: "jee-adv-2026-p1",
-    testTitle: "JEE Advanced 2026 Paper 1",
-    subject: "Physics",
-    text: "A vernier caliper has 20 divisions on the vernier scale which coincide with 19 divisions on the main scale. The least count of the instrument is (1 main scale division = 1 mm):",
-    options: [
-      { key: "A", text: "0.1 mm" },
-      { key: "B", text: "0.05 mm" },
-      { key: "C", text: "0.01 mm" },
-      { key: "D", text: "0.005 mm" },
-    ],
-    correctOptionKey: "B",
-    explanation:
-      "Least Count = 1 MSD - 1 VSD. Given 20 VSD = 19 MSD => 1 VSD = (19/20) MSD = 0.95 mm. LC = 1 mm - 0.95 mm = 0.05 mm.",
-    bookmarkedAt: "02 Nov 2026",
-  },
-  {
-    id: 11,
-    questionNumber: 11,
-    testId: "permutations-and-combinations",
-    testTitle: "Permutations & Combinations DPP",
-    subject: "Mathematics",
-    text: "The number of non-negative integer solutions to the equation x₁ + x₂ + x₃ + x₄ = 12 is:",
-    options: [
-      { key: "A", text: "455" },
-      { key: "B", text: "364" },
-      { key: "C", text: "220" },
-      { key: "D", text: "495" },
-    ],
-    correctOptionKey: "A",
-    explanation:
-      "The formula for non-negative integer solutions to x₁ + x₂ + ... + xᵣ = n is C(n + r - 1, r - 1). Here n = 12, r = 4. Number of solutions = C(12 + 4 - 1, 4 - 1) = C(15, 3) = (15 × 14 × 13) / (3 × 2 × 1) = 455.",
-    bookmarkedAt: "02 Nov 2026",
-  },
-];
-
 function BookmarksContent() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -84,14 +45,9 @@ function BookmarksContent() {
             return;
           }
         }
-        // If empty, initialize with high-yield default sample questions
-        setBookmarks(defaultSampleBookmarks);
-        localStorage.setItem(
-          "ansh_bookmarked_questions",
-          JSON.stringify(defaultSampleBookmarks)
-        );
+        setBookmarks([]);
       } catch {
-        setBookmarks(defaultSampleBookmarks);
+        setBookmarks([]);
       }
     }
   }, []);

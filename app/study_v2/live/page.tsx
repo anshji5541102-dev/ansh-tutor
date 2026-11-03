@@ -49,9 +49,9 @@ function LiveClassContent() {
 
   const lectureTitle =
     searchParams.get("title") ||
-    "Physical Instruments: Vernier Calipers, Multimeter & Measuring Devices";
-  const facultyName = searchParams.get("faculty") || "Rajwant Singh Sir";
-  const subjectName = searchParams.get("subject") || "Physics";
+    "Live Interactive Session";
+  const facultyName = searchParams.get("faculty") || "Faculty";
+  const subjectName = searchParams.get("subject") || "Live Class";
 
   const containerRef = useRef<HTMLDivElement>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
@@ -76,36 +76,7 @@ function LiveClassContent() {
       sender: "Ansh Tutor System",
       avatarColor: "bg-[#5A4BDA]",
       text: "Welcome to Live Class! Keep the chat polite & focused on concepts.",
-      time: "8:55 PM",
-      isTeacher: true,
-    },
-    {
-      id: "2",
-      sender: "Priya Sharma",
-      avatarColor: "bg-emerald-600",
-      text: "Good evening Sir! Excited for Vernier Calipers numericals today.",
-      time: "8:56 PM",
-    },
-    {
-      id: "3",
-      sender: "Aman Gupta",
-      avatarColor: "bg-purple-600",
-      text: "Audio & video crystal clear sir 👍",
-      time: "8:57 PM",
-    },
-    {
-      id: "4",
-      sender: "Rohan Verma",
-      avatarColor: "bg-amber-600",
-      text: "Sir, what is the zero error formula when positive?",
-      time: "8:58 PM",
-    },
-    {
-      id: "5",
-      sender: "Rajwant Singh Sir",
-      avatarColor: "bg-red-600",
-      text: "Correct reading = Observed reading - (Zero Error). We will solve 5 PYQs now!",
-      time: "8:59 PM",
+      time: "Live",
       isTeacher: true,
     },
   ]);
@@ -114,14 +85,9 @@ function LiveClassContent() {
   // Poll States
   const [selectedPollOption, setSelectedPollOption] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
-  const [pollTimer, setPollTimer] = useState(38);
+  const [pollTimer, setPollTimer] = useState(60);
 
-  const [pollOptions, setPollOptions] = useState<PollOption[]>([
-    { key: "A", text: "Moving Coil Galvanometer", votes: 84 },
-    { key: "B", text: "Potentiometer (Null Deflection)", votes: 612 },
-    { key: "C", text: "Digital Voltmeter", votes: 142 },
-    { key: "D", text: "Simple Hot Wire Meter", votes: 38 },
-  ]);
+  const [pollOptions, setPollOptions] = useState<PollOption[]>([]);
 
   // Auto-scroll chat
   useEffect(() => {
@@ -638,125 +604,112 @@ function LiveClassContent() {
         {/* ===================== TAB 2: LIVE POLL ===================== */}
         {sideTab === "poll" && (
           <div className="flex-1 overflow-y-auto p-4 space-y-5 min-h-0">
-            {/* Active Poll Card */}
-            <div className="bg-[#1E293B] rounded-2xl border border-gray-700/80 p-4 space-y-4 shadow-sm">
-              {/* Poll Header: Timer + Live Status */}
-              <div className="flex items-center justify-between pb-3 border-b border-gray-700/60">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">
-                    {pollTimer > 0 ? "Live Question" : "Poll Ended"}
-                  </span>
+            {pollOptions.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 text-center space-y-3 py-16">
+                <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-[#818CF8] flex items-center justify-center text-xl border border-purple-500/20">
+                  📊
                 </div>
-
-                <div className="flex items-center gap-1.5 text-xs text-gray-300 font-mono font-bold bg-black/40 px-2.5 py-1 rounded-full border border-gray-700">
-                  <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  <span>{pollTimer > 0 ? `${pollTimer}s left` : "Closed"}</span>
-                </div>
-              </div>
-
-              {/* Poll Question */}
-              <div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
-                  Question #3 • Physics
-                </span>
-                <p className="text-xs sm:text-sm font-bold text-white leading-snug">
-                  Which instrument is used to measure potential difference with
-                  the highest accuracy without drawing any current?
+                <h4 className="text-sm font-bold text-white">No Active Poll</h4>
+                <p className="text-xs text-gray-400 max-w-xs leading-relaxed">
+                  The educator has not launched a poll yet. Interactive questions and quiz polls will appear here live during class.
                 </p>
               </div>
+            ) : (
+              <div className="bg-[#1E293B] rounded-2xl border border-gray-700/80 p-4 space-y-4 shadow-sm">
+                {/* Poll Header: Timer + Live Status */}
+                <div className="flex items-center justify-between pb-3 border-b border-gray-700/60">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">
+                      {pollTimer > 0 ? "Live Question" : "Poll Ended"}
+                    </span>
+                  </div>
 
-              {/* Poll Options (Clickable before vote, shows live percentages after vote) */}
-              <div className="space-y-2.5 pt-1">
-                {pollOptions.map((opt) => {
-                  const percentage =
-                    totalVotes > 0
-                      ? Math.round((opt.votes / totalVotes) * 100)
-                      : 0;
-                  const isSelected = selectedPollOption === opt.key;
-                  const isCorrect = opt.key === "B"; // Potentiometer
+                  <div className="flex items-center gap-1.5 text-xs text-gray-300 font-mono font-bold bg-black/40 px-2.5 py-1 rounded-full border border-gray-700">
+                    <Clock className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{pollTimer > 0 ? `${pollTimer}s left` : "Closed"}</span>
+                  </div>
+                </div>
 
-                  return (
-                    <button
-                      key={opt.key}
-                      disabled={hasVoted || pollTimer === 0}
-                      onClick={() => handleVote(opt.key)}
-                      className={`w-full text-left p-3 rounded-xl border transition-all relative overflow-hidden cursor-pointer ${
-                        isSelected
-                          ? "border-[#5A4BDA] bg-[#5A4BDA]/15"
-                          : "border-gray-700 bg-black/30 hover:bg-black/50 hover:border-gray-600"
-                      }`}
-                    >
-                      {/* Live Percentage Fill Bar if voted */}
-                      {hasVoted && (
-                        <div
-                          className={`absolute left-0 top-0 bottom-0 opacity-20 rounded-xl transition-all duration-700 ${
-                            isCorrect ? "bg-emerald-500" : "bg-[#5A4BDA]"
-                          }`}
-                          style={{ width: `${percentage}%` }}
-                        />
-                      )}
+                {/* Poll Question */}
+                <div>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1">
+                    Live Question
+                  </span>
+                  <p className="text-xs sm:text-sm font-bold text-white leading-snug">
+                    Question will appear when broadcasted by faculty.
+                  </p>
+                </div>
 
-                      <div className="relative z-10 flex items-center justify-between gap-3 text-xs">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span
-                            className={`w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 ${
-                              isSelected
-                                ? "bg-[#5A4BDA] text-white"
-                                : "bg-gray-700 text-gray-300"
-                            }`}
-                          >
-                            {opt.key}
-                          </span>
-                          <span className="text-gray-200 font-medium truncate">
-                            {opt.text}
-                          </span>
-                        </div>
+                {/* Poll Options */}
+                <div className="space-y-2.5 pt-1">
+                  {pollOptions.map((opt) => {
+                    const percentage =
+                      totalVotes > 0
+                        ? Math.round((opt.votes / totalVotes) * 100)
+                        : 0;
+                    const isSelected = selectedPollOption === opt.key;
 
+                    return (
+                      <button
+                        key={opt.key}
+                        disabled={hasVoted || pollTimer === 0}
+                        onClick={() => handleVote(opt.key)}
+                        className={`w-full text-left p-3 rounded-xl border transition-all relative overflow-hidden cursor-pointer ${
+                          isSelected
+                            ? "border-[#5A4BDA] bg-[#5A4BDA]/15"
+                            : "border-gray-700 bg-black/30 hover:bg-black/50 hover:border-gray-600"
+                        }`}
+                      >
                         {hasVoted && (
-                          <span
-                            className={`font-bold font-mono text-xs shrink-0 ${
-                              isCorrect ? "text-emerald-400" : "text-gray-300"
-                            }`}
-                          >
-                            {percentage}%
-                          </span>
+                          <div
+                            className="absolute left-0 top-0 bottom-0 opacity-20 rounded-xl transition-all duration-700 bg-[#5A4BDA]"
+                            style={{ width: `${percentage}%` }}
+                          />
                         )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
 
-              {/* Poll Footer */}
-              <div className="flex items-center justify-between pt-2 border-t border-gray-700/60 text-[11px] text-gray-400">
-                <span>Total Votes: {totalVotes}</span>
-                {hasVoted ? (
-                  <span className="text-emerald-400 font-bold flex items-center gap-1">
-                    <Check className="w-3.5 h-3.5" /> Vote Submitted
-                  </span>
-                ) : (
-                  <span className="text-amber-400 font-semibold">
-                    Select an option to vote
-                  </span>
-                )}
-              </div>
-            </div>
+                        <div className="relative z-10 flex items-center justify-between gap-3 text-xs">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <span
+                              className={`w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 ${
+                                isSelected
+                                  ? "bg-[#5A4BDA] text-white"
+                                  : "bg-gray-700 text-gray-300"
+                              }`}
+                            >
+                              {opt.key}
+                            </span>
+                            <span className="text-gray-200 font-medium truncate">
+                              {opt.text}
+                            </span>
+                          </div>
 
-            {/* Past Polls Summary Card */}
-            <div className="bg-[#1E293B]/60 rounded-xl border border-gray-800 p-3 space-y-2">
-              <span className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">
-                Previous Polls from this Class
-              </span>
-              <div className="text-xs text-gray-300 flex items-center justify-between py-1 border-b border-gray-800">
-                <span>Q1: Least Count of Vernier Scale</span>
-                <span className="text-emerald-400 font-bold">88% Correct</span>
+                          {hasVoted && (
+                            <span className="font-bold font-mono text-xs shrink-0 text-gray-300">
+                              {percentage}%
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Poll Footer */}
+                <div className="flex items-center justify-between pt-2 border-t border-gray-700/60 text-[11px] text-gray-400">
+                  <span>Total Votes: {totalVotes}</span>
+                  {hasVoted ? (
+                    <span className="text-emerald-400 font-bold flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" /> Vote Submitted
+                    </span>
+                  ) : (
+                    <span className="text-amber-400 font-semibold">
+                      Select an option to vote
+                    </span>
+                  )}
+                </div>
               </div>
-              <div className="text-xs text-gray-300 flex items-center justify-between py-1">
-                <span>Q2: Multimeter resistance range dial</span>
-                <span className="text-emerald-400 font-bold">92% Correct</span>
-              </div>
-            </div>
+            )}
           </div>
         )}
       </div>

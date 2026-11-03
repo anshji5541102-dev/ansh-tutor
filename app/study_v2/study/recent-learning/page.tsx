@@ -37,87 +37,9 @@ interface PracticeHistoryItem {
   testId: string;
 }
 
-const mockVideoHistory: VideoHistoryItem[] = [
-  {
-    id: "vid-1",
-    subject: "Physics",
-    faculty: "Rajwant Singh Sir",
-    title:
-      "Units & Measurements: Units & Measurements in One Shot | All Concepts & PYQs Covered...",
-    duration: "6h 7m",
-    isCompleted: true,
-    thumbnail: "/batches/user_avatar.png",
-  },
-  {
-    id: "vid-2",
-    subject: "Mathematics",
-    faculty: "Ritik Mishra Sir",
-    title:
-      "Linear Equations in One Variable: NCERT Detailed Exercise & Exemplar Questions",
-    duration: "1h 45m",
-    watchedDuration: "42m watched",
-    isCompleted: false,
-    thumbnail: "/batches/user_avatar.png",
-  },
-  {
-    id: "vid-3",
-    subject: "Chemistry",
-    faculty: "Samridhi Sharma Ma'am",
-    title:
-      "Synthetic Fibres & Plastics: Fast-Track Revision with Important NCERT In-Text Problems",
-    duration: "2h 15m",
-    isCompleted: true,
-    thumbnail: "/batches/user_avatar.png",
-  },
-];
+const mockVideoHistory: VideoHistoryItem[] = [];
 
-const mockPracticeHistory: PracticeHistoryItem[] = [
-  {
-    id: "prac-1",
-    type: "TEST",
-    date: "26 Aug",
-    title: "Sequence and Series",
-    marks: "100 Marks",
-    xp: "Earn 25",
-    testId: "jee-adv-2026-p1",
-  },
-  {
-    id: "prac-2",
-    type: "TEST",
-    date: "27 Feb",
-    title: "21 Jan 2026 - Shift 01",
-    marks: "300 Marks",
-    xp: "Earn 75",
-    testId: "jee-adv-2026-p1",
-  },
-  {
-    id: "prac-3",
-    type: "TEST",
-    date: "27 Aug",
-    title: "Permutations and Combinations",
-    marks: "100 Marks",
-    xp: "Earn 25",
-    testId: "jee-adv-2026-p1",
-  },
-  {
-    id: "prac-4",
-    type: "TEST",
-    date: "02 Nov",
-    title: "JEE Advanced 2026 Paper 1 - Full Mock Test",
-    marks: "180 Marks",
-    xp: "Earn 50",
-    testId: "jee-adv-2026-p1",
-  },
-  {
-    id: "prac-5",
-    type: "DPP",
-    date: "Today",
-    title: "Units & Dimensions Daily Practice Problem 01",
-    marks: "40 Marks",
-    xp: "Earn 10",
-    testId: "jee-adv-2026-p1",
-  },
-];
+const mockPracticeHistory: PracticeHistoryItem[] = [];
 
 function RecentLearningContent() {
   const router = useRouter();
@@ -237,7 +159,18 @@ function RecentLearningContent() {
               {/* TAB 1: VIDEOS */}
               {activeTab === "videos" && (
                 <div className="space-y-4">
-                  {mockVideoHistory.map((item) => (
+                  {mockVideoHistory.length === 0 ? (
+                    <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center max-w-lg mx-auto shadow-xs my-6 space-y-3">
+                      <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-[#5A4BDA] flex items-center justify-center mx-auto text-2xl font-bold">
+                        📺
+                      </div>
+                      <h4 className="text-base font-bold text-gray-900">No Video Lectures Watched Yet</h4>
+                      <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                        When you start watching live or recorded lectures, your progress and history will be saved here automatically.
+                      </p>
+                    </div>
+                  ) : (
+                    mockVideoHistory.map((item) => (
                     <div
                       key={item.id}
                       className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 shadow-2xs hover:border-gray-300 transition-all flex flex-col justify-between relative overflow-hidden"
@@ -316,14 +249,25 @@ function RecentLearningContent() {
                         </button>
                       </div>
                     </div>
-                  ))}
+                  )))}
                 </div>
               )}
 
               {/* TAB 2: PRACTICE (DPPs, Tests & Test Series - Strictly NO Syllabus Option) */}
               {activeTab === "practice" && (
                 <div className="space-y-4">
-                  {mockPracticeHistory.map((item) => (
+                  {mockPracticeHistory.length === 0 ? (
+                    <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center max-w-lg mx-auto shadow-xs my-6 space-y-3">
+                      <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-[#5A4BDA] flex items-center justify-center mx-auto text-2xl font-bold">
+                        🎯
+                      </div>
+                      <h4 className="text-base font-bold text-gray-900">No Practice Tests Attempted</h4>
+                      <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                        Take mock tests or DPP drills from your batches to build and view your practice record here.
+                      </p>
+                    </div>
+                  ) : (
+                    mockPracticeHistory.map((item) => (
                     <div
                       key={item.id}
                       className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 shadow-2xs hover:border-gray-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
@@ -372,7 +316,7 @@ function RecentLearningContent() {
                         </Link>
                       </div>
                     </div>
-                  ))}
+                  )))}
                 </div>
               )}
             </div>

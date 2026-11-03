@@ -21,9 +21,9 @@ function WatchPlayerContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const lectureTitle = searchParams.get("title") || "Mathematics Marathon : One Shot";
-  const subjectName = searchParams.get("subject") || "Mathematics";
-  const returnUrl = searchParams.get("returnUrl") || "/study_v2/study/all-classes/mathematics";
+  const lectureTitle = searchParams.get("title") || "Recorded Lecture Session";
+  const subjectName = searchParams.get("subject") || "General";
+  const returnUrl = searchParams.get("returnUrl") || "/study_v2/study/my-batches";
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);

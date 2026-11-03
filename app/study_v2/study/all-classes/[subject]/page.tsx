@@ -49,6 +49,9 @@ function SubjectDetailContent() {
   const [videoModalOpen, setVideoModalOpen] = useState(false)
   const [notesModalOpen, setNotesModalOpen] = useState(false)
   const [attemptedTests, setAttemptedTests] = useState<Record<string, boolean>>({})
+  const [lecturesList, setLecturesList] = useState<any[]>([])
+  const [dppsList, setDppsList] = useState<any[]>([])
+  const [notesList, setNotesList] = useState<any[]>([])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -57,9 +60,21 @@ function SubjectDetailContent() {
         if (saved) {
           setAttemptedTests(JSON.parse(saved))
         }
-      } catch {}
+
+        const storedLec = JSON.parse(localStorage.getItem('ansh_admin_lectures') || '[]')
+        const storedDpp = JSON.parse(localStorage.getItem('ansh_admin_dpps') || '[]')
+        const storedNotes = JSON.parse(localStorage.getItem('ansh_admin_notes') || '[]')
+
+        setLecturesList(Array.isArray(storedLec) ? storedLec.filter((l: any) => !l.subject || l.subject.toLowerCase() === subjectKey) : [])
+        setDppsList(Array.isArray(storedDpp) ? storedDpp.filter((d: any) => !d.subject || d.subject.toLowerCase() === subjectKey) : [])
+        setNotesList(Array.isArray(storedNotes) ? storedNotes.filter((n: any) => !n.subject || n.subject.toLowerCase() === subjectKey) : [])
+      } catch {
+        setLecturesList([])
+        setDppsList([])
+        setNotesList([])
+      }
     }
-  }, [])
+  }, [subjectKey])
 
   // Lecture completion tracking (persisted in localStorage)
   const [completedLectures, setCompletedLectures] = useState<Record<string, boolean>>(() => {
@@ -92,11 +107,9 @@ function SubjectDetailContent() {
 
   // Chapters list for left sidebar
   const chapters = [
-    { id: 'ch-1', code: 'CH - 01', title: 'Half Yearly Marathon' },
-    { id: 'ch-2', code: 'CH - 02', title: currentSubject.short === 'Maths' ? 'Rational Numbers' : 'Fundamental Principles' },
-    { id: 'ch-3', code: 'CH - 03', title: currentSubject.short === 'Maths' ? 'Linear Equations in One Variable' : 'Core Chapter Concepts' },
-    { id: 'ch-4', code: 'CH - 04', title: currentSubject.short === 'Maths' ? 'Understanding Quadrilaterals' : 'Advanced Applications' },
-    { id: 'ch-5', code: 'CH - 05', title: currentSubject.short === 'Maths' ? 'Data Handling & Graphs' : 'Exam Revision Drill' },
+    { id: 'ch-1', code: 'CH - 01', title: 'Chapter 1: Foundations & Concepts' },
+    { id: 'ch-2', code: 'CH - 02', title: 'Chapter 2: Core Theory & Practice' },
+    { id: 'ch-3', code: 'CH - 03', title: 'Chapter 3: Advanced Applications' },
   ]
 
   const activeChapterData = chapters.find((c) => c.id === selectedChapter) || chapters[0]
@@ -224,101 +237,94 @@ function SubjectDetailContent() {
                 })}
               </div>
 
-              {/* TAB CONTENT: LECTURES ONLY (All column removed as requested) */}
+              {/* TAB CONTENT: LECTURES ONLY */}
               {activeSubTab === 'Lectures' && (
                 <div className="space-y-4">
-                  
-                  {/* Exact Lecture Card from Screenshot */}
-                  <div className="border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 bg-white shadow-2xs hover:border-gray-300 transition-shadow">
-                    
-                    {/* Top Row: Thumbnail + Info (Left) and Checkmark (Right) */}
-                    <div className="flex items-start justify-between gap-4 mb-5">
-                      
-                      {/* Left: Thumbnail & Details */}
-                      <div className="flex items-center gap-4">
-                        
-                        {/* Educator Thumbnail Container */}
-                        <div className="w-[72px] h-[72px] sm:w-[80px] sm:h-[80px] rounded-xl bg-[#FCE7E4] relative overflow-hidden flex items-end justify-center shrink-0 shadow-2xs">
-                          <Image
-                            src="/tutor-ansh.png"
-                            alt="Educator"
-                            width={75}
-                            height={75}
-                            className="object-contain object-bottom"
-                          />
-                          {/* Red Circular Play Badge at bottom-right corner */}
-                          <div className="absolute right-1.5 bottom-1.5 w-5 h-5 rounded-full bg-[#EF4444] text-white flex items-center justify-center shadow-xs">
-                            <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
-                          </div>
-                        </div>
-
-                        {/* Details */}
-                        <div className="space-y-1">
-                          <div className="text-xs text-gray-500 flex items-center gap-1.5 font-medium">
-                            <span>Lecture</span>
-                            <span>&bull;</span>
-                            <span>9 Sept 2026</span>
-                          </div>
-                          
-                          <h4 className="text-[16px] sm:text-[17px] font-bold text-[#1B212D] tracking-tight">
-                            {currentSubject.short} Marathon : One Shot
-                          </h4>
-
-                          <div className="text-xs text-gray-500 font-medium">
-                            5h:29m
-                          </div>
-                        </div>
-
+                  {lecturesList.length === 0 ? (
+                    <div className="border border-dashed border-gray-200 rounded-2xl p-12 text-center space-y-3 bg-gray-50/50">
+                      <div className="w-12 h-12 rounded-xl bg-purple-50 text-[#5A4BDA] flex items-center justify-center mx-auto">
+                        <Play className="w-5 h-5 fill-current ml-0.5" />
                       </div>
-
-                      {/* Right: Interactive Lecture Completion Checkmark matching PW */}
-                      <button
-                        type="button"
-                        onClick={toggleLectureCompletion}
-                        title={isLectureCompleted ? 'Mark as Incomplete' : 'Mark as Completed'}
-                        aria-label={isLectureCompleted ? 'Mark lecture as incomplete' : 'Mark lecture as completed'}
-                        className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
-                          isLectureCompleted
-                            ? 'bg-[#10B981] border-2 border-[#10B981] text-white hover:bg-emerald-600'
-                            : 'border border-gray-300 text-gray-400 hover:text-emerald-600 hover:border-emerald-500 bg-white'
-                        }`}
-                      >
-                        {isLectureCompleted ? (
-                          <Check className="w-4 h-4 text-white stroke-[2.8]" />
-                        ) : (
-                          <CheckCircle className="w-4 h-4 stroke-[1.8]" />
-                        )}
-                      </button>
-
+                      <h4 className="text-sm font-bold text-gray-900">No Recorded Lectures Yet</h4>
+                      <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                        Recorded lectures and chapter sessions for this subject will appear here once published by faculty.
+                      </p>
                     </div>
-
-                    {/* Bottom Button Row: "Watch" (Routes to /study_v2/watch) */}
-                    <div className="pt-1">
-                      <button
-                        onClick={() =>
-                          router.push(
-                            `/study_v2/watch?title=${encodeURIComponent(
-                              currentSubject.short + ' Marathon : One Shot'
-                            )}&subject=${encodeURIComponent(
-                              currentSubject.title
-                            )}&returnUrl=${encodeURIComponent(
-                              `/study_v2/study/all-classes/${rawSubject}`
-                            )}`
-                          )
-                        }
-                        className="py-2.5 px-6 rounded-lg bg-[#F3F4F6] hover:bg-[#E5E7EB] text-[#1F2937] text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                      >
-                        <Play className="w-3.5 h-3.5 fill-current text-[#1F2937]" />
-                        <span>Watch</span>
-                      </button>
-                    </div>
-
-                  </div>
-
+                  ) : (
+                    lecturesList.map((lec, idx) => (
+                      <div key={idx} className="border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 bg-white shadow-2xs hover:border-gray-300 transition-shadow">
+                        <div className="flex items-start justify-between gap-4 mb-5">
+                          <div className="flex items-center gap-4">
+                            <div className="w-[72px] h-[72px] sm:w-[80px] sm:h-[80px] rounded-xl bg-[#FCE7E4] relative overflow-hidden flex items-end justify-center shrink-0 shadow-2xs">
+                              <Image
+                                src="/tutor-ansh.png"
+                                alt="Educator"
+                                width={75}
+                                height={75}
+                                className="object-contain object-bottom"
+                              />
+                              <div className="absolute right-1.5 bottom-1.5 w-5 h-5 rounded-full bg-[#EF4444] text-white flex items-center justify-center shadow-xs">
+                                <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-xs text-gray-500 flex items-center gap-1.5 font-medium">
+                                <span>{lec.lectureNumber || "Lecture"}</span>
+                                <span>&bull;</span>
+                                <span>{lec.date || "Active"}</span>
+                              </div>
+                              <h4 className="text-[16px] sm:text-[17px] font-bold text-[#1B212D] tracking-tight">
+                                {lec.title}
+                              </h4>
+                              <div className="text-xs text-gray-500 font-medium">
+                                {lec.duration || "45 mins"} &bull; {lec.educator || "Faculty"}
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={toggleLectureCompletion}
+                            title={isLectureCompleted ? 'Mark as Incomplete' : 'Mark as Completed'}
+                            aria-label={isLectureCompleted ? 'Mark lecture as incomplete' : 'Mark lecture as completed'}
+                            className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
+                              isLectureCompleted
+                                ? 'bg-[#10B981] border-2 border-[#10B981] text-white hover:bg-emerald-600'
+                                : 'border border-gray-300 text-gray-400 hover:text-emerald-600 hover:border-emerald-500 bg-white'
+                            }`}
+                          >
+                            {isLectureCompleted ? (
+                              <Check className="w-4 h-4 text-white stroke-[2.8]" />
+                            ) : (
+                              <CheckCircle className="w-4 h-4 stroke-[1.8]" />
+                            )}
+                          </button>
+                        </div>
+                        <div className="pt-1">
+                          <button
+                            onClick={() =>
+                              router.push(
+                                `/study_v2/watch?title=${encodeURIComponent(
+                                  lec.title
+                                )}&subject=${encodeURIComponent(
+                                  currentSubject.title
+                                )}&returnUrl=${encodeURIComponent(
+                                  `/study_v2/study/all-classes/${rawSubject}`
+                                )}`
+                              )
+                            }
+                            className="py-2.5 px-6 rounded-lg bg-[#F3F4F6] hover:bg-[#E5E7EB] text-[#1F2937] text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                          >
+                            <Play className="w-3.5 h-3.5 fill-current text-[#1F2937]" />
+                            <span>Watch</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               )}
 
-              {/* TAB CONTENT: DPPs (Rectangular cards stacked vertically as instructed) */}
+              {/* TAB CONTENT: DPPs */}
               {activeSubTab === 'DPPs' && (
                 <div className="space-y-4">
                   <div className="pb-1">
@@ -326,174 +332,122 @@ function SubjectDetailContent() {
                       Daily Practice Problems ({activeChapterData.title})
                     </h3>
                   </div>
-
-                  <div className="space-y-3.5">
-                    {[
-                      {
-                        id: 'vectors',
-                        dppNo: '01',
-                        title: 'Vectors : Daily Practice Problems',
-                        questionsCount: 25,
-                        totalMarks: 100,
-                        duration: '45 mins',
-                      },
-                      {
-                        id: 'quadratic-equations',
-                        dppNo: '02',
-                        title: 'Quadratic Equations : Practice Sheet',
-                        questionsCount: 25,
-                        totalMarks: 100,
-                        duration: '45 mins',
-                      },
-                      {
-                        id: 'determinants',
-                        dppNo: '03',
-                        title: 'Determinants : Practice Drill',
-                        questionsCount: 25,
-                        totalMarks: 100,
-                        duration: '45 mins',
-                      },
-                      {
-                        id: 'relations-and-functions',
-                        dppNo: '04',
-                        title: 'Relations and Functions : Core Problems',
-                        questionsCount: 25,
-                        totalMarks: 100,
-                        duration: '45 mins',
-                      },
-                      {
-                        id: 'permutations-and-combinations',
-                        dppNo: '05',
-                        title: 'Permutations and Combinations : Advance DPP',
-                        questionsCount: 25,
-                        totalMarks: 100,
-                        duration: '45 mins',
-                      },
-                    ].map((dpp) => {
-                      const isAttempted = !!attemptedTests[dpp.id]
-                      return (
-                        <div
-                          key={dpp.id}
-                          className="border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 bg-white shadow-2xs hover:border-gray-300 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                        >
-                          <div className="space-y-1.5">
-                            <div className="flex items-center gap-2">
-                              <span className="px-2.5 py-0.5 rounded-[5px] bg-[#EFF6FF] text-[#2563EB] text-[11px] font-bold uppercase tracking-wider">
-                                DPP &bull; {dpp.dppNo}
-                              </span>
-                              <span className="text-xs text-gray-400">&bull;</span>
-                              <span className="text-xs text-gray-500 font-medium">Class 8th Foundation</span>
-                            </div>
-
-                            <h4 className="text-[16px] sm:text-[17px] font-bold text-[#1B212D] tracking-tight">
-                              {dpp.title}
-                            </h4>
-
-                            <div className="flex items-center gap-4 text-xs text-gray-500 font-medium pt-0.5">
-                              <div className="flex items-center gap-1.5">
-                                <FileText className="w-3.5 h-3.5 text-gray-400 stroke-[1.8]" />
-                                <span>{dpp.questionsCount} Questions</span>
+                  {dppsList.length === 0 ? (
+                    <div className="border border-dashed border-gray-200 rounded-2xl p-12 text-center space-y-3 bg-gray-50/50">
+                      <div className="w-12 h-12 rounded-xl bg-blue-50 text-[#2563EB] flex items-center justify-center mx-auto">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <h4 className="text-sm font-bold text-gray-900">No Practice Problems (DPP) Yet</h4>
+                      <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                        Daily practice problem sheets and question drills will be published here for this chapter.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3.5">
+                      {dppsList.map((dpp) => {
+                        const isAttempted = !!attemptedTests[dpp.id]
+                        return (
+                          <div
+                            key={dpp.id}
+                            className="border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 bg-white shadow-2xs hover:border-gray-300 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                          >
+                            <div className="space-y-1.5">
+                              <div className="flex items-center gap-2">
+                                <span className="px-2.5 py-0.5 rounded-[5px] bg-[#EFF6FF] text-[#2563EB] text-[11px] font-bold uppercase tracking-wider">
+                                  {dpp.dppNumber || "DPP"}
+                                </span>
+                                <span className="text-xs text-gray-400">&bull;</span>
+                                <span className="text-xs text-gray-500 font-medium">{currentSubject.title}</span>
                               </div>
-                              <div className="flex items-center gap-1.5">
-                                <Star className="w-3.5 h-3.5 text-gray-400 stroke-[1.8]" />
-                                <span>{dpp.totalMarks} Marks</span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <Clock className="w-3.5 h-3.5 text-gray-400 stroke-[1.8]" />
-                                <span>{dpp.duration}</span>
+                              <h4 className="text-[16px] sm:text-[17px] font-bold text-[#1B212D] tracking-tight">
+                                {dpp.title}
+                              </h4>
+                              <div className="flex items-center gap-4 text-xs text-gray-500 font-medium pt-0.5">
+                                <div className="flex items-center gap-1.5">
+                                  <FileText className="w-3.5 h-3.5 text-gray-400 stroke-[1.8]" />
+                                  <span>{dpp.questionsCount || 15} Questions</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <Star className="w-3.5 h-3.5 text-gray-400 stroke-[1.8]" />
+                                  <span>{dpp.totalMarks || 60} Marks</span>
+                                </div>
                               </div>
                             </div>
+                            <div className="shrink-0 pt-2 sm:pt-0">
+                              <button
+                                onClick={() =>
+                                  router.push(
+                                    isAttempted
+                                      ? `/study_v2/test/${dpp.id}/result`
+                                      : `/study_v2/test/${dpp.id}/instructions`
+                                  )
+                                }
+                                className="w-full sm:w-auto px-7 py-2.5 rounded-xl bg-[#F0EEFF] hover:bg-[#E5E0FF] text-[#5A4BDA] font-bold text-xs sm:text-sm transition-colors cursor-pointer text-center"
+                              >
+                                {isAttempted ? 'View Result' : 'Attempt Now'}
+                              </button>
+                            </div>
                           </div>
-
-                          {/* Action Button: View Result if attempted, else Attempt Now */}
-                          <div className="shrink-0 pt-2 sm:pt-0">
-                            <button
-                              onClick={() =>
-                                router.push(
-                                  isAttempted
-                                    ? `/study_v2/test/${dpp.id}/result`
-                                    : `/study_v2/test/${dpp.id}/instructions`
-                                )
-                              }
-                              className="w-full sm:w-auto px-7 py-2.5 rounded-xl bg-[#F0EEFF] hover:bg-[#E5E0FF] text-[#5A4BDA] font-bold text-xs sm:text-sm transition-colors cursor-pointer text-center"
-                            >
-                              {isAttempted ? 'View Result' : 'Attempt Now'}
-                            </button>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* TAB CONTENT: Notes (Exact Layout matching screenshot media_1793617049941_cd6bf141.png) */}
+              {/* TAB CONTENT: Notes */}
               {activeSubTab === 'Notes' && (
                 <div className="space-y-4">
-                  <div className="border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 bg-white shadow-2xs hover:border-gray-300 transition-colors">
-                    
-                    {/* Top Row: Notepad Icon (Left) & Metadata + Title (Right) */}
-                    <div className="flex items-start gap-4 mb-4">
-                      
-                      {/* Pastel Blue Notepad Icon with Pen Nib Badge matching screenshot */}
-                      <div className="w-[64px] h-[64px] sm:w-[72px] sm:h-[72px] rounded-2xl bg-[#BAE6FD] relative flex items-center justify-center shrink-0 shadow-2xs">
-                        {/* White Lined Notepad */}
-                        <div className="w-9 h-10 bg-white rounded-[7px] shadow-2xs p-1.5 flex flex-col justify-between border border-blue-100">
-                          <div className="space-y-1 pt-0.5">
-                            <div className="h-[2px] w-full bg-blue-200 rounded-full" />
-                            <div className="h-[2px] w-full bg-blue-200 rounded-full" />
-                            <div className="h-[2px] w-full bg-blue-200 rounded-full" />
-                            <div className="h-[2px] w-3/4 bg-blue-200 rounded-full" />
+                  {notesList.length === 0 ? (
+                    <div className="border border-dashed border-gray-200 rounded-2xl p-12 text-center space-y-3 bg-gray-50/50">
+                      <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
+                        <BookOpen className="w-5 h-5" />
+                      </div>
+                      <h4 className="text-sm font-bold text-gray-900">No Notes Uploaded Yet</h4>
+                      <p className="text-xs text-gray-400 max-w-sm mx-auto">
+                        Classroom annotations, PDF handouts, and revision sheets will be uploaded here.
+                      </p>
+                    </div>
+                  ) : (
+                    notesList.map((note, idx) => (
+                      <div key={idx} className="border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 bg-white shadow-2xs hover:border-gray-300 transition-colors">
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="w-[64px] h-[64px] sm:w-[72px] sm:h-[72px] rounded-2xl bg-[#BAE6FD] relative flex items-center justify-center shrink-0 shadow-2xs">
+                            <div className="w-9 h-10 bg-white rounded-[7px] shadow-2xs p-1.5 flex flex-col justify-between border border-blue-100">
+                              <div className="space-y-1 pt-0.5">
+                                <div className="h-[2px] w-full bg-blue-200 rounded-full" />
+                                <div className="h-[2px] w-full bg-blue-200 rounded-full" />
+                                <div className="h-[2px] w-full bg-blue-200 rounded-full" />
+                                <div className="h-[2px] w-3/4 bg-blue-200 rounded-full" />
+                              </div>
+                              <div className="h-[1.5px] w-1/2 bg-blue-100 rounded-full" />
+                            </div>
                           </div>
-                          <div className="h-[1.5px] w-1/2 bg-blue-100 rounded-full" />
+                          <div className="space-y-1">
+                            <div className="text-xs text-gray-500 flex items-center gap-1.5 font-medium">
+                              <span className="uppercase font-semibold tracking-wider text-[11px] text-gray-500">NOTES</span>
+                              <span>&bull;</span>
+                              <span>{note.pages ? `${note.pages} pages` : "Handout"}</span>
+                            </div>
+                            <h4 className="text-[16px] sm:text-[17px] font-bold text-[#1B212D] tracking-tight">
+                              {note.title}
+                            </h4>
+                          </div>
                         </div>
-
-                        {/* Bottom-right circular badge with pen nib icon matching screenshot */}
-                        <div className="absolute -right-1 -bottom-1 w-5 h-5 rounded-full bg-[#0284C7] text-white flex items-center justify-center shadow-xs">
-                          <svg viewBox="0 0 24 24" className="w-2.5 h-2.5 fill-current">
-                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-                          </svg>
+                        <div className="flex items-center gap-2.5 pt-1">
+                          <a
+                            href={`/study_v2/pdf-viewer?title=${encodeURIComponent(note.title)}&subject=${encodeURIComponent(currentSubject.title)}&chapter=${encodeURIComponent(activeChapterData.code + ': ' + activeChapterData.title)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="py-2 px-4.5 rounded-lg bg-[#F3F4F6] hover:bg-[#E5E7EB] text-[#1F2937] text-xs sm:text-sm font-semibold flex items-center gap-2 transition-colors cursor-pointer"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-[#1F2937]" />
+                            <span>View Note</span>
+                          </a>
                         </div>
                       </div>
-
-                      {/* Details: NOTES • 9 Sept + Subject Marathon : Class Notes */}
-                      <div className="space-y-1">
-                        <div className="text-xs text-gray-500 flex items-center gap-1.5 font-medium">
-                          <span className="uppercase font-semibold tracking-wider text-[11px] text-gray-500">NOTES</span>
-                          <span>&bull;</span>
-                          <span>9 Sept</span>
-                        </div>
-
-                        <h4 className="text-[16px] sm:text-[17px] font-bold text-[#1B212D] tracking-tight">
-                          {currentSubject.short} Marathon : Class Notes
-                        </h4>
-                      </div>
-
-                    </div>
-
-                    {/* Bottom Buttons: "View Note" (Opens PDF in New Tab) and Download Button */}
-                    <div className="flex items-center gap-2.5 pt-1">
-                      <a
-                        href={`/study_v2/pdf-viewer?title=${encodeURIComponent(currentSubject.short + ' Marathon : Class Notes')}&subject=${encodeURIComponent(currentSubject.title)}&chapter=${encodeURIComponent(activeChapterData.code + ': ' + activeChapterData.title)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="py-2 px-4.5 rounded-lg bg-[#F3F4F6] hover:bg-[#E5E7EB] text-[#1F2937] text-xs sm:text-sm font-semibold flex items-center gap-2 transition-colors cursor-pointer"
-                      >
-                        <Eye className="w-3.5 h-3.5 text-[#1F2937]" />
-                        <span>View Note</span>
-                      </a>
-
-                      <button
-                        onClick={() => alert('Downloading official class notes PDF...')}
-                        className="py-2 px-3 rounded-lg bg-[#F3F4F6] hover:bg-[#E5E7EB] text-[#1F2937] flex items-center justify-center transition-colors cursor-pointer"
-                        title="Download Note"
-                        aria-label="Download Note"
-                      >
-                        <Download className="w-3.5 h-3.5 text-[#1F2937]" />
-                      </button>
-                    </div>
-
-                  </div>
+                    ))
+                  )}
                 </div>
               )}
 

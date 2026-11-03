@@ -13,6 +13,18 @@ function MyPurchasesContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [purchases, setPurchases] = useState<PurchaseItem[]>([]);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = JSON.parse(localStorage.getItem("ansh_purchases") || "[]");
+        setPurchases(stored);
+      } catch {
+        setPurchases([]);
+      }
+    }
+  }, []);
 
   // If search param like ?view=order_detail_... is present, route to [orderId]
   React.useEffect(() => {
@@ -57,7 +69,24 @@ function MyPurchasesContent() {
 
           {/* Cards List (Matching screenshot media_1793627254187_e2791c65.png) */}
           <div className="space-y-5 max-w-5xl">
-            {purchasesList.map((item) => (
+            {purchases.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center max-w-lg mx-auto shadow-xs my-8 space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-purple-50 text-[#5A4BDA] flex items-center justify-center mx-auto text-2xl font-bold">
+                  🧾
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">No Purchases Recorded Yet</h3>
+                <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                  When you enroll in an academic batch or pay via Pay Later, your invoice and batch access will appear here automatically.
+                </p>
+                <button
+                  onClick={() => router.push("/study_v2/batches")}
+                  className="px-6 py-2.5 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
+                >
+                  Explore Batches
+                </button>
+              </div>
+            ) : (
+              purchases.map((item) => (
               <div
                 key={item.id}
                 onClick={() => router.push(`/study_v2/my-purchase/${item.id}`)}
@@ -111,7 +140,7 @@ function MyPurchasesContent() {
                   <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-800 transition-colors" />
                 </div>
               </div>
-            ))}
+            )))}
           </div>
         </main>
       </div>

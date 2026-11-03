@@ -12,7 +12,7 @@ interface BatchItem {
   id: string;
   title: string;
   category: "enrolled" | "all";
-  bannerImg: string;
+  bannerImg?: string;
   bannerBg: string;
   bannerTextColor: string;
   bannerLabel: string;
@@ -24,78 +24,45 @@ interface BatchItem {
   whatsAppMsg: string;
 }
 
-const allBatches: BatchItem[] = [
-  {
-    id: "jee-prep-2027",
-    title: "JEE Prep 2027 Comprehensive Batch",
-    category: "enrolled",
-    bannerImg: "/batches/my_batch_card1_banner.png",
-    bannerBg: "bg-[#EAE5FC]",
-    bannerTextColor: "text-[#5A4BDA]",
-    bannerLabel: "JEE PREP 2027\nCOMPREHENSIVE BATCH",
-    avatarSrc: "/batches/user_avatar.png",
-    facultyName: "Faculty",
-    language: "Hinglish",
-    startDate: "26 Aug 2026",
-    endDate: "30 Jun 2030",
-    whatsAppMsg: "Hello Ansh Tutor, I have a question about JEE Prep 2027 Comprehensive Batch.",
-  },
-  {
-    id: "ritik-mishra-2027",
-    title: "Ritik Mishra - Class 8th Academic Batch (2027)",
-    category: "enrolled",
-    bannerImg: "/batches/my_batch_card2_banner.png",
-    bannerBg: "bg-[#D1FAE5]",
-    bannerTextColor: "text-[#059669]",
-    bannerLabel: "RITIK MISHRA CLASS 8TH (2027)",
-    avatarSrc: "/batches/user_avatar.png",
-    facultyName: "Ritik Mishra",
-    language: "Hinglish",
-    startDate: "24 Aug 2026",
-    endDate: "31 Mar 2027",
-    whatsAppMsg: "Hello Ansh Tutor, I have a question about Ritik Mishra Class 8th (2027).",
-  },
-  {
-    id: "samridhi-sharma-2027",
-    title: "Samridhi Sharma - Class 8th Academic Batch (2027)",
-    category: "enrolled",
-    bannerImg: "/batches/my_batch_card3_banner.png",
-    bannerBg: "bg-[#FFE4E6]",
-    bannerTextColor: "text-[#E11D48]",
-    bannerLabel: "SAMRIDHI SHARMA CLASS 8TH (2027)",
-    avatarSrc: "/batches/user_avatar.png",
-    facultyName: "Samridhi Sharma",
-    language: "Hinglish",
-    startDate: "06 Sep 2026",
-    endDate: "31 Mar 2027",
-    whatsAppMsg: "Hello Ansh Tutor, I have a question about Samridhi Sharma Class 8th (2027).",
-  },
-  {
-    id: "ansh-foundation-2027",
-    title: "Ansh Foundation Master Batch 2027 (Class 8)",
-    category: "enrolled",
-    bannerImg: "",
-    bannerBg: "bg-[#E0E7FF]",
-    bannerTextColor: "text-[#4338CA]",
-    bannerLabel: "ANSH FOUNDATION CLASS 8TH\nMASTER BATCH",
-    avatarSrc: "/batches/user_avatar.png",
-    facultyName: "Expert Faculty",
-    language: "Hinglish",
-    startDate: "05 Oct 2026",
-    endDate: "31 Mar 2027",
-    whatsAppMsg: "Hello Ansh Tutor, I have a question about Ansh Foundation Master Batch 2027.",
-  },
-];
+const defaultBatches: BatchItem[] = [];
 
 function MyBatchesContent() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState<"enrolled" | "all">("enrolled");
+  const [batches, setBatches] = useState<BatchItem[]>([]);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = JSON.parse(localStorage.getItem("ansh_purchases") || "[]");
+        if (Array.isArray(stored) && stored.length > 0) {
+          const mapped: BatchItem[] = stored.map((p) => ({
+            id: p.id,
+            title: p.title,
+            category: "enrolled",
+            bannerBg: p.bannerBg || "bg-[#EAE5FC]",
+            bannerTextColor: p.bannerTextColor || "text-[#5A4BDA]",
+            bannerLabel: p.bannerLabel || `${p.title.toUpperCase()}\nENROLLED`,
+            avatarSrc: p.avatarSrc || "/batches/user_avatar.png",
+            facultyName: p.avatarAlt || "Faculty",
+            language: "Hinglish",
+            startDate: p.orderDate || "Ongoing",
+            endDate: p.validTill || "Jun 30, 2030",
+            whatsAppMsg: `Hello Ansh Tutor, I have a question about ${p.title}.`,
+          }));
+          setBatches(mapped);
+          return;
+        }
+      } catch {}
+      setBatches([]);
+    }
+  }, []);
 
   const filteredBatches =
     selectedTab === "all"
-      ? allBatches
-      : allBatches.filter((b) => b.category === "enrolled");
+      ? batches
+      : batches.filter((b) => b.category === "enrolled");
 
   const handleWhatsAppClick = (msg: string) => {
     const url = `https://wa.me/917525009428?text=${encodeURIComponent(msg)}`;
@@ -258,10 +225,20 @@ function MyBatchesContent() {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center max-w-lg mx-auto my-8">
-              <p className="text-gray-500 text-sm font-medium">
-                No batches found under this category.
+            <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center max-w-lg mx-auto shadow-xs my-8 space-y-4">
+              <div className="w-16 h-16 rounded-2xl bg-purple-50 text-[#5A4BDA] flex items-center justify-center mx-auto text-2xl font-bold">
+                🎓
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">No Enrolled Batches Yet</h3>
+              <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                You haven&apos;t enrolled in any batches yet. Head over to the Batches section to explore and enroll in an academic program.
               </p>
+              <button
+                onClick={() => router.push("/study_v2/batches")}
+                className="px-6 py-2.5 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
+              >
+                Explore Batches
+              </button>
             </div>
           )}
         </main>

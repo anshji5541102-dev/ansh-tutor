@@ -105,7 +105,7 @@ export default function StudyHeader({
             aria-expanded={profileDropdownOpen}
             aria-haspopup="true"
           >
-            {/* "Hi, Abhinav" text */}
+            {/* "Hi, Student" text */}
             <span className="text-xs sm:text-[13.5px] font-bold tracking-tight">
               Hi, {userName}
             </span>

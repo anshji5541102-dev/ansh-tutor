@@ -31,54 +31,31 @@ export default function LibraryPage() {
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [activePdfItem, setActivePdfItem] = useState<QuestionBankItem | null>(null)
+  const [questionBanks, setQuestionBanks] = useState<QuestionBankItem[]>([])
 
-  // Strictly ONLY ONE section: Question Bank (as requested)
-  const questionBanks: QuestionBankItem[] = [
-    {
-      id: 'qb-maths',
-      title: 'Mathematics Chapterwise Question Bank',
-      subject: 'Mathematics',
-      questionsCount: 250,
-      coverBg: 'from-[#1E1B4B] to-[#312E81]',
-      coverAccent: '#818CF8',
-      tagColor: 'text-[#6366F1]',
-      fileName: 'Mathematics_Class8_Question_Bank.pdf',
-      topics: ['Rational Numbers', 'Linear Equations', 'Quadrilaterals', 'Data Handling'],
-    },
-    {
-      id: 'qb-science',
-      title: 'Science Exemplar & Practice Question Bank',
-      subject: 'Science',
-      questionsCount: 220,
-      coverBg: 'from-[#064E3B] to-[#047857]',
-      coverAccent: '#34D399',
-      tagColor: 'text-[#10B981]',
-      fileName: 'Science_Class8_Question_Bank.pdf',
-      topics: ['Crop Production', 'Microorganisms', 'Force & Pressure', 'Sound & Light'],
-    },
-    {
-      id: 'qb-english',
-      title: 'English Comprehension & Grammar Bank',
-      subject: 'English',
-      questionsCount: 180,
-      coverBg: 'from-[#701A75] to-[#86198F]',
-      coverAccent: '#E879F9',
-      tagColor: 'text-[#C026D3]',
-      fileName: 'English_Grammar_Question_Bank.pdf',
-      topics: ['Reading Comprehension', 'Tenses & Modals', 'Reported Speech', 'Active/Passive'],
-    },
-    {
-      id: 'qb-sst',
-      title: 'Social Science Master Question Bank',
-      subject: 'Social Science',
-      questionsCount: 200,
-      coverBg: 'from-[#7C2D12] to-[#9A3412]',
-      coverAccent: '#FB923C',
-      tagColor: 'text-[#EA580C]',
-      fileName: 'SST_Foundation_Question_Bank.pdf',
-      topics: ['History: Modern India', 'Geography: Resources', 'Civics: Indian Constitution'],
-    },
-  ]
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = JSON.parse(localStorage.getItem("ansh_admin_library") || "[]")
+        if (Array.isArray(stored) && stored.length > 0) {
+          const mapped: QuestionBankItem[] = stored.map((item, idx) => ({
+            id: item.id || `lib-${idx}`,
+            title: item.title,
+            subject: item.subject || 'All Subjects',
+            questionsCount: item.questionsCount || 100,
+            coverBg: 'from-[#1E1B4B] to-[#312E81]',
+            coverAccent: '#818CF8',
+            tagColor: 'text-[#6366F1]',
+            fileName: item.fileName || `${item.title.replace(/\s+/g, '_')}.pdf`,
+            topics: item.topics || ['Chapter Notes', 'Exemplar Problems', 'Formula Sheet'],
+          }))
+          setQuestionBanks(mapped)
+          return
+        }
+      } catch {}
+      setQuestionBanks([])
+    }
+  }, [])
 
   return (
     <div className="h-screen bg-white flex flex-col overflow-hidden font-sans selection:bg-[#5A4BDA] selection:text-white antialiased">
@@ -150,6 +127,7 @@ export default function LibraryPage() {
             </div>
 
             {/* CARDS GRID matching media_1793617959951_025b054b.png */}
+            {questionBanks.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {questionBanks.map((item) => (
                 <div
@@ -237,6 +215,17 @@ export default function LibraryPage() {
                 </div>
               ))}
             </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center max-w-lg mx-auto shadow-xs my-6 space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mx-auto text-2xl font-bold">
+                  📖
+                </div>
+                <h4 className="text-base font-bold text-gray-900">No Question Banks Uploaded Yet</h4>
+                <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                  When chapterwise PDF question banks or formula sheets are published by faculty, they will appear here.
+                </p>
+              </div>
+            )}
 
           </div>
 

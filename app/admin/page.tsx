@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -252,10 +252,10 @@ function AdminPortalContent() {
   // Form states for Content Upload
   const [newLecTitle, setNewLecTitle] = useState("");
   const [newLecChapter, setNewLecChapter] = useState("CH - 01 Rational Numbers");
-  const [newLecNumber, setNewLecNumber] = useState("Lec 03");
-  const [newLecEducator, setNewLecEducator] = useState("Rajwant Singh Sir");
+  const [newLecNumber, setNewLecNumber] = useState("Lec 01");
+  const [newLecEducator, setNewLecEducator] = useState("");
   const [newLecDuration, setNewLecDuration] = useState("45 mins");
-  const [newLecUrl, setNewLecUrl] = useState("https://www.youtube.com/embed/dQw4w9WgXcQ");
+  const [newLecUrl, setNewLecUrl] = useState("");
 
   const [newNoteTitle, setNewNoteTitle] = useState("");
   const [newNoteChapter, setNewNoteChapter] = useState("CH - 01 Rational Numbers");
@@ -327,6 +327,87 @@ function AdminPortalContent() {
       } catch {}
     }
   }, []);
+
+  const hasMounted = useRef(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const storedBatches = localStorage.getItem("ansh_admin_batches");
+        if (storedBatches) setBatchesList(JSON.parse(storedBatches));
+
+        const storedTests = localStorage.getItem("ansh_admin_tests");
+        if (storedTests) setTestSeriesList(JSON.parse(storedTests));
+
+        const storedLib = localStorage.getItem("ansh_admin_library");
+        if (storedLib) setLibraryList(JSON.parse(storedLib));
+
+        const storedLive = localStorage.getItem("ansh_admin_live");
+        if (storedLive) setLiveList(JSON.parse(storedLive));
+
+        const storedAnn = localStorage.getItem("ansh_admin_announcements");
+        if (storedAnn) setAnnouncements(JSON.parse(storedAnn));
+
+        const storedLec = localStorage.getItem("ansh_admin_lectures");
+        if (storedLec) setLecturesList(JSON.parse(storedLec));
+
+        const storedDpp = localStorage.getItem("ansh_admin_dpps");
+        if (storedDpp) setDppsList(JSON.parse(storedDpp));
+
+        const storedNotes = localStorage.getItem("ansh_admin_notes");
+        if (storedNotes) setNotesList(JSON.parse(storedNotes));
+      } catch {}
+      hasMounted.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (hasMounted.current && typeof window !== "undefined") {
+      localStorage.setItem("ansh_admin_batches", JSON.stringify(batchesList));
+    }
+  }, [batchesList]);
+
+  useEffect(() => {
+    if (hasMounted.current && typeof window !== "undefined") {
+      localStorage.setItem("ansh_admin_tests", JSON.stringify(testSeriesList));
+    }
+  }, [testSeriesList]);
+
+  useEffect(() => {
+    if (hasMounted.current && typeof window !== "undefined") {
+      localStorage.setItem("ansh_admin_library", JSON.stringify(libraryList));
+    }
+  }, [libraryList]);
+
+  useEffect(() => {
+    if (hasMounted.current && typeof window !== "undefined") {
+      localStorage.setItem("ansh_admin_live", JSON.stringify(liveList));
+    }
+  }, [liveList]);
+
+  useEffect(() => {
+    if (hasMounted.current && typeof window !== "undefined") {
+      localStorage.setItem("ansh_admin_announcements", JSON.stringify(announcements));
+    }
+  }, [announcements]);
+
+  useEffect(() => {
+    if (hasMounted.current && typeof window !== "undefined") {
+      localStorage.setItem("ansh_admin_lectures", JSON.stringify(lecturesList));
+    }
+  }, [lecturesList]);
+
+  useEffect(() => {
+    if (hasMounted.current && typeof window !== "undefined") {
+      localStorage.setItem("ansh_admin_dpps", JSON.stringify(dppsList));
+    }
+  }, [dppsList]);
+
+  useEffect(() => {
+    if (hasMounted.current && typeof window !== "undefined") {
+      localStorage.setItem("ansh_admin_notes", JSON.stringify(notesList));
+    }
+  }, [notesList]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);

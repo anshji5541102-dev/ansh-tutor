@@ -27,29 +27,35 @@ export default function StudyHomePage() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
   const [batchDrawerOpen, setBatchDrawerOpen] = useState(false)
   
-  // Batches state matching exact screenshot
-  const [selectedBatch, setSelectedBatch] = useState('Half Yearly Marathon Class 8')
-  const [tempSelectedBatch, setTempSelectedBatch] = useState('Half Yearly Marathon Class 8')
+  // Batches state dynamically loaded from student's enrolled courses
+  const [userBatches, setUserBatches] = useState<{ id: string; title: string }[]>([])
+  const [selectedBatch, setSelectedBatch] = useState('Select Academic Batch')
+  const [tempSelectedBatch, setTempSelectedBatch] = useState('Select Academic Batch')
   const [drawerSearch, setDrawerSearch] = useState('')
   const [starredBatches, setStarredBatches] = useState<string[]>([])
   const [activeModal, setActiveModal] = useState<string | null>(null)
 
   const userName = profile?.name || user?.displayName || 'Student'
 
-  const allBatches = [
-    {
-      id: 'half-yearly',
-      title: 'Half Yearly Marathon Class 8',
-    },
-    {
-      id: 'booster-course',
-      title: 'Booster-Course Grade 8',
-    },
-    {
-      id: 'samridhi-sharma',
-      title: 'Samridhi Sharma - Class 8th (2027)',
-    },
-  ]
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = JSON.parse(localStorage.getItem("ansh_purchases") || "[]")
+        if (Array.isArray(stored) && stored.length > 0) {
+          const list = stored.map((p: any) => ({ id: p.id, title: p.title }))
+          setUserBatches(list)
+          setSelectedBatch(list[0].title)
+          setTempSelectedBatch(list[0].title)
+          return
+        }
+      } catch {}
+      setUserBatches([])
+      setSelectedBatch('No Enrolled Batches')
+      setTempSelectedBatch('No Enrolled Batches')
+    }
+  }, [])
+
+  const allBatches = userBatches
 
   const toggleStar = (batchTitle: string, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -475,7 +481,18 @@ export default function StudyHomePage() {
                 </div>
 
                 <div className="space-y-1 border-t border-gray-100 pt-1">
-                  {filteredBatches.map((batch) => {
+                  {filteredBatches.length === 0 ? (
+                    <div className="py-6 text-center text-xs text-gray-500">
+                      No enrolled batches found.
+                      <Link
+                        href="/study_v2/batches"
+                        className="block mt-2 text-[#5A4BDA] font-bold hover:underline"
+                      >
+                        Explore Available Batches &rarr;
+                      </Link>
+                    </div>
+                  ) : (
+                    filteredBatches.map((batch) => {
                     const isSelected = tempSelectedBatch === batch.title
                     const isStarred = starredBatches.includes(batch.title)
 
@@ -518,7 +535,7 @@ export default function StudyHomePage() {
                         </div>
                       </div>
                     )
-                  })}
+                  }))}
                 </div>
               </div>
 

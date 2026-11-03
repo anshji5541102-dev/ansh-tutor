@@ -20,6 +20,18 @@ export default function TestSeriesPage() {
   const [selectedMode, setSelectedMode] = useState('All')
   const [typeDropdownOpen, setTypeDropdownOpen] = useState(false)
   const [modeDropdownOpen, setModeDropdownOpen] = useState(false)
+  const [testsList, setTestsList] = useState<any[]>([])
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = JSON.parse(localStorage.getItem("ansh_admin_tests") || "[]")
+        setTestsList(Array.isArray(stored) ? stored : [])
+      } catch {
+        setTestsList([])
+      }
+    }
+  }, [])
 
   return (
     <div className="h-screen bg-white flex flex-col overflow-hidden font-sans selection:bg-[#5A4BDA] selection:text-white antialiased">
@@ -170,32 +182,28 @@ export default function TestSeriesPage() {
 
             </div>
 
-            {/* Test Cards Carousel (Matching screenshot media_1793621854968_1e708a4f.png and media_1793622276774_c4536252.png) */}
-            <div className="mt-6">
-              <TestCarousel
-                tests={[
-                  { id: 'permutations-and-combinations', title: 'Permutations and Combinations', questionsCount: 25, totalMarks: 100 },
-                  { id: 'relations-and-functions', title: 'Relations and Functions', questionsCount: 25, totalMarks: 100 },
-                  { id: 'vectors', title: 'Vectors', questionsCount: 25, totalMarks: 100 },
-                  { id: 'quadratic-equations', title: 'Quadratic Equations', questionsCount: 25, totalMarks: 100 },
-                  { id: 'determinants', title: 'Determinants', questionsCount: 25, totalMarks: 100 },
-                ]}
-              />
-            </div>
-
-            {/* Full Syllabus Tests Section */}
-            <div className="mt-10 pt-6 border-t border-gray-100">
-              <h4 className="text-base font-bold text-gray-900 mb-4">
-                Full Syllabus Mock Tests
-              </h4>
-              <TestCarousel
-                tests={[
-                  { id: 'all-india-mock-1', title: 'All India Foundation Mock Test #1', questionsCount: 25, totalMarks: 100 },
-                  { id: 'all-india-mock-2', title: 'All India Foundation Mock Test #2', questionsCount: 25, totalMarks: 100 },
-                  { id: 'term-1-exam-drill', title: 'Term 1 Mega Revision Test', questionsCount: 25, totalMarks: 100 },
-                ]}
-              />
-            </div>
+            {/* Test Cards List (Populated via Admin Portal) */}
+            {testsList.length > 0 ? (
+              <div className="mt-6">
+                <TestCarousel tests={testsList} />
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center max-w-lg mx-auto shadow-xs my-8 space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-[#5A4BDA] flex items-center justify-center mx-auto text-2xl font-bold">
+                  📝
+                </div>
+                <h4 className="text-base font-bold text-gray-900">No Tests Scheduled Yet</h4>
+                <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                  When chapterwise CBT assessments, DPP tests, or All India Mocks are scheduled by faculty, they will appear here.
+                </p>
+                <Link
+                  href="/study_v2/study"
+                  className="inline-block px-6 py-2.5 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
+                >
+                  Go to Study Room
+                </Link>
+              </div>
+            )}
 
           </div>
 
