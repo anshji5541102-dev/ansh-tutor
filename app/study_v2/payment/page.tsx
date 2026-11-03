@@ -93,7 +93,6 @@ function PaymentFlowContent() {
   const [payLaterAddress, setPayLaterAddress] = useState("");
   const [payLaterError, setPayLaterError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [utrNumber, setUtrNumber] = useState("");
   const [copiedUpi, setCopiedUpi] = useState(false);
   const adminUpiId = process.env.NEXT_PUBLIC_ADMIN_UPI_ID || "7525009428@paytm";
 
@@ -203,7 +202,7 @@ function PaymentFlowContent() {
       }
 
       router.push("/study_v2/my-purchase/jee-prep-2027");
-    }, 1200);
+    }, 400);
   };
 
   const handlePayLaterSubmit = (e: React.FormEvent) => {
@@ -286,7 +285,7 @@ function PaymentFlowContent() {
       }
 
       router.push("/study_v2/my-purchase/jee-prep-2027");
-    }, 1200);
+    }, 400);
   };
 
   return (
@@ -693,26 +692,6 @@ function PaymentFlowContent() {
                       <span>Tap to Pay with Paytm / UPI App</span>
                     </a>
 
-                    {/* UTR / Reference ID Field */}
-                    <div className="w-full max-w-sm space-y-1 text-left">
-                      <label className="text-[11px] font-bold text-gray-700 block">
-                        UPI Transaction / UTR No. (12 Digits)
-                      </label>
-                      <input
-                        type="text"
-                        value={utrNumber}
-                        onChange={(e) =>
-                          setUtrNumber(e.target.value.replace(/\D/g, "").slice(0, 12))
-                        }
-                        placeholder="e.g. 412356789012"
-                        maxLength={12}
-                        className="w-full px-3.5 py-2 bg-gray-50 border border-gray-300 rounded-xl text-xs font-mono text-gray-900 placeholder:text-gray-400 outline-none focus:border-[#5A4BDA] transition-colors"
-                      />
-                      <span className="text-[10px] text-gray-400 block">
-                        Available in transaction history on Paytm / PhonePe / GPay
-                      </span>
-                    </div>
-
                     {/* Countdown Progress Line */}
                     <div className="w-56 h-1 bg-gray-200 rounded-full overflow-hidden">
                       <div
@@ -728,18 +707,18 @@ function PaymentFlowContent() {
                       </strong>
                     </div>
 
-                    {/* Confirm Payment Completion Action */}
+                    {/* Direct 1-Click Access After Payment */}
                     <button
                       onClick={handlePaymentSuccess}
                       disabled={isProcessing}
-                      className="w-full max-w-sm py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors shadow-2xs cursor-pointer flex items-center justify-center gap-2 mt-1"
+                      className="w-full max-w-sm py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-extrabold text-xs sm:text-sm transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 mt-1"
                     >
                       {isProcessing ? (
-                        <span>Verifying Payment with Bank...</span>
+                        <span>Activating Your Batch Access...</span>
                       ) : (
                         <>
                           <Check className="w-4 h-4 stroke-[3]" />
-                          <span>Confirm Payment &amp; Start Learning</span>
+                          <span>Payment Done? Open Batch &amp; Start Learning</span>
                         </>
                       )}
                     </button>
