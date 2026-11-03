@@ -219,7 +219,7 @@ function MyBatchesContent() {
                     href="/study_v2/study/all-classes"
                     className="w-full py-2.5 sm:py-3 bg-[#5A4BDA] hover:bg-[#4939C8] active:bg-[#3E2FB8] text-white font-bold text-xs sm:text-sm rounded-xl transition-colors shadow-xs text-center block"
                   >
-                    Let's Study
+                    Let&apos;s Study
                   </Link>
                 </div>
               ))}

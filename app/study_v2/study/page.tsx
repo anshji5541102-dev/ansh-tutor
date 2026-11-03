@@ -315,7 +315,7 @@ export default function StudyHomePage() {
               <div className="bg-[#F8F9FA] border border-[#E5E7EB] rounded-[18px] px-7 py-5 flex items-center gap-4 h-[84px]">
                 <Calendar className="w-6 h-6 text-gray-500 shrink-0" />
                 <span className="text-[15px] font-medium text-gray-700">
-                  Today's live events have ended
+                  Today&apos;s live events have ended
                 </span>
               </div>
 

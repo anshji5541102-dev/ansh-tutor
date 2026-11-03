@@ -40,7 +40,7 @@ function JackpotCounter({
   useEffect(() => {
     if (!hasStarted) return
 
-    let start = 0
+    const start = 0
     const end = targetNumber
     const totalFrames = Math.min(60, Math.floor(duration / 16))
     let currentFrame = 0
