@@ -674,7 +674,7 @@ function AdminPortalContent() {
         />
 
         {/* MAIN SCROLLABLE CONTENT */}
-        <main className="flex-1 overflow-y-auto px-6 sm:px-10 lg:px-12 py-6 sm:py-8 bg-[#F8F9FB]">
+        <main className="flex-1 overflow-y-auto px-3.5 sm:px-8 lg:px-12 py-4 sm:py-8 bg-[#F8F9FB]">
           {/* Toast Notification */}
           {toastMessage && (
             <div className="fixed top-18 right-6 z-50 bg-[#1B212D] text-white text-xs sm:text-sm font-semibold px-4 py-3 rounded-xl shadow-lg border border-gray-700 flex items-center gap-2 animate-in fade-in">
@@ -1432,7 +1432,7 @@ function AdminPortalContent() {
                   />
                 </div>
 
-                <div className="bg-[#EAEFF5] p-1 rounded-xl inline-flex items-center gap-1 self-start sm:self-auto">
+                <div className="bg-[#EAEFF5] p-1 rounded-xl inline-flex items-center gap-1 self-start sm:self-auto overflow-x-auto max-w-full">
                   {[
                     { id: "all" as const, label: `All (${payLaterList.length})` },
                     { id: "overdue" as const, label: `Overdue (${overdueCount})` },
@@ -1834,7 +1834,7 @@ function AdminPortalContent() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+              <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-x-auto shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
                 <table className="w-full text-xs text-left">
                   <thead>
                     <tr className="bg-[#F8F9FB] text-gray-500 font-bold uppercase tracking-wider border-b border-gray-200">
@@ -2059,7 +2059,7 @@ function AdminPortalContent() {
       {/* 1. UPLOAD RECORDED VIDEO LECTURE MODAL */}
       {uploadLectureModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-full max-w-md shadow-2xl space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <h3 className="text-base font-bold text-gray-900">
                 Upload Recorded Video Lecture
@@ -2167,7 +2167,7 @@ function AdminPortalContent() {
       {/* 2. UPLOAD NOTES PDF MODAL */}
       {uploadNotesModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-full max-w-md shadow-2xl space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <h3 className="text-base font-bold text-gray-900">
                 Upload Lecture Notes PDF
@@ -2249,7 +2249,7 @@ function AdminPortalContent() {
       {/* 3. UPLOAD DPP MODAL */}
       {uploadDppModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-full max-w-md shadow-2xl space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <h3 className="text-base font-bold text-gray-900">
                 Upload Daily Practice Problem (DPP)
@@ -2343,7 +2343,7 @@ function AdminPortalContent() {
       {/* 4. CREATE CBT TEST MODAL */}
       {createTestModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-full max-w-md shadow-2xl space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <h3 className="text-base font-bold text-gray-900">
                 Create CBT Test / Mock Exam
@@ -2437,7 +2437,7 @@ function AdminPortalContent() {
       {/* 5. UPLOAD LIBRARY BOOK MODAL */}
       {uploadLibraryModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-full max-w-md shadow-2xl space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <h3 className="text-base font-bold text-gray-900">
                 Upload Digital Library Resource
@@ -2537,7 +2537,7 @@ function AdminPortalContent() {
       {/* 6. CREATE BATCH MODAL */}
       {addBatchModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-full max-w-md shadow-2xl space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <h3 className="text-base font-bold text-gray-900">
                 Create New Academic Batch
@@ -2623,7 +2623,7 @@ function AdminPortalContent() {
       {/* 7. SCHEDULE LIVE CLASS MODAL */}
       {addLiveModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-full max-w-md shadow-2xl space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <h3 className="text-base font-bold text-gray-900">
                 Schedule Live Class
@@ -2708,7 +2708,7 @@ function AdminPortalContent() {
       {/* 8. BROADCAST ANNOUNCEMENT MODAL */}
       {addAnnouncementModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-full max-w-md shadow-2xl space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <h3 className="text-base font-bold text-gray-900">
                 Broadcast Student Announcement

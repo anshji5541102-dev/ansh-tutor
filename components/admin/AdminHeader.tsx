@@ -53,7 +53,7 @@ export default function AdminHeader({
         </button>
 
         {/* Brand Logo & Name */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
           <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center p-1 shadow-sm">
             <Image
               src="/owl-logo.png"
@@ -63,7 +63,7 @@ export default function AdminHeader({
               className="object-contain"
             />
           </div>
-          <span className="font-extrabold text-white text-[17px] tracking-tight">
+          <span className="hidden xs:inline font-extrabold text-white text-[16px] sm:text-[17px] tracking-tight">
             Ansh Tutor
           </span>
         </div>
