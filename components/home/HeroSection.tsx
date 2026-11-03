@@ -21,7 +21,7 @@ export default function HeroSection() {
           {/* Left Column: Heading, Subtitle & Get Started CTA with Scroll Reveal */}
           <div className="lg:col-span-5 space-y-6 text-left">
             <ScrollReveal animation="fade-right" duration={800}>
-              <h1 className="text-4xl sm:text-5xl lg:text-[54px] font-black text-gray-950 tracking-tight leading-[1.12]">
+              <h1 className="text-3xl sm:text-5xl lg:text-[54px] font-black text-gray-950 tracking-tight leading-[1.15]">
                 Bharat&apos;s{' '}
                 <span className="text-[#5a4bda] bg-clip-text text-transparent bg-gradient-to-r from-[#5a4bda] via-[#705df5] to-[#5a4bda] bg-[length:200%_auto] hover:bg-right transition-all duration-500">
                   Trusted &amp;
@@ -64,7 +64,7 @@ export default function HeroSection() {
           {/* Right Column: Two Dashed Orbits with Uncropped Top & Curved Bottom Figures */}
           <div className="lg:col-span-7 flex justify-center items-center relative py-4">
             <ScrollReveal animation="fade-left" duration={900} className="w-full flex justify-center">
-              <div className="relative w-full max-w-[680px] h-[320px] sm:h-[350px]">
+              <div className="relative w-full max-w-[680px] h-[300px] sm:h-[350px] scale-[0.82] xs:scale-[0.92] sm:scale-100 origin-center transition-transform">
                 
                 {/* ======================================================== */}
                 {/* LEFT: Ansh Sir (Fit Inside Orbit, Curved Bottom, Full Head) */}

@@ -26,6 +26,14 @@ export default function StudySidebar({
 
   return (
     <>
+      {/* Mobile Drawer Backdrop */}
+      {mobileMenuOpen && (
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 top-14 bg-black/40 backdrop-blur-xs z-25 md:hidden transition-opacity"
+        />
+      )}
+
       {/* Sidebar Container: Wider width (w-[195px]), taller rows (h-[48px]), larger icons & fonts */}
       {/* Kept 100% still (pinned/sticky) when right-side main content is scrolled */}
       <aside

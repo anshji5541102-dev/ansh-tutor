@@ -290,19 +290,19 @@ export default function LoginModal({
       <div id="recaptcha-container" />
 
       {/* Main Dialog Card - Exact PW Specifications: width 560px, max-w 100%, height 696px, rounded 24px */}
-      <div className="relative w-[560px] max-w-full h-[696px] max-h-[96vh] bg-white rounded-[24px] shadow-2xl border border-gray-100 overflow-hidden flex flex-col justify-between animate-dialog-enter">
+      <div className="relative w-[560px] max-w-full h-[696px] max-h-[96vh] bg-white rounded-[24px] shadow-2xl border border-gray-100 overflow-y-auto flex flex-col justify-between animate-dialog-enter">
         
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-5 right-5 sm:top-6 sm:right-6 p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer z-20"
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer z-20"
           aria-label="Close dialog"
         >
           <X className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
 
         {/* Top & Form Section with exact 32px padding between shape and content */}
-        <div className="pt-10 px-8 sm:px-12 flex flex-col flex-1">
+        <div className="pt-8 sm:pt-10 px-4 sm:px-12 flex flex-col flex-1">
           {/* Top Scalloped Phone Badge Illustration */}
           <div className="flex justify-center shrink-0">
             <AuthIllustration step={step} />
@@ -360,9 +360,9 @@ export default function LoginModal({
             </form>
           ) : step === 'phone' ? (
             <form onSubmit={handleSendOtp} className="space-y-5 flex-1 flex flex-col">
-              {/* Title with yellow pill - Exactly 1 neat line */}
+              {/* Title with yellow pill */}
               <div className="flex items-center gap-2">
-                <h3 className="text-lg sm:text-[20px] font-bold text-gray-900 tracking-tight leading-snug whitespace-nowrap">
+                <h3 className="text-base sm:text-[20px] font-bold text-gray-900 tracking-tight leading-snug">
                   Please enter your Mobile Number
                 </h3>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-black tracking-widest select-none shrink-0">
@@ -464,7 +464,7 @@ export default function LoginModal({
               </div>
 
               {/* 6 Square OTP Boxes */}
-              <div className="flex justify-between gap-2 sm:gap-2.5 pt-1">
+              <div className="flex justify-between gap-1.5 sm:gap-2.5 pt-1">
                 {otp.map((digit, index) => (
                   <input
                     key={index}
@@ -478,7 +478,7 @@ export default function LoginModal({
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={handlePaste}
-                    className="w-10 h-12 sm:w-12 sm:h-14 text-center text-xl font-bold text-gray-900 rounded-xl border border-gray-300 focus:border-[#5a4bda] focus:ring-2 focus:ring-[#5a4bda]/20 outline-none transition-all shadow-2xs bg-white"
+                    className="w-10 h-12 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-bold text-gray-900 rounded-xl border border-gray-300 focus:border-[#5a4bda] focus:ring-2 focus:ring-[#5a4bda]/20 outline-none transition-all shadow-2xs bg-white"
                   />
                 ))}
               </div>

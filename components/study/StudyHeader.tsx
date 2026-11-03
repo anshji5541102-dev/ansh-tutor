@@ -60,7 +60,7 @@ export default function StudyHeader({
         </button>
 
         {/* Brand: Circular Monogram + Ansh Tutor */}
-        <Link href="/" className="flex items-center gap-3 shrink-0 group">
+        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 shrink-0 group">
           <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center p-1 shadow-sm">
             <Image
               src="/owl-logo.png"
@@ -70,7 +70,7 @@ export default function StudyHeader({
               className="object-contain"
             />
           </div>
-          <span className="font-extrabold text-white text-[17px] tracking-tight">
+          <span className="hidden xs:inline font-extrabold text-white text-[16px] sm:text-[17px] tracking-tight">
             Ansh Tutor
           </span>
         </Link>
@@ -78,13 +78,13 @@ export default function StudyHeader({
         {/* Class Pill: e.g. "Class 8 >" (Foundation removed, opens Select Your Class) */}
         <button
           onClick={() => router.push('/study_v2/cohort-selection')}
-          className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#282F3E] hover:bg-[#343D4F] text-white text-xs sm:text-[13px] font-semibold border border-gray-700/60 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 rounded-full bg-[#282F3E] hover:bg-[#343D4F] text-white text-xs sm:text-[13px] font-semibold border border-gray-700/60 transition-colors cursor-pointer"
         >
           {/* Magenta round badge with celebration icon matching screenshot */}
-          <span className="w-4.5 h-4.5 rounded-full bg-[#EC4899] text-white flex items-center justify-center text-[10px] shadow-2xs">
+          <span className="w-4 h-4 sm:w-4.5 sm:h-4.5 rounded-full bg-[#EC4899] text-white flex items-center justify-center text-[10px] shadow-2xs">
             🎂
           </span>
-          <span className="truncate max-w-[130px] sm:max-w-none">
+          <span className="truncate max-w-[70px] xs:max-w-[120px] sm:max-w-none">
             {selectedClass}
           </span>
           <ChevronRight className="w-3.5 h-3.5 text-gray-400 shrink-0" />
@@ -106,7 +106,7 @@ export default function StudyHeader({
             aria-haspopup="true"
           >
             {/* "Hi, Student" text */}
-            <span className="text-xs sm:text-[13.5px] font-bold tracking-tight">
+            <span className="hidden xs:inline text-xs sm:text-[13.5px] font-bold tracking-tight">
               Hi, {userName}
             </span>
 

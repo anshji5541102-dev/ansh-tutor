@@ -32,9 +32,9 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           
           {/* Left: Brand Logo & All Courses Dropdown */}
-          <div className="flex items-center gap-6 sm:gap-8">
+          <div className="flex items-center gap-3 sm:gap-6 md:gap-8">
             <Link href="/" className="flex items-center group">
-              <div className="relative h-12 w-48 sm:w-56 transition-transform duration-200 group-hover:scale-[1.02]">
+              <div className="relative h-10 sm:h-12 w-36 xs:w-44 sm:w-56 transition-transform duration-200 group-hover:scale-[1.02]">
                 <Image
                   src="/logo-transparent.png"
                   alt="Ansh Tutor"
@@ -143,7 +143,7 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={openLoginModal}
-                className="group relative overflow-hidden bg-[#1A1D24] hover:bg-black text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer"
+                className="group relative overflow-hidden bg-[#1A1D24] hover:bg-black text-white px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 cursor-pointer whitespace-nowrap"
               >
                 <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-700 ease-out pointer-events-none" />
                 <span className="relative z-10">Login/Register</span>

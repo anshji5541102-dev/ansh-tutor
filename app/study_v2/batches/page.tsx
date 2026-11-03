@@ -63,17 +63,17 @@ export default function StudyBatchesPage() {
         {/* ======================================================== */}
         {/* RIGHT MAIN CONTENT AREA                                  */}
         {/* ======================================================== */}
-        <main className="flex-1 overflow-y-auto px-6 sm:px-10 lg:px-14 py-5 sm:py-7 bg-white">
+        <main className="flex-1 overflow-y-auto px-4 sm:px-10 lg:px-14 py-4 sm:py-7 bg-white">
           
           {/* Subheader: "Batches" (Left) & Search Bar + ₹0 Coin Capsule (Right) */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#E5E7EB]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#E5E7EB] gap-3 sm:gap-0">
             <h2 className="text-[15px] font-semibold text-[#1B212D]">
               Batches
             </h2>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 sm:gap-3 w-full sm:w-auto">
               {/* Search Bar matching PW UI */}
-              <div className="relative w-52 sm:w-64">
+              <div className="relative flex-1 sm:w-64">
                 <Search className="w-3.5 h-3.5 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
