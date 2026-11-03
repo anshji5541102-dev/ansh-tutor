@@ -19,11 +19,14 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const courses = [
-    { name: 'Class 6th to 10th (Foundation)', desc: 'CBSE, ICSE & Olympiads', badge: 'Popular' },
-    { name: 'IIT-JEE (Main & Advanced)', desc: 'Class 11, 12 & Droppers', badge: 'Top Rated' },
-    { name: 'NEET UG Medical', desc: 'Target 700+ Score in NEET', badge: 'High Yield' },
-    { name: 'Commerce & CUET', desc: 'Accounts, Economics, BST', badge: 'Trending' },
-    { name: 'Coding & Tech Skills', desc: 'Python, Web Dev & AI', badge: 'New' },
+    { name: 'Class 8th (Umang Batch)', desc: 'CBSE, ICSE & Olympiad Prep', badge: 'Popular' },
+    { name: 'Class 7th (Sankalp Batch)', desc: 'Math, Science & English Mastery', badge: 'Top Rated' },
+    { name: 'Class 6th (Prarambh Batch)', desc: 'Conceptual Basics & School Drill', badge: 'High Yield' },
+    { name: 'Class 5th Academic Batch', desc: 'Core Foundations & Mental Ability', badge: 'Core' },
+    { name: 'Class 4th Academic Batch', desc: 'Interactive Conceptual Learning', badge: 'Active' },
+    { name: 'Class 3rd Academic Batch', desc: 'Fundamental Skills & Practice', badge: 'Active' },
+    { name: 'Class 2nd Academic Batch', desc: 'Early Childhood Learning', badge: 'Junior' },
+    { name: 'Class 1st Academic Batch', desc: 'Foundational Alphabets & Numbers', badge: 'Junior' },
   ]
 
   return (

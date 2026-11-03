@@ -152,7 +152,7 @@ export default function StudyBatchesPage() {
                           Active
                         </span>
                         <span className="text-gray-300 mx-1">|</span>
-                        <span>{batchItem.startedDate || 'Enrollment Open'}</span>
+                        <span>Valid till: <strong className="text-gray-800">{batchItem.validityDate || '31 Mar 2027'}</strong></span>
                       </div>
                     </div>
 

@@ -69,6 +69,7 @@ interface BatchRecord {
   grade: string;
   faculty: string;
   targetYear: string;
+  validityDate?: string;
   status: "Active" | "Upcoming";
   bannerBg: string;
   bannerTextColor: string;
@@ -284,6 +285,8 @@ function AdminPortalContent() {
   const [newBatchGrade, setNewBatchGrade] = useState("Class 8");
   const [newBatchFaculty, setNewBatchFaculty] = useState("");
   const [newBatchTargetYear, setNewBatchTargetYear] = useState("Session 2026-27");
+  const [newBatchValidityDate, setNewBatchValidityDate] = useState("31 March 2027");
+  const [counselingBookings, setCounselingBookings] = useState<any[]>([]);
 
   const [newLiveTitle, setNewLiveTitle] = useState("");
   const [newLiveSubject, setNewLiveSubject] = useState("Physics");
@@ -356,6 +359,9 @@ function AdminPortalContent() {
 
         const storedNotes = localStorage.getItem("ansh_admin_notes");
         if (storedNotes) setNotesList(JSON.parse(storedNotes));
+
+        const storedBookings = localStorage.getItem("ansh_counseling_bookings");
+        if (storedBookings) setCounselingBookings(JSON.parse(storedBookings));
       } catch {}
       hasMounted.current = true;
     }
@@ -568,6 +574,7 @@ function AdminPortalContent() {
       grade: newBatchGrade,
       targetYear: newBatchTargetYear,
       faculty: newBatchFaculty.trim() || "Expert Faculty",
+      validityDate: newBatchValidityDate.trim() || "31 March 2027",
       status: "Active",
       bannerBg: "bg-[#EAE5FC]",
       bannerTextColor: "text-[#5A4BDA]",
@@ -1682,7 +1689,7 @@ function AdminPortalContent() {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between text-xs text-gray-600 mb-3 py-1.5 px-2 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between text-xs text-gray-600 mb-2 py-1.5 px-2 bg-gray-50 rounded-lg">
                         <span className="font-bold text-[#5A4BDA]">
                           {batch.grade}
                         </span>
@@ -1691,9 +1698,12 @@ function AdminPortalContent() {
                         </span>
                       </div>
 
-                      <p className="text-xs text-gray-500 mb-4">
-                        Faculty: <strong className="text-gray-800">{batch.faculty}</strong>
-                      </p>
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-3 px-1">
+                        <span>Faculty: <strong className="text-gray-800">{batch.faculty}</strong></span>
+                        <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          Valid: {batch.validityDate || "31 Mar 2027"}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
@@ -2046,6 +2056,77 @@ function AdminPortalContent() {
                     </div>
                   </div>
                 )))}
+              </div>
+
+              {/* SECTION: 1-on-1 Academic Counseling & Offline Campus Bookings */}
+              <div className="pt-8 border-t border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#5A4BDA]" />
+                      <span>Academic Counseling &amp; Offline Campus Bookings</span>
+                    </h2>
+                    <p className="text-xs text-gray-500">
+                      Slots booked by parents/students via the online booking portal (/book).
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold px-2.5 py-1 bg-purple-50 text-[#5A4BDA] rounded-lg border border-purple-100">
+                    Total: {counselingBookings.length}
+                  </span>
+                </div>
+
+                {counselingBookings.length === 0 ? (
+                  <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-8 text-center text-gray-400 text-xs">
+                    No counseling slots booked yet. New bookings submitted on /book will appear here automatically.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {counselingBookings.map((b) => (
+                      <div key={b.id} className="bg-white rounded-2xl border border-gray-200 p-4 shadow-2xs space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-[#5A4BDA]">
+                            {b.sessionMode === 'offline' ? '🏛️ Offline Campus Visit' : '💻 1:1 Video Call'}
+                          </span>
+                          <span className="text-xs font-mono text-gray-400">{b.id}</span>
+                        </div>
+                        <div>
+                          <div className="font-bold text-sm text-gray-900">{b.studentName} ({b.studentClass})</div>
+                          <div className="text-xs text-gray-500">Parent: {b.parentName} • Phone: {b.phone}</div>
+                        </div>
+                        <div className="text-xs bg-gray-50 p-2.5 rounded-lg text-gray-700">
+                          <div><strong>Date &amp; Slot:</strong> {b.bookingDate} • {b.timeSlot}</div>
+                          <div><strong>Focus:</strong> {b.subjectConcern}</div>
+                          {b.notes && <div className="mt-1 text-gray-500 italic">&ldquo;{b.notes}&rdquo;</div>}
+                        </div>
+                        <div className="flex items-center justify-between pt-1">
+                          <a
+                            href={`https://wa.me/91${b.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+                              `Hello ${b.parentName}, this is regarding your 1:1 counseling booking for ${b.studentName} (${b.studentClass}) at Ansh Tutor on ${b.bookingDate} (${b.timeSlot}).`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs rounded-lg flex items-center gap-1.5"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            <span>WhatsApp Parent</span>
+                          </a>
+                          <button
+                            onClick={() => {
+                              const updated = counselingBookings.filter((item) => item.id !== b.id);
+                              setCounselingBookings(updated);
+                              localStorage.setItem('ansh_counseling_bookings', JSON.stringify(updated));
+                              showToast('Booking record cleared');
+                            }}
+                            className="text-xs text-gray-400 hover:text-red-600 p-1 cursor-pointer"
+                            title="Remove Booking"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -2569,10 +2650,13 @@ function AdminPortalContent() {
                     className="w-full px-3.5 py-2 border rounded-xl bg-white"
                   >
                     <option>Class 8</option>
-                    <option>Class 9</option>
-                    <option>Class 10</option>
-                    <option>Class 11</option>
-                    <option>Foundation</option>
+                    <option>Class 7</option>
+                    <option>Class 6</option>
+                    <option>Class 5</option>
+                    <option>Class 4</option>
+                    <option>Class 3</option>
+                    <option>Class 2</option>
+                    <option>Class 1</option>
                   </select>
                 </div>
                 <div>
@@ -2588,16 +2672,29 @@ function AdminPortalContent() {
                 </div>
               </div>
 
-              <div>
-                <label className="font-bold text-gray-700 block mb-1">Faculty Name</label>
-                <input
-                  type="text"
-                  value={newBatchFaculty}
-                  onChange={(e) => setNewBatchFaculty(e.target.value)}
-                  placeholder="e.g. Ritik Mishra Sir"
-                  className="w-full px-3.5 py-2 border rounded-xl"
-                  required
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-gray-700 block mb-1">Faculty Name</label>
+                  <input
+                    type="text"
+                    value={newBatchFaculty}
+                    onChange={(e) => setNewBatchFaculty(e.target.value)}
+                    placeholder="e.g. Ritik Mishra Sir"
+                    className="w-full px-3.5 py-2 border rounded-xl"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-gray-700 block mb-1">Course Validity Date</label>
+                  <input
+                    type="text"
+                    value={newBatchValidityDate}
+                    onChange={(e) => setNewBatchValidityDate(e.target.value)}
+                    placeholder="e.g. 31 March 2027"
+                    className="w-full px-3.5 py-2 border rounded-xl"
+                    required
+                  />
+                </div>
               </div>
 
               <div className="pt-2 flex items-center justify-end gap-2">

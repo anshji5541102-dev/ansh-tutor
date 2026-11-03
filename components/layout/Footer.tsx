@@ -88,32 +88,55 @@ export default function Footer() {
           {/* Popular Courses */}
           <div className="lg:col-span-3 space-y-4">
             <h4 className="text-sm font-bold uppercase tracking-wider text-gray-900">
-              Popular Courses
+              Academic Batches
             </h4>
             <ul className="space-y-2.5 text-sm text-gray-600">
               <li>
-                <Link href="/book" className="hover:text-[#5a4bda] transition-colors">
-                  IIT JEE Main &amp; Advanced Batches
+                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
+                  <span>Class 8th (Umang Batch)</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
               <li>
-                <Link href="/book" className="hover:text-[#5a4bda] transition-colors">
-                  NEET UG Medical Preparation
+                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
+                  <span>Class 7th (Sankalp Batch)</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
               <li>
-                <Link href="/book" className="hover:text-[#5a4bda] transition-colors">
-                  Class 10th CBSE Board Booster
+                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
+                  <span>Class 6th (Prarambh Batch)</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
               <li>
-                <Link href="/book" className="hover:text-[#5a4bda] transition-colors">
-                  Class 9th Foundation Olympiads
+                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
+                  <span>Class 5th Academic Batch</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
               <li>
-                <Link href="/book" className="hover:text-[#5a4bda] transition-colors">
-                  Commerce &amp; CUET Prep
+                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
+                  <span>Class 4th Academic Batch</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
+                  <span>Class 3rd Academic Batch</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
+                  <span>Class 2nd Academic Batch</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
+                  <span>Class 1st Academic Batch</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
             </ul>
