@@ -44,7 +44,7 @@ export async function POST(request: Request) {
           },
           body: JSON.stringify({
             recipients: [`+91${digits}`],
-            message: `Your Ansh Tutor verification code is ${generatedOtp}. Do not share this OTP with anyone.`,
+            message: `Ansh Tutor OTP is ${generatedOtp}`,
             deviceId: textbeeDeviceId,
           }),
         })
