@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ansh Tutor — Education Platform
+
+A Next.js 14 (App Router) tutoring platform with Supabase backend and Firebase OTP authentication.
+
+## Tech Stack
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **Font**: Reddit Sans (self-hosted, all weights)
+- **Backend**: Supabase (Auth, Database, Storage, Realtime)
+- **OTP Auth**: Firebase Phone Authentication
+- **Database**: PostgreSQL via Supabase
 
 ## Getting Started
 
-First, run the development server:
-
+### 1. Configure environment variables
+Copy `.env.example` to `.env.local` and fill in your keys:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Set up Supabase
+- Create a project at [supabase.com](https://supabase.com)
+- Copy your Project URL and Anon Key into `.env.local`
+- Run `supabase/schema.sql` in the Supabase SQL Editor
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Set up Firebase OTP
+- Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
+- Enable **Phone Authentication** under Authentication > Sign-in methods
+- Add your Firebase config to `.env.local`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. Run the development server
+```bash
+npm run dev
+```
 
-## Learn More
+## Folder Structure
+```
+app/
+  (auth)/login/       # Login page
+  (auth)/signup/      # Signup page
+  dashboard/          # Student dashboard (protected)
+  book/               # Book a session (protected)
+  profile/            # User profile (protected)
+components/
+  ui/                 # Reusable UI components (Button, Input)
+  layout/             # Navbar, Footer
+lib/
+  supabase/           # Supabase client, server, middleware helpers
+  firebase/           # Firebase config and OTP helpers
+  types/              # TypeScript interfaces
+public/
+  fonts/reddit-sans/  # Self-hosted Reddit Sans font files
+supabase/
+  schema.sql          # Database schema with RLS policies
+```
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Pages (to be styled from screenshots)
+- `/` — Home / Landing page
+- `/login` — Login with email or phone OTP
+- `/signup` — Create account
+- `/dashboard` — Student dashboard
+- `/book` — Book a session
+- `/profile` — User profile

@@ -1,0 +1,130 @@
+@font-face {
+    font-family: 'Reddit Sans';
+    src: url('RedditSans-Regular.eot');
+    src: local('Reddit Sans Regular'), local('RedditSans-Regular'),
+        url('RedditSans-Regular.eot?#iefix') format('embedded-opentype'),
+        url('RedditSans-Regular.woff2') format('woff2'),
+        url('RedditSans-Regular.woff') format('woff'),
+        url('RedditSans-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Reddit Sans';
+    src: url('RedditSans-Bold.eot');
+    src: local('Reddit Sans Bold'), local('RedditSans-Bold'),
+        url('RedditSans-Bold.eot?#iefix') format('embedded-opentype'),
+        url('RedditSans-Bold.woff2') format('woff2'),
+        url('RedditSans-Bold.woff') format('woff'),
+        url('RedditSans-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Reddit Sans';
+    src: url('RedditSans-ExtraBoldItalic.eot');
+    src: local('Reddit Sans ExtraBold Italic'), local('RedditSans-ExtraBoldItalic'),
+        url('RedditSans-ExtraBoldItalic.eot?#iefix') format('embedded-opentype'),
+        url('RedditSans-ExtraBoldItalic.woff2') format('woff2'),
+        url('RedditSans-ExtraBoldItalic.woff') format('woff'),
+        url('RedditSans-ExtraBoldItalic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Reddit Sans';
+    src: url('RedditSans-Light.eot');
+    src: local('Reddit Sans Light'), local('RedditSans-Light'),
+        url('RedditSans-Light.eot?#iefix') format('embedded-opentype'),
+        url('RedditSans-Light.woff2') format('woff2'),
+        url('RedditSans-Light.woff') format('woff'),
+        url('RedditSans-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Reddit Sans';
+    src: url('RedditSans-Italic.eot');
+    src: local('Reddit Sans Italic'), local('RedditSans-Italic'),
+        url('RedditSans-Italic.eot?#iefix') format('embedded-opentype'),
+        url('RedditSans-Italic.woff2') format('woff2'),
+        url('RedditSans-Italic.woff') format('woff'),
+        url('RedditSans-Italic.ttf') format('truetype');
+    font-weight: normal;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Reddit Sans';
+    src: url('RedditSans-SemiBold.eot');
+    src: local('Reddit Sans SemiBold'), local('RedditSans-SemiBold'),
+        url('RedditSans-SemiBold.eot?#iefix') format('embedded-opentype'),
+        url('RedditSans-SemiBold.woff2') format('woff2'),
+        url('RedditSans-SemiBold.woff') format('woff'),
+        url('RedditSans-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Reddit Sans';
+    src: url('RedditSans-BoldItalic.eot');
+    src: local('Reddit Sans Bold Italic'), local('RedditSans-BoldItalic'),
+        url('RedditSans-BoldItalic.eot?#iefix') format('embedded-opentype'),
+        url('RedditSans-BoldItalic.woff2') format('woff2'),
+        url('RedditSans-BoldItalic.woff') format('woff'),
+        url('RedditSans-BoldItalic.ttf') format('truetype');
+    font-weight: bold;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Reddit Sans';
+    src: url('RedditSans-SemiBoldItalic.eot');
+    src: local('Reddit Sans SemiBold Italic'), local('RedditSans-SemiBoldItalic'),
+        url('RedditSans-SemiBoldItalic.eot?#iefix') format('embedded-opentype'),
+        url('RedditSans-SemiBoldItalic.woff2') format('woff2'),
+        url('RedditSans-SemiBoldItalic.woff') format('woff'),
+        url('RedditSans-SemiBoldItalic.ttf') format('truetype');
+    font-weight: 600;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Reddit Sans';
+    src: url('RedditSans-LightItalic.eot');
+    src: local('Reddit Sans Light Italic'), local('RedditSans-LightItalic'),
+        url('RedditSans-LightItalic.eot?#iefix') format('embedded-opentype'),
+        url('RedditSans-LightItalic.woff2') format('woff2'),
+        url('RedditSans-LightItalic.woff') format('woff'),
+        url('RedditSans-LightItalic.ttf') format('truetype');
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Reddit Sans';
+    src: url('RedditSans-ExtraBold.eot');
+    src: local('Reddit Sans ExtraBold'), local('RedditSans-ExtraBold'),
+        url('RedditSans-ExtraBold.eot?#iefix') format('embedded-opentype'),
+        url('RedditSans-ExtraBold.woff2') format('woff2'),
+        url('RedditSans-ExtraBold.woff') format('woff'),
+        url('RedditSans-ExtraBold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
