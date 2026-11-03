@@ -64,12 +64,12 @@ export default function HeroSection() {
           {/* Right Column: Two Dashed Orbits with Uncropped Top & Curved Bottom Figures */}
           <div className="lg:col-span-7 flex justify-center items-center relative py-4">
             <ScrollReveal animation="fade-left" duration={900} className="w-full flex justify-center">
-              <div className="relative w-full max-w-[680px] h-[300px] sm:h-[350px] scale-[0.82] xs:scale-[0.92] sm:scale-100 origin-center transition-transform">
+              <div className="relative w-full max-w-[680px] h-[460px] sm:h-[350px]">
                 
                 {/* ======================================================== */}
                 {/* LEFT: Ansh Sir (Fit Inside Orbit, Curved Bottom, Full Head) */}
                 {/* ======================================================== */}
-                <div className="absolute left-6 sm:left-14 top-1/2 -translate-y-1/2 z-10 w-48 h-48 sm:w-56 sm:h-56 flex items-end justify-center">
+                <div className="absolute top-3 left-3 xs:left-6 sm:top-1/2 sm:-translate-y-1/2 sm:left-14 z-10 w-44 h-44 sm:w-56 sm:h-56 flex items-end justify-center">
                   
                   {/* Rotating Dashed Orbit Ring */}
                   <div className="absolute inset-0 rounded-full border border-dashed border-[#5a4bda]/40 animate-[spin_40s_linear_infinite] pointer-events-none">
@@ -80,10 +80,10 @@ export default function HeroSection() {
                   </div>
 
                   {/* Soft ambient aura with pulse */}
-                  <div className="absolute w-40 h-40 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-purple-200/40 to-blue-100/50 blur-md pointer-events-none -z-10 animate-pulse-glow" />
+                  <div className="absolute w-36 h-36 sm:w-40 sm:h-40 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-purple-200/40 to-blue-100/50 blur-md pointer-events-none -z-10 animate-pulse-glow" />
 
                   {/* Prominent floating Ansh Sir figure */}
-                  <div className="relative w-[115px] h-[160px] sm:w-[135px] sm:h-[185px] flex items-end justify-center z-10 transition-transform duration-300 hover:scale-105 animate-float-bob">
+                  <div className="relative w-[105px] h-[145px] sm:w-[135px] sm:h-[185px] flex items-end justify-center z-10 transition-transform duration-300 hover:scale-105 animate-float-bob">
                     <Image
                       src="/tutor-ansh.png"
                       alt="Ansh Sir - Lead Educator"
@@ -98,7 +98,7 @@ export default function HeroSection() {
                 {/* ======================================================== */}
                 {/* RIGHT: Student (Inward Facing, Real Phone Screen, Curved Base) */}
                 {/* ======================================================== */}
-                <div className="absolute right-6 sm:right-12 top-1/2 -translate-y-1/2 z-10 w-48 h-48 sm:w-56 sm:h-56 flex items-end justify-center">
+                <div className="absolute bottom-3 right-3 xs:right-6 sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2 sm:right-12 z-10 w-44 h-44 sm:w-56 sm:h-56 flex items-end justify-center">
                   
                   {/* Rotating Dashed Orbit Ring */}
                   <div className="absolute inset-0 rounded-full border border-dashed border-[#5a4bda]/40 animate-[spin_35s_linear_infinite_reverse] pointer-events-none">
@@ -111,10 +111,10 @@ export default function HeroSection() {
                   </div>
 
                   {/* Soft ambient aura with pulse */}
-                  <div className="absolute w-40 h-40 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-pink-200/40 to-purple-100/50 blur-md pointer-events-none -z-10 animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
+                  <div className="absolute w-36 h-36 sm:w-40 sm:h-40 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-pink-200/40 to-purple-100/50 blur-md pointer-events-none -z-10 animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
 
                   {/* Student: Facing Inward, Screen facing her, smooth bottom curve with prominent float */}
-                  <div className="relative w-[130px] h-[145px] sm:w-[155px] sm:h-[175px] flex items-end justify-center z-10 transition-transform duration-300 hover:scale-105 animate-float-bob-reverse">
+                  <div className="relative w-[115px] h-[135px] sm:w-[155px] sm:h-[175px] flex items-end justify-center z-10 transition-transform duration-300 hover:scale-105 animate-float-bob-reverse">
                     <Image
                       src="/student-new.png"
                       alt="Student Learning"
@@ -131,8 +131,8 @@ export default function HeroSection() {
                 {/* ======================================================== */}
 
                 {/* DIALOGUE 1: Student Question (White with border) */}
-                <div className="absolute top-2 sm:top-4 right-16 sm:right-24 z-30 animate-fly-drop-1">
-                  <div className="relative bg-white text-gray-900 px-4 py-2 rounded-2xl shadow-xl border border-gray-100 text-xs sm:text-[13px] font-semibold tracking-tight whitespace-nowrap animate-float-bubble hover:scale-105 transition-transform cursor-default">
+                <div className="absolute bottom-[180px] right-3 xs:right-8 sm:top-4 sm:bottom-auto sm:right-24 z-30 animate-fly-drop-1">
+                  <div className="relative bg-white text-gray-900 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl shadow-xl border border-gray-100 text-xs sm:text-[13px] font-semibold tracking-tight whitespace-nowrap animate-float-bubble hover:scale-105 transition-transform cursor-default">
                     <span>Ansh Sir, What is AT?</span>
                     {/* Pointer pointing down-right towards Student's head */}
                     <div className="absolute -bottom-1.5 right-6 w-3 h-3 bg-white border-b border-r border-gray-100 transform rotate-45" />
@@ -140,7 +140,7 @@ export default function HeroSection() {
                 </div>
 
                 {/* DIALOGUE 2: Sir's Answer (In Open Center Gap, ZERO Overlap with Face or Student) */}
-                <div className="absolute top-32 sm:top-36 left-[28%] sm:left-[32%] z-30 animate-fly-drop-2">
+                <div className="absolute top-[175px] left-3 xs:left-8 sm:top-36 sm:left-[32%] z-30 animate-fly-drop-2">
                   <div className="relative bg-[#12153B] text-white px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl shadow-2xl text-[11px] sm:text-xs font-normal max-w-[155px] sm:max-w-[170px] leading-snug border border-indigo-900/60 animate-float-bubble hover:scale-105 transition-transform cursor-default">
                     <span>
                       AT is where students<br />
@@ -148,7 +148,7 @@ export default function HeroSection() {
                       can grow with guidance
                     </span>
                     {/* Pointer on left side pointing towards Ansh Sir */}
-                    <div className="absolute top-4 -left-1.5 w-3 h-3 bg-[#12153B] transform rotate-45" />
+                    <div className="absolute top-3 sm:top-4 -left-1.5 w-3 h-3 bg-[#12153B] transform rotate-45" />
                   </div>
                 </div>
 
