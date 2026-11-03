@@ -31,7 +31,6 @@ export default function LoginModal({
   const [studentNameInput, setStudentNameInput] = useState('')
   const [otp, setOtp] = useState(['', '', '', '', '', ''])
   const [sessionId, setSessionId] = useState<string | null>(null)
-  const [devHint, setDevHint] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [timer, setTimer] = useState(30)
@@ -47,7 +46,6 @@ export default function LoginModal({
       setStudentNameInput('')
       setOtp(['', '', '', '', '', ''])
       setSessionId(null)
-      setDevHint(null)
       setError(null)
       setLoading(false)
       setTimer(30)
@@ -79,7 +77,6 @@ export default function LoginModal({
 
     setLoading(true)
     setError(null)
-    setDevHint(null)
 
     try {
       const res = await fetch('/api/auth/send-otp', {
@@ -94,9 +91,6 @@ export default function LoginModal({
       }
 
       setSessionId(data.sessionId || null)
-      if (data.debugCode) {
-        setDevHint(`Code: ${data.debugCode}`)
-      }
 
       setStep('otp')
       setTimer(30)
@@ -466,15 +460,6 @@ export default function LoginModal({
                 <p className="text-[11px] text-gray-400 mt-0.5">
                   Your code is verified automatically once all 6 digits are entered.
                 </p>
-
-                {devHint && (
-                  <div className="mt-2 px-3 py-1.5 bg-indigo-50 border border-indigo-200/80 rounded-lg text-xs text-[#5a4bda] flex items-center justify-between font-medium">
-                    <span>Verification Code (Demo Mode):</span>
-                    <span className="font-mono font-bold tracking-widest text-xs sm:text-sm bg-white px-2 py-0.5 rounded border border-indigo-200">
-                      {devHint.replace('Code: ', '')}
-                    </span>
-                  </div>
-                )}
               </div>
 
               {/* 6 Square OTP Boxes */}
