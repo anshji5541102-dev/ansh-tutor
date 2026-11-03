@@ -1513,6 +1513,19 @@ function AdminPortalContent() {
                             <Mail className="w-3.5 h-3.5 text-[#5A4BDA]" />
                             <span>Email Notice</span>
                           </button>
+
+                          <button
+                            onClick={() => {
+                              if (confirm(`Are you sure you want to delete pay later record for ${item.studentName}?`)) {
+                                setPayLaterList(payLaterList.filter((p) => p.orderId !== item.orderId));
+                                showToast(`Pay Later record "${item.orderId}" deleted`);
+                              }
+                            }}
+                            className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
+                            title="Delete Record"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -1750,12 +1763,13 @@ function AdminPortalContent() {
                       <th className="py-3 px-4">Class</th>
                       <th className="py-3 px-4">Enrolled Course</th>
                       <th className="py-3 px-4 text-right">Access Status</th>
+                      <th className="py-3 px-4 text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {studentsList.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-gray-400 text-xs">
+                        <td colSpan={7} className="py-12 text-center text-gray-400 text-xs">
                           No registered student records in directory yet. Enrolled students will appear here automatically.
                         </td>
                       </tr>
@@ -1781,6 +1795,20 @@ function AdminPortalContent() {
                           >
                             {st.status}
                           </span>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <button
+                            onClick={() => {
+                              if (confirm(`Are you sure you want to remove student "${st.name}"?`)) {
+                                setStudentsList(studentsList.filter((s) => s.id !== st.id));
+                                showToast(`Student "${st.name}" removed from directory`);
+                              }
+                            }}
+                            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer inline-flex items-center justify-center"
+                            title="Delete Student"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </td>
                       </tr>
                     )))}

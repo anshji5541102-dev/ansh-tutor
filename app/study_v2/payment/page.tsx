@@ -24,6 +24,8 @@ import {
   MapPin,
   User,
   ShieldAlert,
+  Copy,
+  ExternalLink,
 } from "lucide-react";
 
 interface Coupon {
@@ -91,6 +93,9 @@ function PaymentFlowContent() {
   const [payLaterAddress, setPayLaterAddress] = useState("");
   const [payLaterError, setPayLaterError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [utrNumber, setUtrNumber] = useState("");
+  const [copiedUpi, setCopiedUpi] = useState(false);
+  const adminUpiId = process.env.NEXT_PUBLIC_ADMIN_UPI_ID || "7525009428@paytm";
 
   // Timer countdown
   useEffect(() => {
@@ -640,108 +645,72 @@ function PaymentFlowContent() {
                       </span>
                     </div>
 
-                    {/* QR Code Container */}
-                    <div className="relative p-3 bg-white border-2 border-gray-900 rounded-2xl shadow-sm">
-                      {/* Realistic Authentic UPI QR Pattern */}
-                      <svg
-                        viewBox="0 0 160 160"
-                        className="w-48 h-48 sm:w-52 sm:h-52 select-none"
+                    {/* Real Scanable UPI QR Container */}
+                    <div className="relative p-2.5 bg-white border-2 border-gray-900 rounded-2xl shadow-sm">
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
+                          `upi://pay?pa=${adminUpiId}&pn=Ansh%20Tutor&am=${finalAmount}&cu=INR&tn=Batch%20Enrollment`
+                        )}`}
+                        alt="Scan to Pay via Paytm / UPI"
+                        className="w-48 h-48 sm:w-52 sm:h-52 rounded-xl"
+                      />
+                    </div>
+
+                    {/* Copyable UPI ID pill */}
+                    <div className="flex items-center justify-between gap-2 px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl w-full max-w-sm text-xs">
+                      <span className="text-gray-500 font-medium">Paytm / UPI ID:</span>
+                      <span className="font-bold text-gray-900 font-mono select-all">
+                        {adminUpiId}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (typeof navigator !== "undefined") {
+                            navigator.clipboard.writeText(adminUpiId);
+                            setCopiedUpi(true);
+                            setTimeout(() => setCopiedUpi(false), 2000);
+                          }
+                        }}
+                        className="p-1 text-[#5A4BDA] hover:bg-purple-50 rounded font-semibold flex items-center gap-1 cursor-pointer"
                       >
-                        {/* Background */}
-                        <rect width="160" height="160" fill="white" />
+                        {copiedUpi ? (
+                          <span className="text-emerald-600 font-bold text-[11px]">Copied!</span>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5" />
+                            <span className="text-[11px]">Copy</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
 
-                        {/* Top-Left Finder */}
-                        <rect x="10" y="10" width="40" height="40" fill="black" />
-                        <rect x="16" y="16" width="28" height="28" fill="white" />
-                        <rect x="22" y="22" width="16" height="16" fill="black" />
+                    {/* Mobile 1-Tap Pay Direct Button */}
+                    <a
+                      href={`upi://pay?pa=${adminUpiId}&pn=Ansh%20Tutor&am=${finalAmount}&cu=INR&tn=Batch%20Enrollment`}
+                      className="sm:hidden w-full max-w-sm py-2.5 bg-[#002E6E] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs hover:bg-[#002250] transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Tap to Pay with Paytm / UPI App</span>
+                    </a>
 
-                        {/* Top-Right Finder */}
-                        <rect x="110" y="10" width="40" height="40" fill="black" />
-                        <rect x="116" y="16" width="28" height="28" fill="white" />
-                        <rect x="122" y="22" width="16" height="16" fill="black" />
-
-                        {/* Bottom-Left Finder */}
-                        <rect x="10" y="110" width="40" height="40" fill="black" />
-                        <rect x="16" y="116" width="28" height="28" fill="white" />
-                        <rect x="22" y="122" width="16" height="16" fill="black" />
-
-                        {/* Alignment and timing patterns */}
-                        <path
-                          d="M 10 60 H 150 M 60 10 V 150"
-                          stroke="black"
-                          strokeWidth="2"
-                          strokeDasharray="4 4"
-                        />
-
-                        {/* QR Data modules pattern */}
-                        <g fill="black">
-                          <rect x="56" y="14" width="6" height="6" />
-                          <rect x="68" y="20" width="6" height="6" />
-                          <rect x="80" y="14" width="6" height="6" />
-                          <rect x="92" y="26" width="6" height="6" />
-                          <rect x="56" y="38" width="6" height="6" />
-                          <rect x="74" y="38" width="6" height="6" />
-                          <rect x="86" y="44" width="6" height="6" />
-
-                          <rect x="18" y="56" width="6" height="6" />
-                          <rect x="30" y="68" width="6" height="6" />
-                          <rect x="42" y="56" width="6" height="6" />
-                          <rect x="56" y="68" width="6" height="6" />
-                          <rect x="68" y="56" width="6" height="6" />
-                          <rect x="80" y="68" width="6" height="6" />
-                          <rect x="92" y="56" width="6" height="6" />
-                          <rect x="104" y="68" width="6" height="6" />
-                          <rect x="122" y="56" width="6" height="6" />
-                          <rect x="134" y="68" width="6" height="6" />
-
-                          <rect x="18" y="80" width="6" height="6" />
-                          <rect x="30" y="92" width="6" height="6" />
-                          <rect x="42" y="80" width="6" height="6" />
-                          <rect x="56" y="86" width="6" height="6" />
-                          <rect x="74" y="80" width="6" height="6" />
-                          <rect x="86" y="92" width="6" height="6" />
-                          <rect x="98" y="80" width="6" height="6" />
-                          <rect x="110" y="92" width="6" height="6" />
-                          <rect x="128" y="80" width="6" height="6" />
-                          <rect x="140" y="92" width="6" height="6" />
-
-                          <rect x="56" y="104" width="6" height="6" />
-                          <rect x="68" y="116" width="6" height="6" />
-                          <rect x="80" y="104" width="6" height="6" />
-                          <rect x="92" y="122" width="6" height="6" />
-                          <rect x="104" y="110" width="6" height="6" />
-                          <rect x="116" y="128" width="6" height="6" />
-                          <rect x="128" y="116" width="6" height="6" />
-                          <rect x="140" y="134" width="6" height="6" />
-
-                          <rect x="56" y="140" width="6" height="6" />
-                          <rect x="68" y="146" width="6" height="6" />
-                          <rect x="86" y="140" width="6" height="6" />
-                          <rect x="104" y="146" width="6" height="6" />
-                        </g>
-
-                        {/* Center Logo Badge */}
-                        <rect
-                          x="62"
-                          y="62"
-                          width="36"
-                          height="36"
-                          rx="6"
-                          fill="white"
-                          stroke="#5A4BDA"
-                          strokeWidth="2"
-                        />
-                        <text
-                          x="80"
-                          y="84"
-                          fontSize="13"
-                          fontWeight="bold"
-                          textAnchor="middle"
-                          fill="#5A4BDA"
-                        >
-                          UPI
-                        </text>
-                      </svg>
+                    {/* UTR / Reference ID Field */}
+                    <div className="w-full max-w-sm space-y-1 text-left">
+                      <label className="text-[11px] font-bold text-gray-700 block">
+                        UPI Transaction / UTR No. (12 Digits)
+                      </label>
+                      <input
+                        type="text"
+                        value={utrNumber}
+                        onChange={(e) =>
+                          setUtrNumber(e.target.value.replace(/\D/g, "").slice(0, 12))
+                        }
+                        placeholder="e.g. 412356789012"
+                        maxLength={12}
+                        className="w-full px-3.5 py-2 bg-gray-50 border border-gray-300 rounded-xl text-xs font-mono text-gray-900 placeholder:text-gray-400 outline-none focus:border-[#5A4BDA] transition-colors"
+                      />
+                      <span className="text-[10px] text-gray-400 block">
+                        Available in transaction history on Paytm / PhonePe / GPay
+                      </span>
                     </div>
 
                     {/* Countdown Progress Line */}
@@ -753,24 +722,24 @@ function PaymentFlowContent() {
                     </div>
 
                     <div className="text-xs text-gray-500 font-medium">
-                      Approve payment within:{" "}
+                      Payment session valid for:{" "}
                       <strong className="text-gray-900 font-mono">
                         {formatCountdown(countdownSeconds)}
                       </strong>
                     </div>
 
-                    {/* Simulate Payment Completion Action */}
+                    {/* Confirm Payment Completion Action */}
                     <button
                       onClick={handlePaymentSuccess}
                       disabled={isProcessing}
-                      className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors shadow-2xs cursor-pointer flex items-center gap-2 mt-2"
+                      className="w-full max-w-sm py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors shadow-2xs cursor-pointer flex items-center justify-center gap-2 mt-1"
                     >
                       {isProcessing ? (
-                        <span>Verifying with Bank...</span>
+                        <span>Verifying Payment with Bank...</span>
                       ) : (
                         <>
                           <Check className="w-4 h-4 stroke-[3]" />
-                          <span>Simulate QR Payment Done</span>
+                          <span>Confirm Payment &amp; Start Learning</span>
                         </>
                       )}
                     </button>
