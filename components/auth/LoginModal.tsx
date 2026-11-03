@@ -77,6 +77,7 @@ export default function LoginModal({
 
     setLoading(true)
     setError(null)
+    setOtp(['', '', '', '', '', '']) // Clear OTP boxes whenever OTP is sent or resent
 
     try {
       const res = await fetch('/api/auth/send-otp', {
@@ -495,7 +496,14 @@ export default function LoginModal({
                 {resendAvailable ? (
                   <button
                     type="button"
-                    onClick={() => handleSendOtp()}
+                    onClick={() => {
+                      setOtp(['', '', '', '', '', ''])
+                      setError(null)
+                      handleSendOtp()
+                      setTimeout(() => {
+                        otpInputsRef.current[0]?.focus()
+                      }, 100)
+                    }}
                     className="text-[#5a4bda] hover:text-[#4a3bc7] font-semibold hover:underline cursor-pointer"
                   >
                     Resend OTP

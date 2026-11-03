@@ -11,6 +11,4 @@ const globalForOtp = globalThis as unknown as {
 export const localOtpStore =
   globalForOtp.localOtpStore ?? new Map<string, OtpEntry>()
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForOtp.localOtpStore = localOtpStore
-}
+globalForOtp.localOtpStore = localOtpStore
