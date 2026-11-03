@@ -94,6 +94,8 @@ function PaymentFlowContent() {
   const [payLaterError, setPayLaterError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [copiedUpi, setCopiedUpi] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isPayLaterSuccess, setIsPayLaterSuccess] = useState(false);
   const adminUpiId = process.env.NEXT_PUBLIC_ADMIN_UPI_ID || "7525009428@paytm";
 
   // Timer countdown
@@ -201,7 +203,9 @@ function PaymentFlowContent() {
         } catch {}
       }
 
-      router.push("/study_v2/my-purchase/jee-prep-2027");
+      setIsProcessing(false);
+      setIsPayLaterSuccess(false);
+      setShowSuccessModal(true);
     }, 400);
   };
 
@@ -284,7 +288,9 @@ function PaymentFlowContent() {
         } catch {}
       }
 
-      router.push("/study_v2/my-purchase/jee-prep-2027");
+      setIsProcessing(false);
+      setIsPayLaterSuccess(true);
+      setShowSuccessModal(true);
     }, 400);
   };
 
@@ -848,6 +854,104 @@ function PaymentFlowContent() {
             </div>
           </div>
         </main>
+      )}
+
+      {/* 4. ENROLLMENT SUCCESS MODAL (Exact match to PhysicsWallah screenshot) */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative bg-white rounded-3xl w-full max-w-sm sm:max-w-md p-8 sm:p-10 text-center shadow-2xl overflow-hidden border border-gray-100 animate-in zoom-in-95 duration-200 flex flex-col items-center">
+            {/* Close Button */}
+            <button
+              onClick={() => router.push("/study_v2/study/my-batches")}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 flex items-center justify-center text-xs font-bold transition-colors cursor-pointer"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4 stroke-[2.5]" />
+            </button>
+
+            {/* Circular Green Checkmark Badge */}
+            <div className="w-16 h-16 rounded-full bg-[#16A34A] flex items-center justify-center mb-5 shadow-lg shadow-green-600/20">
+              <Check className="w-9 h-9 text-white stroke-[3.5]" />
+            </div>
+
+            {/* Title (Clean, NO 'free' tags anywhere) */}
+            <h2 className="text-xl sm:text-2xl font-bold text-[#1B212D] tracking-tight leading-snug px-2">
+              You have successfully enrolled in this batch
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-xs sm:text-sm text-gray-500 mt-2 font-medium max-w-xs">
+              {isPayLaterSuccess
+                ? "7-Day Pay Later activated. You can find this batch on My Batches section."
+                : "You can find this batch on My Batches section"}
+            </p>
+
+            {/* Big Purple Let's Study Button */}
+            <button
+              onClick={() => router.push("/study_v2/study/my-batches")}
+              className="w-full mt-6 py-3.5 bg-[#5A4BDA] hover:bg-[#4939C8] active:scale-[0.99] text-white font-extrabold text-sm sm:text-base rounded-xl transition-all shadow-md hover:shadow-lg cursor-pointer tracking-wide"
+            >
+              Let&apos;s Study
+            </button>
+
+            {/* Bottom Study Illustration (Matching screenshot students studying with books and giant pencil) */}
+            <div className="mt-8 -mb-4 w-full flex justify-center select-none pointer-events-none">
+              <svg
+                viewBox="0 0 340 140"
+                className="w-full max-w-[280px] sm:max-w-[320px] h-auto"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {/* Background Soft Sky Blobs */}
+                <circle cx="170" cy="95" r="60" fill="#F0F4FF" />
+                <circle cx="235" cy="70" r="35" fill="#EEF2FF" />
+                <circle cx="95" cy="85" r="35" fill="#FAF5FF" />
+
+                {/* Stack of Books */}
+                {/* Book 1 (Bottom Dark Blue) */}
+                <rect x="75" y="115" width="150" height="14" rx="3" fill="#3B82F6" />
+                <rect x="73" y="117" width="8" height="10" rx="1" fill="#1D4ED8" />
+                <rect x="85" y="119" width="138" height="6" fill="#EFF6FF" />
+
+                {/* Book 2 (Middle Gold/Amber) */}
+                <rect x="90" y="100" width="130" height="14" rx="3" fill="#F59E0B" />
+                <rect x="88" y="102" width="7" height="10" rx="1" fill="#D97706" />
+                <rect x="98" y="104" width="120" height="6" fill="#FFFBEB" />
+                {/* Bookmark ribbon */}
+                <path d="M185 110 L185 126 L190 122 L195 126 L195 110 Z" fill="#EF4444" />
+
+                {/* Book 3 (Top Purple) */}
+                <rect x="105" y="85" width="110" height="14" rx="3" fill="#6366F1" />
+                <rect x="103" y="87" width="6" height="10" rx="1" fill="#4F46E5" />
+                <rect x="112" y="89" width="101" height="6" fill="#EEF2FF" />
+
+                {/* Girl Student Sitting on Books (Left) */}
+                <path d="M130 85 L133 67 L145 71 L142 85 Z" fill="#1E293B" />
+                <path d="M135 52 L148 55 L145 69 L132 65 Z" fill="#F97316" />
+                <circle cx="138" cy="43" r="7" fill="#FDBA74" />
+                <path d="M132 39 C132 35 144 35 144 39 C146 44 141 47 137 47 Z" fill="#78350F" />
+                <rect x="146" y="58" width="12" height="10" rx="1" fill="#10B981" transform="rotate(15 146 58)" />
+
+                {/* Giant Red Pencil (Right) */}
+                <rect x="250" y="45" width="11" height="70" rx="2" fill="#EF4444" />
+                <rect x="250" y="40" width="11" height="5" fill="#FCA5A5" />
+                <polygon points="250,40 255.5,28 261,40" fill="#FDE047" />
+                <polygon points="253.5,32 255.5,28 257.5,32" fill="#1F2937" />
+
+                {/* Boy Student Sitting & Reading (Right) */}
+                <rect x="215" y="93" width="13" height="22" rx="2" fill="#2563EB" />
+                <path d="M217 115 L210 126 L224 126 L228 115 Z" fill="#1E293B" />
+                <circle cx="221" cy="85" r="6" fill="#FDBA74" />
+                <path d="M216 83 C216 78 226 78 226 83 C227 86 218 87 216 83 Z" fill="#1F2937" />
+                <rect x="206" y="106" width="14" height="10" rx="1" fill="#F59E0B" transform="rotate(-10 206 106)" />
+
+                {/* Sparkles */}
+                <path d="M75 50 L77 54 L81 55 L77 57 L75 61 L73 57 L69 55 L73 54 Z" fill="#F59E0B" opacity="0.8" />
+                <path d="M280 75 L281 78 L284 79 L281 80 L280 83 L279 80 L276 79 L279 78 Z" fill="#6366F1" opacity="0.8" />
+              </svg>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

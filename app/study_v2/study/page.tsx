@@ -468,10 +468,10 @@ export default function StudyHomePage() {
                 )}
               </div>
 
-              {/* Free Batches (3) */}
+              {/* Enrolled Batches */}
               <div>
                 <div className="text-[13px] font-bold text-[#1B212D] mb-2">
-                  Free Batches ({filteredBatches.length})
+                  All Batches ({filteredBatches.length})
                 </div>
 
                 <div className="space-y-1 border-t border-gray-100 pt-1">

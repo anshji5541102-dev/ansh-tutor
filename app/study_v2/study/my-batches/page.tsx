@@ -11,7 +11,7 @@ import { ArrowLeft, Calendar } from "lucide-react";
 interface BatchItem {
   id: string;
   title: string;
-  category: "free" | "paid";
+  category: "enrolled" | "all";
   bannerImg: string;
   bannerBg: string;
   bannerTextColor: string;
@@ -27,23 +27,23 @@ interface BatchItem {
 const allBatches: BatchItem[] = [
   {
     id: "jee-prep-2027",
-    title: "JEE Prep 2027 Free YouTube Series",
-    category: "free",
+    title: "JEE Prep 2027 Comprehensive Batch",
+    category: "enrolled",
     bannerImg: "/batches/my_batch_card1_banner.png",
     bannerBg: "bg-[#EAE5FC]",
     bannerTextColor: "text-[#5A4BDA]",
-    bannerLabel: "JEE PREP 2027\nFREE YOUTUBE SERIES",
+    bannerLabel: "JEE PREP 2027\nCOMPREHENSIVE BATCH",
     avatarSrc: "/batches/user_avatar.png",
     facultyName: "Faculty",
     language: "Hinglish",
     startDate: "26 Aug 2026",
     endDate: "30 Jun 2030",
-    whatsAppMsg: "Hello Ansh Tutor, I have a question about JEE Prep 2027 Free YouTube Series.",
+    whatsAppMsg: "Hello Ansh Tutor, I have a question about JEE Prep 2027 Comprehensive Batch.",
   },
   {
     id: "ritik-mishra-2027",
-    title: "Ritik Mishra - Class 8th YT (2027)",
-    category: "free",
+    title: "Ritik Mishra - Class 8th Academic Batch (2027)",
+    category: "enrolled",
     bannerImg: "/batches/my_batch_card2_banner.png",
     bannerBg: "bg-[#D1FAE5]",
     bannerTextColor: "text-[#059669]",
@@ -53,12 +53,12 @@ const allBatches: BatchItem[] = [
     language: "Hinglish",
     startDate: "24 Aug 2026",
     endDate: "31 Mar 2027",
-    whatsAppMsg: "Hello Ansh Tutor, I have a question about Ritik Mishra Class 8th YT (2027).",
+    whatsAppMsg: "Hello Ansh Tutor, I have a question about Ritik Mishra Class 8th (2027).",
   },
   {
     id: "samridhi-sharma-2027",
-    title: "Samridhi Sharma - Class 8th (2027)",
-    category: "free",
+    title: "Samridhi Sharma - Class 8th Academic Batch (2027)",
+    category: "enrolled",
     bannerImg: "/batches/my_batch_card3_banner.png",
     bannerBg: "bg-[#FFE4E6]",
     bannerTextColor: "text-[#E11D48]",
@@ -73,7 +73,7 @@ const allBatches: BatchItem[] = [
   {
     id: "ansh-foundation-2027",
     title: "Ansh Foundation Master Batch 2027 (Class 8)",
-    category: "paid",
+    category: "enrolled",
     bannerImg: "",
     bannerBg: "bg-[#E0E7FF]",
     bannerTextColor: "text-[#4338CA]",
@@ -90,11 +90,12 @@ const allBatches: BatchItem[] = [
 function MyBatchesContent() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [selectedTab, setSelectedTab] = useState<"paid" | "free">("free");
+  const [selectedTab, setSelectedTab] = useState<"enrolled" | "all">("enrolled");
 
-  const filteredBatches = allBatches.filter(
-    (b) => b.category === selectedTab
-  );
+  const filteredBatches =
+    selectedTab === "all"
+      ? allBatches
+      : allBatches.filter((b) => b.category === "enrolled");
 
   const handleWhatsAppClick = (msg: string) => {
     const url = `https://wa.me/917525009428?text=${encodeURIComponent(msg)}`;
@@ -136,27 +137,27 @@ function MyBatchesContent() {
             My Batches
           </h1>
 
-          {/* Segmented Control / Toggle: Paid vs Free */}
+          {/* Segmented Control / Toggle: Enrolled vs All */}
           <div className="bg-[#EAEFF5] p-1 rounded-2xl inline-flex items-center gap-1 mb-6">
             <button
-              onClick={() => setSelectedTab("paid")}
-              className={`px-8 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer ${
-                selectedTab === "paid"
+              onClick={() => setSelectedTab("enrolled")}
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+                selectedTab === "enrolled"
                   ? "bg-white text-[#1B212D] shadow-xs"
                   : "text-gray-500 hover:text-gray-900"
               }`}
             >
-              Paid
+              Enrolled Batches
             </button>
             <button
-              onClick={() => setSelectedTab("free")}
-              className={`px-8 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer ${
-                selectedTab === "free"
+              onClick={() => setSelectedTab("all")}
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+                selectedTab === "all"
                   ? "bg-white text-[#1B212D] shadow-xs"
                   : "text-gray-500 hover:text-gray-900"
               }`}
             >
-              Free
+              All Batches
             </button>
           </div>
 
