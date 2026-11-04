@@ -1,5 +1,6 @@
 'use client'
 
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -11,8 +12,38 @@ import {
   ArrowRight,
   Sparkles,
 } from 'lucide-react'
+import { isBatchValid, defaultAcademicBatches, BatchItemData } from '@/lib/batchValidity'
 
 export default function Footer() {
+  const [syncedBatches, setSyncedBatches] = useState<BatchItemData[]>(defaultAcademicBatches)
+
+  useEffect(() => {
+    const loadBatches = () => {
+      try {
+        const stored = localStorage.getItem('ansh_admin_batches')
+        if (stored) {
+          const parsed = JSON.parse(stored)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            // Real-time filter: only show non-expired batches in footer
+            const validOnly = parsed.filter((b: any) => isBatchValid(b.validityDate))
+            if (validOnly.length > 0) {
+              setSyncedBatches(validOnly)
+              return
+            }
+          }
+        }
+        setSyncedBatches(defaultAcademicBatches)
+      } catch {
+        setSyncedBatches(defaultAcademicBatches)
+      }
+    }
+
+    loadBatches()
+
+    // Real-time sync across storage events
+    window.addEventListener('storage', loadBatches)
+    return () => window.removeEventListener('storage', loadBatches)
+  }, [])
   return (
     <footer className="bg-[#F4F6FB] text-gray-800 pt-16 pb-12 border-t border-gray-200/80">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -85,60 +116,28 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Academic Batches */}
+          {/* Real-time Synced Academic Batches */}
           <div className="lg:col-span-3 space-y-4">
             <h4 className="text-sm font-bold uppercase tracking-wider text-gray-900 flex items-center justify-between">
               <span>Academic Batches (Class 1-8)</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Real-time synced" />
             </h4>
             <ul className="space-y-2.5 text-sm text-gray-600">
-              <li>
-                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 8th (Umang Batch)</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 7th (Sankalp Batch)</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 6th (Prarambh Batch)</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 5th Academic Batch</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 4th Academic Batch</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 3rd Academic Batch</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 2nd Academic Batch</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 1st Academic Batch</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
-                </Link>
-              </li>
+              {syncedBatches.slice(0, 8).map((b) => (
+                <li key={b.id}>
+                  <Link
+                    href="/study_v2/cohort-selection"
+                    className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group"
+                  >
+                    <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda] truncate mr-2">
+                      {b.title}
+                    </span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded shrink-0">
+                      Enroll
+                    </span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

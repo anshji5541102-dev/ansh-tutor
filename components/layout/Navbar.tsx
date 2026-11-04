@@ -123,17 +123,7 @@ export default function Navbar() {
           </nav>
 
           {/* Right: Login/Register Button or User Profile */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Direct CTA: Book Free Demo / Counselor */}
-            <Link
-              href="/book"
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#5a4bda] to-[#705df5] hover:from-[#4939c8] hover:to-[#5a4bda] text-white text-xs sm:text-sm font-bold shadow-md shadow-[#5a4bda]/25 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer whitespace-nowrap"
-            >
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-300 animate-pulse" />
-              <span className="hidden xs:inline">Book Demo / Counselor</span>
-              <span className="xs:hidden">Book Demo</span>
-            </Link>
-
+          <div className="flex items-center gap-3">
             {user || profile ? (
               <div className="flex items-center gap-2">
                 <Link
@@ -179,19 +169,6 @@ export default function Navbar() {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-b border-gray-200 px-6 py-4 space-y-3">
-          <Link
-            href="/book"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 text-[#5a4bda] font-extrabold text-sm shadow-xs"
-          >
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-500 animate-pulse" />
-              <span>Book Offline Demo / Counselor Slot</span>
-            </div>
-            <span className="text-[10px] font-black uppercase px-2 py-0.5 bg-[#5a4bda] text-white rounded-md">
-              Free
-            </span>
-          </Link>
           <Link
             href="#centres"
             onClick={() => setMobileMenuOpen(false)}
