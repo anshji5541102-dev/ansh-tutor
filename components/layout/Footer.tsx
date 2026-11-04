@@ -85,57 +85,57 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Popular Courses */}
+          {/* Academic Batches */}
           <div className="lg:col-span-3 space-y-4">
-            <h4 className="text-sm font-bold uppercase tracking-wider text-gray-900">
-              Academic Batches
+            <h4 className="text-sm font-bold uppercase tracking-wider text-gray-900 flex items-center justify-between">
+              <span>Academic Batches (Class 1-8)</span>
             </h4>
             <ul className="space-y-2.5 text-sm text-gray-600">
               <li>
                 <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span>Class 8th (Umang Batch)</span>
+                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 8th (Umang Batch)</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
               <li>
                 <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span>Class 7th (Sankalp Batch)</span>
+                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 7th (Sankalp Batch)</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
               <li>
                 <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span>Class 6th (Prarambh Batch)</span>
+                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 6th (Prarambh Batch)</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
               <li>
                 <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span>Class 5th Academic Batch</span>
+                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 5th Academic Batch</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
               <li>
                 <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span>Class 4th Academic Batch</span>
+                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 4th Academic Batch</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
               <li>
                 <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span>Class 3rd Academic Batch</span>
+                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 3rd Academic Batch</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
               <li>
                 <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span>Class 2nd Academic Batch</span>
+                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 2nd Academic Batch</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
               <li>
                 <Link href="/study_v2/cohort-selection" className="hover:text-[#5a4bda] transition-colors flex items-center justify-between group">
-                  <span>Class 1st Academic Batch</span>
+                  <span className="font-semibold text-gray-800 group-hover:text-[#5a4bda]">Class 1st Academic Batch</span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 bg-indigo-50 text-[#5a4bda] rounded">Enroll</span>
                 </Link>
               </li>
@@ -148,6 +148,12 @@ export default function Footer() {
               Quick Links
             </h4>
             <ul className="space-y-2.5 text-sm text-gray-600">
+              <li>
+                <Link href="/book" className="text-[#5a4bda] font-bold hover:underline flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Book Offline Demo</span>
+                </Link>
+              </li>
               <li>
                 <Link href="#centres" className="hover:text-[#5a4bda] transition-colors">
                   Vidyapeeth Centres

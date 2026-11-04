@@ -119,12 +119,12 @@ export default function BookSessionPage() {
           </div>
 
           <h1 className="text-2xl sm:text-4xl font-extrabold text-gray-950 tracking-tight leading-tight">
-            Book a 1-on-1 Academic Session &amp;{' '}
-            <span className="text-[#5a4bda]">Campus Visit</span>
+            Book 1-Day Free Offline Demo &amp;{' '}
+            <span className="text-[#5a4bda]">1:1 Counselor Slot</span>
           </h1>
 
           <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Get personalized career counseling, 1-year academic roadmap planning, and conceptual diagnosis with senior educators at our Rajajipuram Campus or via 1:1 Live Video.
+            Experience our interactive digital classrooms at Rajajipuram Campus, Lucknow with a free 1-day offline demo or schedule a 1-on-1 academic counseling session with senior educators.
           </p>
 
           {/* 4 Feature Highlights */}
@@ -264,13 +264,13 @@ export default function BookSessionPage() {
                   </div>
                   <div>
                     <div className="font-bold text-sm sm:text-base text-gray-900 flex items-center gap-2">
-                      <span>Offline Campus Visit</span>
+                      <span>Offline 1-Day Demo &amp; Campus Visit</span>
                       <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-red-100 text-red-600">
                         Recommended
                       </span>
                     </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      Rajajipuram Campus, Lucknow • 1-on-1 In-person meeting with faculty &amp; smart classroom tour.
+                      Rajajipuram Campus, Lucknow • 1-Day Free Classroom Demo, in-person counseling &amp; smart board tour.
                     </div>
                   </div>
                 </button>

@@ -307,7 +307,7 @@ export default function AdminSidebar({
                       activeTab === 'helpdesk' ? 'text-[#5A4BDA]' : 'text-[#4B5565]'
                     }`}
                   />
-                  <span>Helpdesk</span>
+                  <span>Counseling &amp; Helpdesk</span>
                 </button>
               </li>
             </ul>

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import StudyHeader from '@/components/study/StudyHeader'
 import StudySidebar from '@/components/study/StudySidebar'
+import { isBatchValid, defaultAcademicBatches } from '@/lib/batchValidity'
 import {
   Search,
   ChevronRight,
@@ -33,16 +34,24 @@ export default function StudyBatchesPage() {
     if (typeof window !== "undefined") {
       try {
         const stored = JSON.parse(localStorage.getItem("ansh_admin_batches") || "[]")
-        setBatchesList(Array.isArray(stored) ? stored : [])
+        if (Array.isArray(stored) && stored.length > 0) {
+          setBatchesList(stored)
+        } else {
+          setBatchesList(defaultAcademicBatches)
+          localStorage.setItem("ansh_admin_batches", JSON.stringify(defaultAcademicBatches))
+        }
       } catch {
-        setBatchesList([])
+        setBatchesList(defaultAcademicBatches)
       }
     }
   }, [])
 
-  const filteredBatches = batchesList.filter((b) =>
-    (b.title || '').toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  // Automatically filter out expired batches so they are hidden from the student portal
+  const filteredBatches = batchesList
+    .filter((b) => isBatchValid(b.validityDate))
+    .filter((b) =>
+      (b.title || '').toLowerCase().includes(searchQuery.toLowerCase())
+    )
 
   return (
     <div className="h-screen bg-white flex flex-col overflow-hidden font-sans selection:bg-[#5A4BDA] selection:text-white antialiased">

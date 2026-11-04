@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminSidebar, { AdminTab } from "@/components/admin/AdminSidebar";
+import { isBatchValid, getDaysRemaining, defaultAcademicBatches } from "@/lib/batchValidity";
 import {
   LayoutDashboard,
   ShieldAlert,
@@ -74,6 +75,8 @@ interface BatchRecord {
   bannerBg: string;
   bannerTextColor: string;
   bannerLabel: string;
+  bannerImg?: string;
+  price?: number;
 }
 
 // BATCH CONTENT: Recorded Videos, Notes, DPPs
@@ -286,7 +289,51 @@ function AdminPortalContent() {
   const [newBatchFaculty, setNewBatchFaculty] = useState("");
   const [newBatchTargetYear, setNewBatchTargetYear] = useState("Session 2026-27");
   const [newBatchValidityDate, setNewBatchValidityDate] = useState("31 March 2027");
+  const [newBatchBannerBg, setNewBatchBannerBg] = useState("bg-gradient-to-r from-[#5A4BDA] to-[#7B61FF]");
+  const [newBatchBannerImg, setNewBatchBannerImg] = useState("/batches/banner_umang_term2.png");
+  const [batchesFilter, setBatchesFilter] = useState<"all" | "active" | "expired">("all");
   const [counselingBookings, setCounselingBookings] = useState<any[]>([]);
+
+  // Reusable Animated Confirmation Modal State for All Sensitive Tasks
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    confirmText?: string;
+    cancelText?: string;
+    isDanger?: boolean;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    description: "",
+    confirmText: "Confirm",
+    cancelText: "Cancel",
+    isDanger: true,
+    onConfirm: () => {},
+  });
+
+  const askConfirmation = (opts: {
+    title: string;
+    description: string;
+    confirmText?: string;
+    cancelText?: string;
+    isDanger?: boolean;
+    onConfirm: () => void;
+  }) => {
+    setConfirmModal({
+      isOpen: true,
+      title: opts.title,
+      description: opts.description,
+      confirmText: opts.confirmText || "Confirm",
+      cancelText: opts.cancelText || "Cancel",
+      isDanger: opts.isDanger !== false,
+      onConfirm: () => {
+        opts.onConfirm();
+        setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+      },
+    });
+  };
 
   const [newLiveTitle, setNewLiveTitle] = useState("");
   const [newLiveSubject, setNewLiveSubject] = useState("Physics");
@@ -337,7 +384,12 @@ function AdminPortalContent() {
     if (typeof window !== "undefined") {
       try {
         const storedBatches = localStorage.getItem("ansh_admin_batches");
-        if (storedBatches) setBatchesList(JSON.parse(storedBatches));
+        if (storedBatches && JSON.parse(storedBatches).length > 0) {
+          setBatchesList(JSON.parse(storedBatches));
+        } else {
+          setBatchesList(defaultAcademicBatches as BatchRecord[]);
+          localStorage.setItem("ansh_admin_batches", JSON.stringify(defaultAcademicBatches));
+        }
 
         const storedTests = localStorage.getItem("ansh_admin_tests");
         if (storedTests) setTestSeriesList(JSON.parse(storedTests));
@@ -446,6 +498,20 @@ function AdminPortalContent() {
           return { ...item, isPaid: true, isBlocked: false };
         }
         return item;
+      })
+    );
+  };
+
+  const handleExtendValidity = (batchId: string) => {
+    setBatchesList((prev) =>
+      prev.map((b) => {
+        if (b.id === batchId) {
+          const nextYear = new Date().getFullYear() + 1;
+          const newDate = `31 March ${nextYear}`;
+          showToast(`Validity extended for "${b.title}" till ${newDate}! Batch restored to student website.`);
+          return { ...b, validityDate: newDate, status: "Active" };
+        }
+        return b;
       })
     );
   };
@@ -576,9 +642,10 @@ function AdminPortalContent() {
       faculty: newBatchFaculty.trim() || "Expert Faculty",
       validityDate: newBatchValidityDate.trim() || "31 March 2027",
       status: "Active",
-      bannerBg: "bg-[#EAE5FC]",
-      bannerTextColor: "text-[#5A4BDA]",
-      bannerLabel: newBatchTitle.toUpperCase(),
+      bannerBg: newBatchBannerBg || "bg-gradient-to-r from-[#5A4BDA] to-[#7B61FF]",
+      bannerTextColor: "text-white",
+      bannerLabel: `${newBatchGrade.toUpperCase()} • ${newBatchTitle.toUpperCase()}`,
+      bannerImg: newBatchBannerImg || "/batches/banner_umang_term2.png",
     };
 
     setBatchesList((prev) => [newBatch, ...prev]);
@@ -1042,8 +1109,16 @@ function AdminPortalContent() {
 
                           <button
                             onClick={() => {
-                              setLecturesList((prev) => prev.filter((l) => l.id !== lec.id));
-                              showToast(`Lecture "${lec.title}" removed`);
+                              askConfirmation({
+                                title: "Delete Recorded Video Lecture?",
+                                description: `Are you sure you want to delete lecture "${lec.title}" (${lec.chapter})?`,
+                                confirmText: "Yes, Delete Lecture",
+                                isDanger: true,
+                                onConfirm: () => {
+                                  setLecturesList((prev) => prev.filter((l) => l.id !== lec.id));
+                                  showToast(`Lecture "${lec.title}" removed`);
+                                },
+                              });
                             }}
                             className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
                             title="Delete Lecture"
@@ -1111,8 +1186,16 @@ function AdminPortalContent() {
 
                           <button
                             onClick={() => {
-                              setNotesList((prev) => prev.filter((n) => n.id !== note.id));
-                              showToast(`Notes "${note.title}" removed`);
+                              askConfirmation({
+                                title: "Delete Lecture Notes PDF?",
+                                description: `Are you sure you want to delete notes PDF "${note.title}"?`,
+                                confirmText: "Yes, Delete Notes",
+                                isDanger: true,
+                                onConfirm: () => {
+                                  setNotesList((prev) => prev.filter((n) => n.id !== note.id));
+                                  showToast(`Notes "${note.title}" removed`);
+                                },
+                              });
                             }}
                             className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
                             title="Delete Notes"
@@ -1180,8 +1263,16 @@ function AdminPortalContent() {
 
                           <button
                             onClick={() => {
-                              setDppsList((prev) => prev.filter((d) => d.id !== dpp.id));
-                              showToast(`DPP "${dpp.dppNumber}" removed`);
+                              askConfirmation({
+                                title: "Delete Daily Practice Problem?",
+                                description: `Are you sure you want to delete DPP "${dpp.dppNumber}: ${dpp.title}"?`,
+                                confirmText: "Yes, Delete DPP",
+                                isDanger: true,
+                                onConfirm: () => {
+                                  setDppsList((prev) => prev.filter((d) => d.id !== dpp.id));
+                                  showToast(`DPP "${dpp.dppNumber}" removed`);
+                                },
+                              });
                             }}
                             className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
                             title="Delete DPP"
@@ -1287,8 +1378,16 @@ function AdminPortalContent() {
 
                         <button
                           onClick={() => {
-                            setTestSeriesList((prev) => prev.filter((t) => t.id !== test.id));
-                            showToast(`Test "${test.title}" removed`);
+                            askConfirmation({
+                              title: "Delete Mock Test?",
+                              description: `Are you sure you want to delete test "${test.title}"?`,
+                              confirmText: "Yes, Delete Test",
+                              isDanger: true,
+                              onConfirm: () => {
+                                setTestSeriesList((prev) => prev.filter((t) => t.id !== test.id));
+                                showToast(`Test "${test.title}" removed`);
+                              },
+                            });
                           }}
                           className="text-gray-400 hover:text-red-600 p-1 cursor-pointer"
                         >
@@ -1382,8 +1481,16 @@ function AdminPortalContent() {
 
                       <button
                         onClick={() => {
-                          setLibraryList((prev) => prev.filter((b) => b.id !== book.id));
-                          showToast(`Book "${book.title}" removed`);
+                          askConfirmation({
+                            title: "Delete Library Resource?",
+                            description: `Are you sure you want to remove "${book.title}" from the digital library?`,
+                            confirmText: "Yes, Delete Resource",
+                            isDanger: true,
+                            onConfirm: () => {
+                              setLibraryList((prev) => prev.filter((b) => b.id !== book.id));
+                              showToast(`Book "${book.title}" removed`);
+                            },
+                          });
                         }}
                         className="text-gray-400 hover:text-red-600 p-1 cursor-pointer"
                       >
@@ -1551,7 +1658,17 @@ function AdminPortalContent() {
                         <div className="flex items-center gap-2 flex-wrap">
                           {!item.isPaid && (
                             <button
-                              onClick={() => toggleBlockAccess(item.orderId)}
+                              onClick={() => {
+                                askConfirmation({
+                                  title: item.isBlocked ? "Unblock Student Batch Access?" : "Block Student Batch Access?",
+                                  description: item.isBlocked
+                                    ? `Restore full study access for ${item.studentName}?`
+                                    : `Block ${item.studentName} from accessing live lectures and batch study materials due to pending fees?`,
+                                  confirmText: item.isBlocked ? "Yes, Unblock Access" : "Yes, Block Access",
+                                  isDanger: !item.isBlocked,
+                                  onConfirm: () => toggleBlockAccess(item.orderId),
+                                });
+                              }}
                               className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
                                 item.isBlocked
                                   ? "bg-[#ECFDF5] text-[#059669] hover:bg-emerald-100"
@@ -1574,7 +1691,15 @@ function AdminPortalContent() {
 
                           {!item.isPaid && (
                             <button
-                              onClick={() => markPayLaterPaid(item.orderId)}
+                              onClick={() => {
+                                askConfirmation({
+                                  title: "Confirm Fee Payment?",
+                                  description: `Mark fee of ₹${item.amount} as FULLY PAID for ${item.studentName} (${item.orderId})?`,
+                                  confirmText: "Yes, Mark as Paid",
+                                  isDanger: false,
+                                  onConfirm: () => markPayLaterPaid(item.orderId),
+                                });
+                              }}
                               className="px-4 py-2.5 bg-[#F0EEFF] text-[#5A4BDA] hover:bg-[#E5E0FF] font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
                             >
                               <Check className="w-3.5 h-3.5 stroke-[3]" />
@@ -1604,10 +1729,16 @@ function AdminPortalContent() {
 
                           <button
                             onClick={() => {
-                              if (confirm(`Are you sure you want to delete pay later record for ${item.studentName}?`)) {
-                                setPayLaterList(payLaterList.filter((p) => p.orderId !== item.orderId));
-                                showToast(`Pay Later record "${item.orderId}" deleted`);
-                              }
+                              askConfirmation({
+                                title: "Delete Pay Later Record?",
+                                description: `Are you sure you want to permanently delete the pay later admission record for ${item.studentName} (${item.orderId})?`,
+                                confirmText: "Yes, Delete Record",
+                                isDanger: true,
+                                onConfirm: () => {
+                                  setPayLaterList((prev) => prev.filter((p) => p.orderId !== item.orderId));
+                                  showToast(`Pay Later record "${item.orderId}" deleted`);
+                                },
+                              });
                             }}
                             className="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
                             title="Delete Record"
@@ -1632,103 +1763,195 @@ function AdminPortalContent() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E7EB]">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-[#1B212D] tracking-tight">
-                    Academic Batches &amp; Class Cohorts
+                    Academic Batches &amp; Class Cohorts (Classes 1 - 8)
                   </h1>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    Configure curriculum batches, assign educators, and jump directly to batch content upload.
+                    Batches automatically hide from the student website once their validity date expires.
                   </p>
                 </div>
 
                 <button
                   onClick={() => setAddBatchModalOpen(true)}
-                  className="px-5 py-2.5 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs sm:text-sm rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+                  className="px-5 py-2.5 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs sm:text-sm rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-md shadow-[#5A4BDA]/20 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Create New Batch</span>
                 </button>
               </div>
 
+              {/* Status Filters */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                <button
+                  onClick={() => setBatchesFilter("all")}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    batchesFilter === "all"
+                      ? "bg-[#1B212D] text-white shadow-xs"
+                      : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  All Batches ({batchesList.length})
+                </button>
+                <button
+                  onClick={() => setBatchesFilter("active")}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    batchesFilter === "active"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100"
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Active on Website ({batchesList.filter((b) => isBatchValid(b.validityDate)).length})</span>
+                </button>
+                <button
+                  onClick={() => setBatchesFilter("expired")}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    batchesFilter === "expired"
+                      ? "bg-red-600 text-white shadow-xs"
+                      : "bg-red-50 text-red-800 border border-red-200 hover:bg-red-100"
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                  <span>Expired / Auto-Hidden ({batchesList.filter((b) => !isBatchValid(b.validityDate)).length})</span>
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {batchesList.length === 0 ? (
+                {batchesList.filter((b) => {
+                  if (batchesFilter === "active") return isBatchValid(b.validityDate);
+                  if (batchesFilter === "expired") return !isBatchValid(b.validityDate);
+                  return true;
+                }).length === 0 ? (
                   <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center text-gray-500 text-xs col-span-3">
                     <GraduationCap className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                    <div className="font-bold text-gray-700 text-sm">No Batches Published Yet</div>
-                    <p className="text-gray-400 mt-1">Click &quot;Create New Batch&quot; above to publish your first academic batch.</p>
+                    <div className="font-bold text-gray-700 text-sm">No Batches Found for this filter</div>
+                    <p className="text-gray-400 mt-1">Switch filters above or click &quot;Create New Batch&quot;.</p>
                   </div>
                 ) : (
-                  batchesList.map((batch) => (
-                  <div
-                    key={batch.id}
-                    className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-md hover:border-gray-300 transition-all flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-start justify-between gap-2 mb-3 min-h-[40px]">
-                        <h3 className="text-sm sm:text-base font-bold text-[#1B212D] leading-snug line-clamp-2">
-                          {batch.title}
-                        </h3>
-                        <span className="px-2 py-0.5 rounded-[4px] bg-[#ECFDF5] text-[#059669] text-[10px] font-bold shrink-0">
-                          {batch.status}
-                        </span>
-                      </div>
+                  batchesList
+                    .filter((b) => {
+                      if (batchesFilter === "active") return isBatchValid(b.validityDate);
+                      if (batchesFilter === "expired") return !isBatchValid(b.validityDate);
+                      return true;
+                    })
+                    .map((batch) => {
+                      const isValid = isBatchValid(batch.validityDate);
+                      const daysLeft = getDaysRemaining(batch.validityDate);
 
-                      <div
-                        className={`w-full h-32 rounded-xl ${batch.bannerBg} relative overflow-hidden flex flex-col items-center justify-between p-3 select-none mb-3 shadow-2xs`}
-                      >
+                      return (
                         <div
-                          className={`text-[10px] font-extrabold ${batch.bannerTextColor} uppercase tracking-wider text-center leading-tight whitespace-pre-line pt-1`}
+                          key={batch.id}
+                          className={`bg-white rounded-2xl border p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-200 flex flex-col justify-between ${
+                            isValid ? "border-[#E5E7EB] hover:border-indigo-300" : "border-red-200 bg-red-50/20"
+                          }`}
                         >
-                          {batch.bannerLabel}
+                          <div>
+                            <div className="flex items-start justify-between gap-2 mb-3 min-h-[40px]">
+                              <h3 className="text-sm sm:text-base font-bold text-[#1B212D] leading-snug line-clamp-2">
+                                {batch.title}
+                              </h3>
+                              {isValid ? (
+                                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold shrink-0 flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                  <span>Active</span>
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-700 border border-red-200 text-[10px] font-bold shrink-0 flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                                  <span>Hidden (Expired)</span>
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Banner Display */}
+                            <div
+                              className={`w-full h-32 rounded-xl ${batch.bannerBg || "bg-[#EAE5FC]"} relative overflow-hidden flex flex-col items-center justify-between p-3 select-none mb-3 shadow-2xs`}
+                            >
+                              <div
+                                className={`text-[10px] font-extrabold ${batch.bannerTextColor || "text-white"} uppercase tracking-wider text-center leading-tight whitespace-pre-line pt-1`}
+                              >
+                                {batch.bannerLabel || batch.title}
+                              </div>
+                              <div className="relative w-14 h-14 -mb-1">
+                                <Image
+                                  src="/batches/user_avatar.png"
+                                  alt="Faculty"
+                                  fill
+                                  className="object-cover rounded-full border border-white"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between text-xs text-gray-600 mb-2 py-1.5 px-2 bg-gray-50 rounded-lg">
+                              <span className="font-bold text-[#5A4BDA]">
+                                {batch.grade}
+                              </span>
+                              <span className="text-gray-500 font-medium">
+                                {batch.targetYear}
+                              </span>
+                            </div>
+
+                            <div className="space-y-1.5 text-xs text-gray-600 mb-3 px-1">
+                              <div className="flex items-center justify-between">
+                                <span>Faculty:</span>
+                                <strong className="text-gray-800">{batch.faculty}</strong>
+                              </div>
+                              <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+                                <span>Course Validity:</span>
+                                <span className={`text-[11px] font-bold px-2 py-0.5 rounded border ${
+                                  isValid
+                                    ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                                    : "text-red-700 bg-red-50 border-red-200"
+                                }`}>
+                                  {batch.validityDate || "31 Mar 2027"}
+                                  {daysLeft !== null && isValid && ` (${daysLeft}d left)`}
+                                </span>
+                              </div>
+                            </div>
+
+                            {!isValid && (
+                              <button
+                                onClick={() => handleExtendValidity(batch.id)}
+                                className="w-full mb-3 py-1.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                              >
+                                <Sparkles className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+                                <span>Extend Validity (+1 Year &amp; Unhide)</span>
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+                            <button
+                              onClick={() => {
+                                setSelectedBatchId(batch.id);
+                                setActiveTab("batch-content");
+                              }}
+                              className="flex-1 py-2 bg-[#F0EEFF] text-[#5A4BDA] hover:bg-[#E5E0FF] text-xs font-bold rounded-xl text-center transition-colors cursor-pointer"
+                            >
+                              Manage Content
+                            </button>
+                            <button
+                              onClick={() => {
+                                askConfirmation({
+                                  title: "Delete Academic Batch?",
+                                  description: `Are you sure you want to permanently delete "${batch.title}"? This batch will disappear from all student portals and all uploaded lectures/notes for it will be cleared.`,
+                                  confirmText: "Yes, Delete Batch",
+                                  isDanger: true,
+                                  onConfirm: () => {
+                                    setBatchesList((prev) => prev.filter((b) => b.id !== batch.id));
+                                    showToast(`Batch "${batch.title}" removed`);
+                                  },
+                                });
+                              }}
+                              className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+                              title="Delete Batch"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
-                        <div className="relative w-14 h-14 -mb-1">
-                          <Image
-                            src="/batches/user_avatar.png"
-                            alt="Faculty"
-                            fill
-                            className="object-cover rounded-full border border-white"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between text-xs text-gray-600 mb-2 py-1.5 px-2 bg-gray-50 rounded-lg">
-                        <span className="font-bold text-[#5A4BDA]">
-                          {batch.grade}
-                        </span>
-                        <span className="text-gray-500 font-medium">
-                          {batch.targetYear}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-xs text-gray-500 mb-3 px-1">
-                        <span>Faculty: <strong className="text-gray-800">{batch.faculty}</strong></span>
-                        <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                          Valid: {batch.validityDate || "31 Mar 2027"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
-                      <button
-                        onClick={() => {
-                          setSelectedBatchId(batch.id);
-                          setActiveTab("batch-content");
-                        }}
-                        className="flex-1 py-2 bg-[#F0EEFF] text-[#5A4BDA] hover:bg-[#E5E0FF] text-xs font-bold rounded-xl text-center transition-colors cursor-pointer"
-                      >
-                        Manage Content (Videos/Notes/DPPs)
-                      </button>
-                      <button
-                        onClick={() => {
-                          setBatchesList((prev) => prev.filter((b) => b.id !== batch.id));
-                          showToast(`Batch "${batch.title}" removed`);
-                        }}
-                        className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
-                        title="Delete Batch"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )))}
+                      );
+                    })
+                )}
               </div>
             </div>
           )}
@@ -1890,10 +2113,16 @@ function AdminPortalContent() {
                         <td className="py-3 px-4 text-center">
                           <button
                             onClick={() => {
-                              if (confirm(`Are you sure you want to remove student "${st.name}"?`)) {
-                                setStudentsList(studentsList.filter((s) => s.id !== st.id));
-                                showToast(`Student "${st.name}" removed from directory`);
-                              }
+                              askConfirmation({
+                                title: "Remove Student from Directory?",
+                                description: `Are you sure you want to remove student "${st.name}" (${st.phone})?`,
+                                confirmText: "Yes, Remove Student",
+                                isDanger: true,
+                                onConfirm: () => {
+                                  setStudentsList((prev) => prev.filter((s) => s.id !== st.id));
+                                  showToast(`Student "${st.name}" removed from directory`);
+                                },
+                              });
                             }}
                             className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer inline-flex items-center justify-center"
                             title="Delete Student"
@@ -1966,6 +2195,29 @@ function AdminPortalContent() {
                     <p className="text-xs text-gray-600 leading-relaxed">
                       {ann.content}
                     </p>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-xs">
+                      <span className="text-gray-400">Audience: {ann.target}</span>
+                      <button
+                        onClick={() => {
+                          askConfirmation({
+                            title: "Delete Announcement?",
+                            description: `Remove announcement "${ann.title}" from student dashboards?`,
+                            confirmText: "Yes, Delete",
+                            isDanger: true,
+                            onConfirm: () => {
+                              setAnnouncements((prev) => prev.filter((a) => a.id !== ann.id));
+                              showToast(`Announcement removed`);
+                            },
+                          });
+                        }}
+                        className="text-gray-400 hover:text-red-600 p-1 cursor-pointer flex items-center gap-1 text-[11px]"
+                        title="Delete Announcement"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Remove</span>
+                      </button>
+                    </div>
                   </div>
                 )))}
               </div>
@@ -2112,10 +2364,18 @@ function AdminPortalContent() {
                           </a>
                           <button
                             onClick={() => {
-                              const updated = counselingBookings.filter((item) => item.id !== b.id);
-                              setCounselingBookings(updated);
-                              localStorage.setItem('ansh_counseling_bookings', JSON.stringify(updated));
-                              showToast('Booking record cleared');
+                              askConfirmation({
+                                title: "Delete Counseling Booking?",
+                                description: `Remove booking ${b.id} for ${b.studentName} (${b.studentClass}, Parent: ${b.parentName})?`,
+                                confirmText: "Yes, Delete Booking",
+                                isDanger: true,
+                                onConfirm: () => {
+                                  const updated = counselingBookings.filter((item) => item.id !== b.id);
+                                  setCounselingBookings(updated);
+                                  localStorage.setItem('ansh_counseling_bookings', JSON.stringify(updated));
+                                  showToast('Booking record cleared');
+                                },
+                              });
                             }}
                             className="text-xs text-gray-400 hover:text-red-600 p-1 cursor-pointer"
                             title="Remove Booking"
@@ -2617,99 +2877,234 @@ function AdminPortalContent() {
 
       {/* 6. CREATE BATCH MODAL */}
       {addBatchModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 w-full max-w-md shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl border border-gray-200 p-5 sm:p-7 w-full max-w-lg shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-              <h3 className="text-base font-bold text-gray-900">
-                Create New Academic Batch
-              </h3>
-              <button onClick={() => setAddBatchModalOpen(false)} className="text-gray-400 hover:text-gray-700 font-bold">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-[#5A4BDA] flex items-center justify-center font-bold">
+                  <GraduationCap className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-950">
+                    Create New Academic Batch
+                  </h3>
+                  <p className="text-[11px] text-gray-400">Classes 1st to 8th Curriculum &amp; Validity Setup</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAddBatchModalOpen(false)}
+                className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-colors font-bold cursor-pointer"
+              >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateBatch} className="space-y-3 text-xs">
+            {/* Live Interactive Card Preview */}
+            <div className="rounded-2xl border border-gray-200/80 p-3 bg-gray-50/70 space-y-2">
+              <div className="text-[10px] font-black uppercase tracking-wider text-gray-400 flex items-center justify-between">
+                <span>Live Card Preview (As Seen by Students)</span>
+                <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  ● Visible on Website
+                </span>
+              </div>
+              <div className={`w-full h-28 rounded-xl ${newBatchBannerBg} p-3.5 flex flex-col justify-between text-white shadow-sm relative overflow-hidden transition-all duration-300`}>
+                <div className="flex items-center justify-between text-[10px] font-black">
+                  <span className="px-2 py-0.5 bg-black/30 rounded backdrop-blur-xs uppercase tracking-wider">
+                    {newBatchGrade}
+                  </span>
+                  <span className="px-2 py-0.5 bg-white/20 rounded backdrop-blur-xs font-semibold">
+                    {newBatchTargetYear || "Session 2026-27"}
+                  </span>
+                </div>
+                <div>
+                  <div className="text-sm font-black tracking-tight line-clamp-1">
+                    {newBatchTitle || "Batch Title Preview"}
+                  </div>
+                  <div className="text-[11px] opacity-90 mt-0.5">
+                    Faculty: {newBatchFaculty || "Expert Faculty"}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-gray-600 px-1 pt-1">
+                <span>Validity: <strong className="text-gray-900">{newBatchValidityDate || "31 March 2027"}</strong></span>
+                <span className="text-amber-700 text-[10px] bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                  Auto-Hides On Expiry
+                </span>
+              </div>
+            </div>
+
+            <form onSubmit={handleCreateBatch} className="space-y-4 text-xs">
+              {/* Batch Title */}
               <div>
-                <label className="font-bold text-gray-700 block mb-1">Batch Title</label>
+                <label className="font-bold text-gray-800 block mb-1">Batch Title *</label>
                 <input
                   type="text"
                   value={newBatchTitle}
                   onChange={(e) => setNewBatchTitle(e.target.value)}
-                  placeholder="e.g. Lakshya JEE 2027"
-                  className="w-full px-3.5 py-2 border rounded-xl"
+                  placeholder="e.g. Class 8th (Umang Batch)"
+                  className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#5A4BDA] font-medium"
                   required
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">Class / Cohort</label>
-                  <select
-                    value={newBatchGrade}
-                    onChange={(e) => setNewBatchGrade(e.target.value)}
-                    className="w-full px-3.5 py-2 border rounded-xl bg-white"
-                  >
-                    <option>Class 8</option>
-                    <option>Class 7</option>
-                    <option>Class 6</option>
-                    <option>Class 5</option>
-                    <option>Class 4</option>
-                    <option>Class 3</option>
-                    <option>Class 2</option>
-                    <option>Class 1</option>
-                  </select>
+              {/* Individual Classes 1 to 8 Selector */}
+              <div>
+                <label className="font-bold text-gray-800 block mb-1.5">
+                  Select Class (Individual Classes 1 - 8) *
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    "Class 1",
+                    "Class 2",
+                    "Class 3",
+                    "Class 4",
+                    "Class 5",
+                    "Class 6",
+                    "Class 7",
+                    "Class 8",
+                  ].map((cls) => (
+                    <button
+                      key={cls}
+                      type="button"
+                      onClick={() => setNewBatchGrade(cls)}
+                      className={`py-2 px-1 text-center font-bold text-xs rounded-xl border transition-all cursor-pointer ${
+                        newBatchGrade === cls
+                          ? "bg-[#5A4BDA] text-white border-[#5A4BDA] shadow-xs scale-[1.02]"
+                          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      {cls}
+                    </button>
+                  ))}
                 </div>
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">Academic Session</label>
-                  <input
-                    type="text"
-                    value={newBatchTargetYear}
-                    onChange={(e) => setNewBatchTargetYear(e.target.value)}
-                    placeholder="e.g. Session 2026-27"
-                    className="w-full px-3.5 py-2 border rounded-xl"
-                    required
-                  />
+              </div>
+
+              {/* Banner Theme Color Presets */}
+              <div>
+                <label className="font-bold text-gray-800 block mb-1.5">
+                  Choose Batch Banner Theme *
+                </label>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                  {[
+                    { label: "Cosmic", class: "bg-gradient-to-r from-[#5A4BDA] to-[#7B61FF]" },
+                    { label: "Ocean", class: "bg-gradient-to-r from-[#1E40AF] to-[#3B82F6]" },
+                    { label: "Emerald", class: "bg-gradient-to-r from-[#065F46] to-[#10B981]" },
+                    { label: "Ruby", class: "bg-gradient-to-r from-[#881337] to-[#F43F5E]" },
+                    { label: "Sunset", class: "bg-gradient-to-r from-[#9A3412] to-[#F59E0B]" },
+                    { label: "Slate", class: "bg-gradient-to-r from-[#0F172A] to-[#334155]" },
+                  ].map((theme) => (
+                    <button
+                      key={theme.label}
+                      type="button"
+                      onClick={() => setNewBatchBannerBg(theme.class)}
+                      className={`h-9 rounded-xl ${theme.class} text-white font-bold text-[10px] flex items-center justify-center border-2 transition-all cursor-pointer ${
+                        newBatchBannerBg === theme.class ? "border-black scale-105 shadow-md" : "border-transparent opacity-85 hover:opacity-100"
+                      }`}
+                    >
+                      {theme.label}
+                    </button>
+                  ))}
                 </div>
+              </div>
+
+              {/* Banner Image URL (Optional) */}
+              <div>
+                <label className="font-bold text-gray-800 block mb-1">
+                  Batch Banner Image Graphic (Optional Asset URL)
+                </label>
+                <input
+                  type="text"
+                  value={newBatchBannerImg}
+                  onChange={(e) => setNewBatchBannerImg(e.target.value)}
+                  placeholder="/batches/banner_umang_term2.png"
+                  className="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#5A4BDA]"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-gray-700 block mb-1">Faculty Name</label>
+                  <label className="font-bold text-gray-800 block mb-1">Faculty / Teacher Name *</label>
                   <input
                     type="text"
                     value={newBatchFaculty}
                     onChange={(e) => setNewBatchFaculty(e.target.value)}
                     placeholder="e.g. Ritik Mishra Sir"
-                    className="w-full px-3.5 py-2 border rounded-xl"
+                    className="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#5A4BDA]"
                     required
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-gray-700 block mb-1">Course Validity Date</label>
+                  <label className="font-bold text-gray-800 block mb-1">Academic Session *</label>
                   <input
                     type="text"
-                    value={newBatchValidityDate}
-                    onChange={(e) => setNewBatchValidityDate(e.target.value)}
-                    placeholder="e.g. 31 March 2027"
-                    className="w-full px-3.5 py-2 border rounded-xl"
+                    value={newBatchTargetYear}
+                    onChange={(e) => setNewBatchTargetYear(e.target.value)}
+                    placeholder="e.g. Session 2026-27"
+                    className="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#5A4BDA]"
                     required
                   />
                 </div>
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2">
+              {/* Course Validity Date with Auto-Hide Warning */}
+              <div className="space-y-1.5 p-3 rounded-2xl bg-amber-50/60 border border-amber-200/80">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-amber-950 block">
+                    Course Validity Date *
+                  </label>
+                  <span className="text-[10px] text-amber-800 font-semibold">
+                    Auto-Hides When Expired
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={newBatchValidityDate}
+                  onChange={(e) => setNewBatchValidityDate(e.target.value)}
+                  placeholder="e.g. 31 March 2027"
+                  className="w-full px-3.5 py-2 bg-white border border-amber-300 rounded-xl focus:outline-none font-medium"
+                  required
+                />
+                {/* Quick Preset Pills */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] font-bold text-gray-500">Presets:</span>
+                  {[
+                    "31 March 2027",
+                    "31 March 2028",
+                    "30 September 2027",
+                    "31 December 2027",
+                  ].map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setNewBatchValidityDate(preset)}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border transition-all cursor-pointer ${
+                        newBatchValidityDate === preset
+                          ? "bg-amber-600 text-white border-amber-600"
+                          : "bg-white text-amber-900 border-amber-200 hover:bg-amber-100"
+                      }`}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-amber-800 pt-1 leading-normal">
+                  ⚠ <strong>Automatic Protection:</strong> Jaise hi ye date pass hogi, ye batch automatically student study portal aur website se hat jayega. Admin isse kisi bhi samay renew kar sakta hai.
+                </p>
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setAddBatchModalOpen(false)}
-                  className="px-4 py-2 border rounded-xl text-gray-600 hover:bg-gray-50 font-bold"
+                  className="px-4 py-2.5 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 font-bold transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#5A4BDA] hover:bg-[#4939C8] text-white rounded-xl font-bold shadow-xs cursor-pointer"
+                  className="px-6 py-2.5 bg-[#5A4BDA] hover:bg-[#4939C8] text-white rounded-xl font-bold shadow-md shadow-[#5A4BDA]/25 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                 >
-                  Publish Batch
+                  Publish Batch to Website
                 </button>
               </div>
             </form>
@@ -3048,6 +3443,58 @@ Ansh Tutor`;
                   <span>Send via Email</span>
                 </a>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 10. REUSABLE ANIMATED CONFIRMATION MODAL FOR ALL SENSITIVE TASKS */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-7 w-full max-w-md shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-start gap-3.5">
+              <div
+                className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+                  confirmModal.isDanger
+                    ? "bg-red-50 text-red-600 border border-red-100"
+                    : "bg-indigo-50 text-[#5A4BDA] border border-indigo-100"
+                }`}
+              >
+                {confirmModal.isDanger ? (
+                  <AlertTriangle className="w-5 h-5 animate-pulse" />
+                ) : (
+                  <ShieldAlert className="w-5 h-5" />
+                )}
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-gray-950">
+                  {confirmModal.title}
+                </h3>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  {confirmModal.description}
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+                className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-xs font-bold transition-colors cursor-pointer"
+              >
+                {confirmModal.cancelText || "Cancel"}
+              </button>
+              <button
+                type="button"
+                onClick={confirmModal.onConfirm}
+                className={`px-5 py-2 rounded-xl text-white text-xs font-bold transition-all shadow-sm cursor-pointer ${
+                  confirmModal.isDanger
+                    ? "bg-red-600 hover:bg-red-700 shadow-red-500/20"
+                    : "bg-[#5A4BDA] hover:bg-[#4939C8] shadow-indigo-500/20"
+                }`}
+              >
+                {confirmModal.confirmText || "Confirm Action"}
+              </button>
             </div>
           </div>
         </div>

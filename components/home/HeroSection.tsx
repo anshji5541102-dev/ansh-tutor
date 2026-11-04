@@ -42,7 +42,7 @@ export default function HeroSection() {
             </ScrollReveal>
 
             <ScrollReveal animation="fade-right" delay={250} duration={800}>
-              <div className="pt-2">
+              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <button
                   onClick={() => {
                     if (user) {
@@ -51,12 +51,22 @@ export default function HeroSection() {
                       openLoginModal()
                     }
                   }}
-                  className="group relative inline-flex items-center justify-center px-9 py-3.5 text-base font-bold text-white bg-[#5a4bda] hover:bg-[#4a3bc7] rounded-xl shadow-lg shadow-[#5a4bda]/25 hover:shadow-xl hover:shadow-[#5a4bda]/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 overflow-hidden cursor-pointer animate-pulse-ring"
+                  className="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-white bg-[#5a4bda] hover:bg-[#4a3bc7] rounded-xl shadow-lg shadow-[#5a4bda]/25 hover:shadow-xl hover:shadow-[#5a4bda]/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 overflow-hidden cursor-pointer animate-pulse-ring"
                 >
                   {/* Continuous ambient shimmer shine */}
                   <span className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/25 to-transparent transform -skew-x-12 animate-shimmer pointer-events-none" />
-                  <span className="relative z-10">Get Started</span>
+                  <span className="relative z-10">Explore Batches</span>
                 </button>
+
+                <Link
+                  href="/book"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm sm:text-base font-bold text-[#5a4bda] bg-white hover:bg-indigo-50/50 border-2 border-[#5a4bda]/40 hover:border-[#5a4bda] rounded-xl shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all text-center"
+                >
+                  <span>Book Free Demo / Counselor</span>
+                  <span className="px-1.5 py-0.5 text-[10px] font-black uppercase bg-emerald-100 text-emerald-800 rounded">
+                    Free
+                  </span>
+                </Link>
               </div>
             </ScrollReveal>
           </div>

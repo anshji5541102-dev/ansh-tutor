@@ -1,6 +1,7 @@
 import Navbar from '@/components/layout/Navbar'
 import HeroSection from '@/components/home/HeroSection'
 import FeaturesBar from '@/components/home/FeaturesBar'
+import CounselingBannerSection from '@/components/home/CounselingBannerSection'
 import OfflineCentresSection from '@/components/home/OfflineCentresSection'
 import StatsSection from '@/components/home/StatsSection'
 import Footer from '@/components/layout/Footer'
@@ -13,16 +14,19 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="flex-1">
-        {/* 1. Hero Section (Screenshot 1) */}
+        {/* 1. Hero Section */}
         <HeroSection />
 
-        {/* 2. Features Elevated Bar (Screenshot 1 Bottom) */}
+        {/* 2. Features Elevated Bar */}
         <FeaturesBar />
 
-        {/* 3. Offline Coaching Centres Section (Vidyapeeth Hubs) */}
+        {/* 3. Dedicated Offline Demo & Counseling Slot Reservation Banner */}
+        <CounselingBannerSection />
+
+        {/* 4. Offline Coaching Centres Section (Rajajipuram Lucknow) */}
         <OfflineCentresSection />
 
-        {/* 4. Numbers & Stats with Jackpot Counter Animation (Screenshot 2) */}
+        {/* 5. Numbers & Stats with Jackpot Counter Animation */}
         <StatsSection />
       </main>
 
