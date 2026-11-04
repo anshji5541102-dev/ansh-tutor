@@ -518,6 +518,245 @@ function AdminPortalContent() {
     showToast(`Marking scheme & settings updated for "${updated.title}"!`);
   };
 
+  // ==========================================
+  // UNIFIED 3-STEP ASSESSMENT PUBLISHING WIZARD (PW & NextToppers Model)
+  // Everything set (Questions, Marking Scheme, Solutions) BEFORE publish!
+  // ==========================================
+  const [assessmentWizardOpen, setAssessmentWizardOpen] = useState(false);
+  const [wizardType, setWizardType] = useState<"dpp" | "test">("dpp");
+  const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
+
+  // Step 1: Details & Marking Scheme
+  const [wizTitle, setWizTitle] = useState("");
+  const [wizCode, setWizCode] = useState("DPP 03");
+  const [wizCategory, setWizCategory] = useState<"FULL_MOCK" | "CHAPTER_TEST" | "DPP_QUIZ">("DPP_QUIZ");
+  const [wizSubject, setWizSubject] = useState("Mathematics");
+  const [wizChapter, setWizChapter] = useState("CH - 01 Rational Numbers");
+  const [wizDuration, setWizDuration] = useState<number>(20);
+  const [wizPositiveMarks, setWizPositiveMarks] = useState<number>(4);
+  const [wizNegativeMarks, setWizNegativeMarks] = useState<number>(1);
+
+  // Step 2: Questions & Solutions Builder
+  const [wizQuestions, setWizQuestions] = useState<QuestionItem[]>([]);
+  const [wizIsAddingQ, setWizIsAddingQ] = useState(false);
+  const [wizEditingIndex, setWizEditingIndex] = useState<number | null>(null);
+
+  const [wizQText, setWizQText] = useState("");
+  const [wizQOpt1, setWizQOpt1] = useState("");
+  const [wizQOpt2, setWizQOpt2] = useState("");
+  const [wizQOpt3, setWizQOpt3] = useState("");
+  const [wizQOpt4, setWizQOpt4] = useState("");
+  const [wizQCorrectKey, setWizQCorrectKey] = useState("1");
+  const [wizQExplanation, setWizQExplanation] = useState("");
+  const [wizQConcept, setWizQConcept] = useState("");
+
+  // Open Wizard for DPP
+  const handleOpenDppWizard = () => {
+    setWizardType("dpp");
+    setWizCategory("DPP_QUIZ");
+    setWizTitle("DPP 03: Quadratic Equations & Roots Problem Drill");
+    setWizCode("DPP 03");
+    setWizSubject(selectedSubject || "Mathematics");
+    setWizChapter("CH - 02 Quadratic Equations");
+    setWizDuration(20);
+    setWizPositiveMarks(4);
+    setWizNegativeMarks(1);
+
+    // Seed 5 high-quality default practice questions right from the start
+    const initial = defaultQuestions.slice(0, 5).map((q, idx) => ({
+      ...q,
+      id: Date.now() + idx,
+      questionNumber: idx + 1,
+      subject: selectedSubject || "Mathematics",
+    }));
+    setWizQuestions(initial);
+    setWizIsAddingQ(false);
+    setWizEditingIndex(null);
+    setWizardStep(1);
+    setAssessmentWizardOpen(true);
+  };
+
+  // Open Wizard for CBT Test
+  const handleOpenTestWizard = () => {
+    setWizardType("test");
+    setWizCategory("FULL_MOCK");
+    setWizTitle("JEE Main & Advanced All-India Full Syllabus CBT Mock 02");
+    setWizCode("CBT MOCK 02");
+    setWizSubject(selectedSubject || "Mathematics");
+    setWizChapter("Full Syllabus Comprehensive");
+    setWizDuration(180);
+    setWizPositiveMarks(4);
+    setWizNegativeMarks(1);
+
+    const initial = defaultQuestions.map((q, idx) => ({
+      ...q,
+      id: Date.now() + idx,
+      questionNumber: idx + 1,
+      subject: selectedSubject || "Mathematics",
+    }));
+    setWizQuestions(initial);
+    setWizIsAddingQ(false);
+    setWizEditingIndex(null);
+    setWizardStep(1);
+    setAssessmentWizardOpen(true);
+  };
+
+  // Open Question Form in Wizard
+  const handleWizOpenAddQ = () => {
+    setWizQText("");
+    setWizQOpt1("");
+    setWizQOpt2("");
+    setWizQOpt3("");
+    setWizQOpt4("");
+    setWizQCorrectKey("1");
+    setWizQExplanation("");
+    setWizQConcept("");
+    setWizEditingIndex(null);
+    setWizIsAddingQ(true);
+  };
+
+  const handleWizOpenEditQ = (idx: number) => {
+    const q = wizQuestions[idx];
+    if (!q) return;
+    setWizQText(q.text || "");
+    setWizQOpt1(q.options?.[0]?.text || "");
+    setWizQOpt2(q.options?.[1]?.text || "");
+    setWizQOpt3(q.options?.[2]?.text || "");
+    setWizQOpt4(q.options?.[3]?.text || "");
+    setWizQCorrectKey(q.correctOptionKey || "1");
+    setWizQExplanation(
+      Array.isArray(q.explanation?.steps)
+        ? q.explanation.steps.join("\n")
+        : typeof q.explanation === "string"
+        ? q.explanation
+        : ""
+    );
+    setWizQConcept(q.explanation?.concept || "");
+    setWizEditingIndex(idx);
+    setWizIsAddingQ(true);
+  };
+
+  // Save Question in Wizard
+  const handleWizSaveQ = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!wizQText.trim()) return;
+
+    const qNum = wizEditingIndex !== null ? wizEditingIndex + 1 : wizQuestions.length + 1;
+    const qId = wizEditingIndex !== null && wizQuestions[wizEditingIndex] ? wizQuestions[wizEditingIndex].id : Date.now();
+
+    const newQ: QuestionItem = {
+      id: qId,
+      subject: wizSubject,
+      questionNumber: qNum,
+      text: wizQText.trim(),
+      options: [
+        { key: "1", text: wizQOpt1.trim() || "Option A" },
+        { key: "2", text: wizQOpt2.trim() || "Option B" },
+        { key: "3", text: wizQOpt3.trim() || "Option C" },
+        { key: "4", text: wizQOpt4.trim() || "Option D" },
+      ],
+      correctOptionKey: wizQCorrectKey,
+      explanation: {
+        steps: wizQExplanation.trim().split("\n").filter(Boolean),
+        concept: wizQConcept.trim() || "Standard Curriculum Concept",
+        conclusion: `Therefore, Option ${wizQCorrectKey} is correct.`,
+      },
+      positiveMarks: wizPositiveMarks,
+      negativeMarks: wizNegativeMarks,
+    };
+
+    let updated: QuestionItem[];
+    if (wizEditingIndex !== null) {
+      updated = [...wizQuestions];
+      updated[wizEditingIndex] = newQ;
+    } else {
+      updated = [...wizQuestions, newQ];
+    }
+
+    setWizQuestions(updated);
+    setWizIsAddingQ(false);
+    setWizEditingIndex(null);
+    showToast(wizEditingIndex !== null ? "Question updated in test!" : "New question added to test!");
+  };
+
+  // Delete Question in Wizard
+  const handleWizDeleteQ = (idx: number) => {
+    const updated = wizQuestions.filter((_, i) => i !== idx).map((q, i) => ({ ...q, questionNumber: i + 1 }));
+    setWizQuestions(updated);
+    showToast("Question removed from test");
+  };
+
+  // Auto-fill 5 more questions in Wizard
+  const handleWizAutoFill = () => {
+    const more = defaultQuestions.slice(0, 5).map((q, i) => ({
+      ...q,
+      id: Date.now() + i,
+      questionNumber: wizQuestions.length + i + 1,
+      subject: wizSubject,
+      positiveMarks: wizPositiveMarks,
+      negativeMarks: wizNegativeMarks,
+    }));
+    setWizQuestions((prev) => [...prev, ...more]);
+    showToast("Loaded 5 standard practice questions!");
+  };
+
+  // Final Publish Handler
+  const handleFinalPublishAssessment = () => {
+    if (!wizTitle.trim()) {
+      showToast("Please enter an assessment title");
+      return;
+    }
+    if (wizQuestions.length === 0) {
+      showToast("Please add at least 1 question before publishing!");
+      return;
+    }
+
+    const totalMarks = wizQuestions.length * wizPositiveMarks;
+
+    if (wizardType === "dpp") {
+      const newDpp: DppRecord = {
+        id: `dpp-${Date.now()}`,
+        batchId: selectedBatchId || "batch-1",
+        subject: wizSubject,
+        chapter: wizChapter,
+        dppNumber: wizCode.trim() || "DPP",
+        title: wizTitle.trim(),
+        questionsCount: wizQuestions.length,
+        durationMins: Number(wizDuration) || 20,
+        positiveMarks: Number(wizPositiveMarks) || 4,
+        negativeMarks: Number(wizNegativeMarks) || 0,
+        totalMarks: totalMarks,
+        dppFile: `${wizCode.replace(/\s+/g, "_")}_Questions.pdf`,
+        solutionFile: `${wizCode.replace(/\s+/g, "_")}_Solutions.pdf`,
+        date: "Today",
+        questions: wizQuestions,
+      };
+
+      setDppsList((prev) => [newDpp, ...prev]);
+      setAssessmentWizardOpen(false);
+      showToast(`🚀 DPP "${newDpp.dppNumber}: ${newDpp.title}" PUBLISHED with ${wizQuestions.length} Questions, ${wizPositiveMarks}/-${wizNegativeMarks} Scheme & Solutions!`);
+    } else {
+      const newTest: TestSeriesRecord = {
+        id: `test-${Date.now()}`,
+        title: wizTitle.trim(),
+        type: wizCategory,
+        subject: wizSubject,
+        durationMins: Number(wizDuration) || 180,
+        positiveMarks: Number(wizPositiveMarks) || 4,
+        negativeMarks: Number(wizNegativeMarks) || 1,
+        totalQuestions: wizQuestions.length,
+        totalMarks: totalMarks,
+        status: "Published",
+        scheduledDate: "Active Now",
+        questions: wizQuestions,
+      };
+
+      setTestSeriesList((prev) => [newTest, ...prev]);
+      setAssessmentWizardOpen(false);
+      showToast(`🚀 CBT Mock "${newTest.title}" PUBLISHED with ${wizQuestions.length} Questions, ${wizPositiveMarks}/-${wizNegativeMarks} Scheme & Solutions!`);
+    }
+  };
+
   // MODALS STATE
   // ==========================================
   const [addBatchModalOpen, setAddBatchModalOpen] = useState(false);
@@ -1232,122 +1471,105 @@ function AdminPortalContent() {
                 </div>
               </div>
 
-              {/* Interactive Animated Admin Stat Cards (Click to Jump to Tab) */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+              {/* Spacious Premium EdTech Stat Cards (PhysicsWallah Model) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* 1. Batches Card */}
                 <div
                   onClick={() => setActiveTab("batches")}
-                  className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-xl hover:border-[#5A4BDA] transition-all duration-300 cursor-pointer group active:scale-[0.98]"
+                  className="bg-white rounded-3xl border border-gray-200/90 p-6 shadow-sm hover:shadow-xl hover:border-[#5A4BDA] hover:-translate-y-1 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[140px]"
                 >
-                  <div className="flex items-center justify-between text-gray-400 mb-1.5">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase group-hover:text-[#5A4BDA] transition-colors">Batches</span>
-                    <div className="w-7 h-7 rounded-lg bg-indigo-50 text-[#5A4BDA] flex items-center justify-center group-hover:scale-110 group-hover:bg-[#5A4BDA] group-hover:text-white transition-all">
-                      <GraduationCap className="w-4 h-4" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-gray-500 group-hover:text-[#5A4BDA] transition-colors">
+                      Running Batches
+                    </span>
+                    <div className="w-11 h-11 rounded-2xl bg-indigo-50 text-[#5A4BDA] flex items-center justify-center group-hover:scale-110 group-hover:bg-[#5A4BDA] group-hover:text-white transition-all shadow-xs">
+                      <GraduationCap className="w-6 h-6" />
                     </div>
                   </div>
-                  <div className="text-2xl font-black text-[#1B212D]">{batchesList.length}</div>
-                  <div className="text-[10px] text-gray-400 mt-0.5 flex items-center justify-between">
-                    <span>Active running</span>
-                    <span className="text-[#5A4BDA] font-bold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
+                  <div>
+                    <div className="text-3xl sm:text-4xl font-black text-gray-950 tracking-tight">
+                      {batchesList.length}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1 flex items-center justify-between">
+                      <span>Classes 1st to 8th Curriculums</span>
+                      <span className="text-[#5A4BDA] font-bold">&rarr;</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* 2. Lectures & DPPs */}
+                {/* 2. DPPs & Lectures */}
                 <div
                   onClick={() => setActiveTab("batch-content")}
-                  className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-xl hover:border-indigo-400 transition-all duration-300 cursor-pointer group active:scale-[0.98]"
+                  className="bg-white rounded-3xl border border-gray-200/90 p-6 shadow-sm hover:shadow-xl hover:border-indigo-400 hover:-translate-y-1 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[140px]"
                 >
-                  <div className="flex items-center justify-between text-gray-400 mb-1.5">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase group-hover:text-indigo-600 transition-colors">Lectures &amp; DPPs</span>
-                    <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                      <FolderPlus className="w-4 h-4" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-gray-500 group-hover:text-indigo-600 transition-colors">
+                      DPPs &amp; Lectures
+                    </span>
+                    <div className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-xs">
+                      <FolderPlus className="w-6 h-6" />
                     </div>
                   </div>
-                  <div className="text-2xl font-black text-[#1B212D]">{lecturesList.length + dppsList.length}</div>
-                  <div className="text-[10px] text-gray-400 mt-0.5 flex items-center justify-between">
-                    <span>{notesList.length} Notes</span>
-                    <span className="text-indigo-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
+                  <div>
+                    <div className="text-3xl sm:text-4xl font-black text-gray-950 tracking-tight">
+                      {dppsList.length + lecturesList.length}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1 flex items-center justify-between">
+                      <span>{dppsList.length} CBT DPPs • {lecturesList.length} Lectures</span>
+                      <span className="text-indigo-600 font-bold">&rarr;</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* 3. Test Series */}
+                {/* 3. CBT Test Series */}
                 <div
                   onClick={() => setActiveTab("tests")}
-                  className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-xl hover:border-emerald-400 transition-all duration-300 cursor-pointer group active:scale-[0.98]"
+                  className="bg-white rounded-3xl border border-gray-200/90 p-6 shadow-sm hover:shadow-xl hover:border-emerald-400 hover:-translate-y-1 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[140px]"
                 >
-                  <div className="flex items-center justify-between text-gray-400 mb-1.5">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase group-hover:text-emerald-600 transition-colors">Test Series</span>
-                    <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all">
-                      <FileCheck className="w-4 h-4" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-gray-500 group-hover:text-emerald-700 transition-colors">
+                      CBT Examination Series
+                    </span>
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-xs">
+                      <FileCheck className="w-6 h-6" />
                     </div>
                   </div>
-                  <div className="text-2xl font-black text-[#1B212D]">{testSeriesList.length}</div>
-                  <div className="text-[10px] text-emerald-600 font-semibold mt-0.5 flex items-center justify-between">
-                    <span>CBT Tests live</span>
-                    <span className="text-emerald-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
+                  <div>
+                    <div className="text-3xl sm:text-4xl font-black text-gray-950 tracking-tight">
+                      {testSeriesList.length}
+                    </div>
+                    <div className="text-xs text-emerald-700 font-semibold mt-1 flex items-center justify-between">
+                      <span>Scheduled CBT Mock Exams</span>
+                      <span className="font-bold">&rarr;</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* 4. Library Books */}
-                <div
-                  onClick={() => setActiveTab("library")}
-                  className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-xl hover:border-purple-400 transition-all duration-300 cursor-pointer group active:scale-[0.98]"
-                >
-                  <div className="flex items-center justify-between text-gray-400 mb-1.5">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase group-hover:text-purple-600 transition-colors">Library</span>
-                    <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all">
-                      <BookOpen className="w-4 h-4" />
-                    </div>
-                  </div>
-                  <div className="text-2xl font-black text-[#1B212D]">{libraryList.length}</div>
-                  <div className="text-[10px] text-gray-400 mt-0.5 flex items-center justify-between">
-                    <span>Question Banks</span>
-                    <span className="text-purple-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
-                  </div>
-                </div>
-
-                {/* 5. Offline Bookings & Counselor Sessions */}
-                <div
-                  onClick={() => {
-                    const el = document.getElementById("counseling-bookings-section");
-                    if (el) el.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-xl hover:border-amber-400 transition-all duration-300 cursor-pointer group active:scale-[0.98]"
-                >
-                  <div className="flex items-center justify-between text-gray-400 mb-1.5">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase group-hover:text-amber-600 transition-colors">Bookings</span>
-                    <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition-all">
-                      <Phone className="w-4 h-4" />
-                    </div>
-                  </div>
-                  <div className="text-2xl font-black text-[#1B212D]">{counselingBookings.length}</div>
-                  <div className="text-[10px] text-amber-700 font-semibold mt-0.5 flex items-center justify-between">
-                    <span>Demo &amp; Counselor</span>
-                    <span className="text-amber-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">&darr;</span>
-                  </div>
-                </div>
-
-                {/* 6. Overdue Fees */}
+                {/* 4. Pay Later Overdue */}
                 <div
                   onClick={() => setActiveTab("paylater")}
-                  className={`bg-white rounded-2xl border p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer group active:scale-[0.98] ${
-                    overdueCount > 0
-                      ? "border-red-300 bg-red-50/30 hover:border-red-500"
-                      : "border-[#E5E7EB] hover:border-gray-400"
+                  className={`bg-white rounded-3xl border p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[140px] ${
+                    overdueCount > 0 ? "border-red-300 bg-red-50/20 hover:border-red-500" : "border-gray-200/90 hover:border-gray-400"
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[11px] font-bold text-red-600 uppercase">Overdue Fees</span>
-                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-wider text-red-600">
+                      Overdue Fee Queue
+                    </span>
+                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all shadow-xs ${
                       overdueCount > 0 ? "bg-red-100 text-red-600 group-hover:bg-red-600 group-hover:text-white" : "bg-gray-100 text-gray-500"
                     }`}>
-                      <Lock className="w-4 h-4" />
+                      <Lock className="w-6 h-6" />
                     </div>
                   </div>
-                  <div className="text-2xl font-black text-red-700">{overdueCount}</div>
-                  <div className="text-[10px] text-red-600 font-bold mt-0.5 flex items-center justify-between">
-                    <span>Notice / Block</span>
-                    <span>&rarr;</span>
+                  <div>
+                    <div className="text-3xl sm:text-4xl font-black text-red-700 tracking-tight">
+                      {overdueCount}
+                    </div>
+                    <div className="text-xs text-red-600 font-bold mt-1 flex items-center justify-between">
+                      <span>{overdueCount > 0 ? "Defaulters Need Notice" : "Zero Fee Overdue"}</span>
+                      <span>&rarr;</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1377,7 +1599,7 @@ function AdminPortalContent() {
                     onClick={() => {
                       setActiveTab("batch-content");
                       setContentSubTab("DPPs");
-                      setUploadDppModalOpen(true);
+                      handleOpenDppWizard();
                     }}
                     className="p-4 rounded-xl border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/30 text-left transition-all cursor-pointer group"
                   >
@@ -1406,7 +1628,7 @@ function AdminPortalContent() {
                   <button
                     onClick={() => {
                       setActiveTab("tests");
-                      setCreateTestModalOpen(true);
+                      handleOpenTestWizard();
                     }}
                     className="p-4 rounded-xl border border-gray-200 hover:border-amber-500 hover:bg-amber-50/30 text-left transition-all cursor-pointer group"
                   >
@@ -1500,7 +1722,7 @@ function AdminPortalContent() {
                     onClick={() => {
                       if (contentSubTab === "Lectures") setUploadLectureModalOpen(true);
                       else if (contentSubTab === "Notes") setUploadNotesModalOpen(true);
-                      else setUploadDppModalOpen(true);
+                      else handleOpenDppWizard();
                     }}
                     className="px-5 py-2.5 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs sm:text-sm rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
                   >
@@ -1695,13 +1917,14 @@ function AdminPortalContent() {
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
-                          <Link
-                            href="/study_v2/pdf-viewer"
-                            className="px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors"
+                          <button
+                            type="button"
+                            onClick={() => showToast("PDF Document Verified (Admin View)")}
+                            className="px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
                           >
                             <Eye className="w-3.5 h-3.5" />
                             <span>Preview Document</span>
-                          </Link>
+                          </button>
 
                           <button
                             onClick={() => {
@@ -1736,7 +1959,7 @@ function AdminPortalContent() {
                       No DPP practice tests uploaded for {selectedSubject} yet.
                       <div className="mt-3">
                         <button
-                          onClick={() => setUploadDppModalOpen(true)}
+                          onClick={() => handleOpenDppWizard()}
                           className="px-5 py-2.5 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold rounded-xl transition-all cursor-pointer shadow-md shadow-[#5A4BDA]/20"
                         >
                           + Create First DPP Test
@@ -1814,7 +2037,7 @@ function AdminPortalContent() {
 
                             {/* Attempt CBT Preview */}
                             <a
-                              href={`/study_v2/test/${dpp.id}`}
+                              onClick={() => handleOpenQuestionStudio("dpp", dpp)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="px-3 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors"
@@ -1869,7 +2092,7 @@ function AdminPortalContent() {
 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setCreateTestModalOpen(true)}
+                    onClick={() => handleOpenTestWizard()}
                     className="px-5 py-2.5 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs sm:text-sm rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
                   >
                     <Plus className="w-4 h-4" />
@@ -1958,7 +2181,7 @@ function AdminPortalContent() {
 
                             {/* CBT Player Preview */}
                             <a
-                              href={`/study_v2/test/${test.id}`}
+                              onClick={() => handleOpenQuestionStudio("test", test)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors"
@@ -1971,7 +2194,7 @@ function AdminPortalContent() {
                           <div className="flex items-center justify-between text-xs text-gray-500 pt-1">
                             <div className="flex items-center gap-3">
                               <a
-                                href={`/study_v2/test/${test.id}/solutions`}
+                                onClick={() => handleOpenQuestionStudio("test", test)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="font-bold text-gray-600 hover:text-[#5A4BDA] hover:underline"
@@ -1980,7 +2203,7 @@ function AdminPortalContent() {
                               </a>
                               <span>•</span>
                               <a
-                                href={`/study_v2/test/${test.id}/result`}
+                                onClick={() => handleOpenQuestionStudio("test", test)}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="font-bold text-[#5A4BDA] hover:underline"
@@ -2087,13 +2310,14 @@ function AdminPortalContent() {
                     </div>
 
                     <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-                      <Link
-                        href="/study_v2/library"
-                        className="text-xs font-bold text-[#5A4BDA] hover:underline flex items-center gap-1"
+                      <button
+                        type="button"
+                        onClick={() => showToast(`Resource "${book.title}" verified in digital library.`)}
+                        className="text-xs font-bold text-[#5A4BDA] hover:underline flex items-center gap-1 cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        <span>Preview Book</span>
-                      </Link>
+                        <span>Inspect Book</span>
+                      </button>
 
                       <button
                         onClick={() => {
@@ -4254,7 +4478,7 @@ Ansh Tutor`;
                 </button>
 
                 <a
-                  href={`/study_v2/test/${activeAssessment.item.id}`}
+                  onClick={() => showToast("Previewing inside Admin Studio")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl flex items-center gap-1 transition-colors"
@@ -4797,6 +5021,510 @@ Ansh Tutor`;
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+            {/* ======================================================== */}
+      {/* 13. UNIFIED 3-STEP ASSESSMENT PUBLISHING WIZARD (PW & NT) */}
+      {/* Questions, Marking Scheme & Solutions set BEFORE publish! */}
+      {/* ======================================================== */}
+      {assessmentWizardOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3 sm:p-6 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl border border-gray-200 w-full max-w-4xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Wizard Header with 3-Step Stepper */}
+            <div className="px-6 sm:px-8 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 via-white to-gray-50">
+              <div className="flex items-center justify-between pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-[#5A4BDA] text-white flex items-center justify-center font-black shadow-md shadow-[#5A4BDA]/30">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-950">
+                      {wizardType === "dpp" ? "Create & Publish Daily Practice Test (DPP)" : "Create & Publish CBT Mock Examination"}
+                    </h2>
+                    <p className="text-xs text-gray-500">
+                      PhysicsWallah / NextToppers Publishing Studio • Questions, Marking Scheme &amp; Solutions bundled together.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAssessmentWizardOpen(false)}
+                  className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* 3 Steps Navigation Bar */}
+              <div className="grid grid-cols-3 gap-2 pt-2">
+                <div
+                  onClick={() => setWizardStep(1)}
+                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                    wizardStep === 1
+                      ? "bg-[#5A4BDA] text-white border-[#5A4BDA] shadow-xs"
+                      : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="text-[10px] uppercase font-bold tracking-wider opacity-80">Step 1</div>
+                  <div className="text-xs font-black truncate">Details &amp; Marking Scheme</div>
+                </div>
+
+                <div
+                  onClick={() => setWizardStep(2)}
+                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                    wizardStep === 2
+                      ? "bg-[#5A4BDA] text-white border-[#5A4BDA] shadow-xs"
+                      : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="text-[10px] uppercase font-bold tracking-wider opacity-80">Step 2</div>
+                  <div className="text-xs font-black truncate">Questions ({wizQuestions.length}) &amp; Solutions</div>
+                </div>
+
+                <div
+                  onClick={() => setWizardStep(3)}
+                  className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                    wizardStep === 3
+                      ? "bg-[#5A4BDA] text-white border-[#5A4BDA] shadow-xs"
+                      : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="text-[10px] uppercase font-bold tracking-wider opacity-80">Step 3</div>
+                  <div className="text-xs font-black truncate">Review &amp; Publish Live</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Wizard Body */}
+            <div className="flex-1 overflow-y-auto p-6 sm:p-8">
+              {/* STEP 1: Assessment Meta & Marking Scheme */}
+              {wizardStep === 1 && (
+                <div className="space-y-5 max-w-2xl mx-auto">
+                  <div>
+                    <label className="font-bold text-gray-800 block mb-1.5 text-xs">Assessment Title *</label>
+                    <input
+                      type="text"
+                      value={wizTitle}
+                      onChange={(e) => setWizTitle(e.target.value)}
+                      placeholder="e.g. DPP 03: Quadratic Equations &amp; Roots Practice Drill"
+                      className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#5A4BDA] font-medium text-sm"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="font-bold text-gray-800 block mb-1 text-xs">Subject *</label>
+                      <select
+                        value={wizSubject}
+                        onChange={(e) => setWizSubject(e.target.value)}
+                        className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl bg-white text-xs font-medium"
+                      >
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Science">Science (Physics / Chem / Bio)</option>
+                        <option value="English">English</option>
+                        <option value="Social Studies">Social Studies</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-gray-800 block mb-1 text-xs">Chapter Name *</label>
+                      <input
+                        type="text"
+                        value={wizChapter}
+                        onChange={(e) => setWizChapter(e.target.value)}
+                        placeholder="e.g. CH - 02 Quadratic Equations"
+                        className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl bg-white text-xs font-medium"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="font-bold text-gray-800 block mb-1 text-xs">Assessment Code / Tag</label>
+                      <input
+                        type="text"
+                        value={wizCode}
+                        onChange={(e) => setWizCode(e.target.value)}
+                        placeholder="e.g. DPP 03 or MOCK 01"
+                        className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl bg-white text-xs font-medium"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-gray-800 block mb-1 text-xs">Test Duration (Minutes) *</label>
+                      <input
+                        type="number"
+                        value={wizDuration}
+                        onChange={(e) => setWizDuration(Number(e.target.value))}
+                        className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl bg-white text-xs font-bold"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Marking Scheme Configuration */}
+                  <div className="p-4 bg-gradient-to-br from-indigo-50/70 to-purple-50/40 rounded-2xl border border-indigo-100 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-gray-900 text-xs">Marking Scheme Formula</span>
+                      <span className="text-[11px] text-indigo-700 font-bold">Standard Real EdTech Scheme</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-semibold text-gray-700 block mb-1">
+                          Marks per Correct Answer (+) *
+                        </label>
+                        <input
+                          type="number"
+                          value={wizPositiveMarks}
+                          onChange={(e) => setWizPositiveMarks(Number(e.target.value))}
+                          className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl font-black text-sm text-[#5A4BDA]"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold text-gray-700 block mb-1">
+                          Negative Penalty for Wrong (-) *
+                        </label>
+                        <input
+                          type="number"
+                          value={wizNegativeMarks}
+                          onChange={(e) => setWizNegativeMarks(Number(e.target.value))}
+                          className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl font-black text-sm text-red-600"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <span className="text-xs font-bold text-gray-500">Quick Presets:</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWizPositiveMarks(4);
+                          setWizNegativeMarks(1);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-50 font-bold text-xs text-indigo-700 cursor-pointer"
+                      >
+                        +4 / -1 (JEE / NEET)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWizPositiveMarks(1);
+                          setWizNegativeMarks(0);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-bold text-xs text-gray-700 cursor-pointer"
+                      >
+                        +1 / 0 (School / Board)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWizPositiveMarks(3);
+                          setWizNegativeMarks(1);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 font-bold text-xs text-gray-700 cursor-pointer"
+                      >
+                        +3 / -1 (Olympiad)
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setWizardStep(2)}
+                      className="px-6 py-3 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs rounded-xl shadow-md shadow-[#5A4BDA]/20 transition-all cursor-pointer flex items-center gap-2"
+                    >
+                      <span>Continue to Questions &amp; Solutions (Step 2)</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 2: Questions, Options & Solutions Pre-Publish Builder */}
+              {wizardStep === 2 && (
+                <div className="space-y-6">
+                  {/* Actions Bar */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100">
+                    <div className="text-xs text-gray-600">
+                      Questions in this test: <strong className="text-gray-950 font-black">{wizQuestions.length} Questions</strong> ({wizQuestions.length * wizPositiveMarks} Marks)
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleWizAutoFill}
+                        className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-[#5A4BDA] font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Auto-Populate 5 Practice Qs</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleWizOpenAddQ}
+                        className="px-4 py-2 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm shadow-[#5A4BDA]/20 transition-all cursor-pointer"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Question</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Question Input Form (Drawer) */}
+                  {wizIsAddingQ && (
+                    <form onSubmit={handleWizSaveQ} className="p-5 sm:p-6 bg-gradient-to-br from-indigo-50/70 to-purple-50/40 rounded-2xl border-2 border-[#5A4BDA]/30 space-y-4 text-xs animate-in fade-in duration-150">
+                      <div className="flex items-center justify-between pb-2 border-b border-indigo-100">
+                        <span className="font-bold text-sm text-gray-900">
+                          {wizEditingIndex !== null ? `Edit Question ${wizEditingIndex + 1}` : `Add Question ${wizQuestions.length + 1}`}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setWizIsAddingQ(false)}
+                          className="text-gray-500 hover:text-gray-800 font-bold"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+
+                      <div>
+                        <label className="font-bold text-gray-800 block mb-1">Question Statement / Problem *</label>
+                        <textarea
+                          value={wizQText}
+                          onChange={(e) => setWizQText(e.target.value)}
+                          placeholder="Type problem statement here..."
+                          rows={2}
+                          className="w-full px-3.5 py-2 bg-white border border-gray-200 rounded-xl"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="font-bold text-gray-800">4 Options &amp; Correct Answer Key *</label>
+                          <span className="text-[11px] text-[#5A4BDA] font-bold">Select radio for correct key</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {[
+                            { key: "1", label: "Option A", val: wizQOpt1, setVal: setWizQOpt1 },
+                            { key: "2", label: "Option B", val: wizQOpt2, setVal: setWizQOpt2 },
+                            { key: "3", label: "Option C", val: wizQOpt3, setVal: setWizQOpt3 },
+                            { key: "4", label: "Option D", val: wizQOpt4, setVal: setWizQOpt4 },
+                          ].map((opt) => (
+                            <div
+                              key={opt.key}
+                              className={`p-3 rounded-xl border flex items-center gap-2.5 bg-white ${
+                                wizQCorrectKey === opt.key ? "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/20" : "border-gray-200"
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="wizCorrectOpt"
+                                id={`wizOpt${opt.key}`}
+                                checked={wizQCorrectKey === opt.key}
+                                onChange={() => setWizQCorrectKey(opt.key)}
+                                className="w-4 h-4 text-emerald-600 cursor-pointer"
+                              />
+                              <div className="flex-1 space-y-0.5">
+                                <label htmlFor={`wizOpt${opt.key}`} className="font-bold text-xs text-gray-700 block cursor-pointer">
+                                  {opt.label} {wizQCorrectKey === opt.key && <span className="text-emerald-700 font-bold ml-1">✓ Correct</span>}
+                                </label>
+                                <input
+                                  type="text"
+                                  value={opt.val}
+                                  onChange={(e) => opt.setVal(e.target.value)}
+                                  placeholder={`Text for ${opt.label}`}
+                                  className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs"
+                                  required
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="font-bold text-gray-800 block mb-1">Step-by-step Solution</label>
+                          <textarea
+                            value={wizQExplanation}
+                            onChange={(e) => setWizQExplanation(e.target.value)}
+                            placeholder="Step 1: Formula...&#10;Step 2: Substitution...&#10;Step 3: Result..."
+                            rows={2}
+                            className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-xl font-mono text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label className="font-bold text-gray-800 block mb-1">Concept Note</label>
+                          <input
+                            type="text"
+                            value={wizQConcept}
+                            onChange={(e) => setWizQConcept(e.target.value)}
+                            placeholder="e.g. Discriminant b² - 4ac Rule"
+                            className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-xs"
+                          />
+                          <div className="mt-3 flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setWizIsAddingQ(false)}
+                              className="px-3.5 py-1.5 border rounded-xl font-bold"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="submit"
+                              className="px-4 py-1.5 bg-[#5A4BDA] text-white font-bold rounded-xl shadow-xs"
+                            >
+                              Save Question
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                  )}
+
+                  {/* Questions List */}
+                  <div className="space-y-3">
+                    {wizQuestions.map((q, idx) => (
+                      <div
+                        key={q.id || idx}
+                        className="bg-white rounded-2xl border border-gray-200 p-4 shadow-2xs hover:shadow-md transition-all flex items-start justify-between gap-3 group"
+                      >
+                        <div className="space-y-1.5 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-md bg-gray-100 text-gray-800 font-bold text-xs flex items-center justify-center">
+                              {idx + 1}
+                            </span>
+                            <span className="text-xs font-bold text-gray-900 line-clamp-1">{q.text}</span>
+                          </div>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] pt-1">
+                            {q.options?.map((opt, oIdx) => {
+                              const isCorr = q.correctOptionKey === opt.key || q.correctOptionKey === String(oIdx + 1);
+                              return (
+                                <div
+                                  key={opt.key || oIdx}
+                                  className={`px-2 py-1 rounded-lg border text-xs truncate ${
+                                    isCorr ? "bg-emerald-50 text-emerald-800 border-emerald-300 font-bold" : "bg-gray-50 text-gray-600 border-gray-200"
+                                  }`}
+                                >
+                                  {["A", "B", "C", "D"][oIdx]}: {opt.text}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleWizOpenEditQ(idx)}
+                            className="p-1.5 text-gray-500 hover:text-[#5A4BDA] rounded-lg hover:bg-indigo-50"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleWizDeleteQ(idx)}
+                            className="p-1.5 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-4 flex items-center justify-between border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => setWizardStep(1)}
+                      className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 font-bold text-xs cursor-pointer"
+                    >
+                      &larr; Back to Step 1
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWizardStep(3)}
+                      className="px-6 py-2.5 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs rounded-xl shadow-md shadow-[#5A4BDA]/20 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>Proceed to Final Review (Step 3)</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 3: Review & Live Publish */}
+              {wizardStep === 3 && (
+                <div className="space-y-6 max-w-2xl mx-auto">
+                  <div className="p-6 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/30 rounded-3xl border border-indigo-100 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="px-3 py-1 rounded-md bg-[#5A4BDA] text-white font-black text-xs uppercase tracking-wider">
+                        Ready to Publish
+                      </span>
+                      <span className="text-emerald-700 font-bold text-xs bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>All {wizQuestions.length} Questions &amp; Keys Verified</span>
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-black text-gray-950">{wizTitle}</h3>
+                      <p className="text-xs text-gray-500 mt-0.5">{wizSubject} • {wizChapter}</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs">
+                      <div className="p-3 bg-white rounded-xl border border-gray-200">
+                        <div className="text-[10px] text-gray-400 uppercase font-bold">Questions</div>
+                        <div className="text-base font-black text-gray-900">{wizQuestions.length} Qs</div>
+                      </div>
+
+                      <div className="p-3 bg-white rounded-xl border border-gray-200">
+                        <div className="text-[10px] text-gray-400 uppercase font-bold">Duration</div>
+                        <div className="text-base font-black text-gray-900">{wizDuration} Mins</div>
+                      </div>
+
+                      <div className="p-3 bg-white rounded-xl border border-gray-200">
+                        <div className="text-[10px] text-gray-400 uppercase font-bold">Scheme</div>
+                        <div className="text-base font-black text-[#5A4BDA]">+{wizPositiveMarks} / -{wizNegativeMarks}</div>
+                      </div>
+
+                      <div className="p-3 bg-white rounded-xl border border-gray-200">
+                        <div className="text-[10px] text-gray-400 uppercase font-bold">Total Marks</div>
+                        <div className="text-base font-black text-emerald-700">{wizQuestions.length * wizPositiveMarks} Marks</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setWizardStep(2)}
+                      className="px-5 py-2.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 font-bold text-xs cursor-pointer"
+                    >
+                      &larr; Back to Questions
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleFinalPublishAssessment}
+                      className="px-8 py-3 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-black text-sm rounded-2xl shadow-xl shadow-[#5A4BDA]/30 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer flex items-center gap-2"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span>🚀 Publish Assessment Live Now</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

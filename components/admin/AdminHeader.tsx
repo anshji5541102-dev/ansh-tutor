@@ -102,17 +102,6 @@ export default function AdminHeader({
           </div>
         </div>
 
-        {/* Exit to Student View (Optional preview link) */}
-        <Link
-          href="/study_v2/study"
-          target="_blank"
-          className="hidden lg:flex items-center gap-1 text-[11px] text-gray-400 hover:text-white font-medium px-2 py-1 transition-colors"
-          title="Preview Student Portal in new tab"
-        >
-          <span>Student App</span>
-          <ExternalLink className="w-3 h-3" />
-        </Link>
-
         {/* Logout Button */}
         <button
           onClick={handleAdminLogout}
