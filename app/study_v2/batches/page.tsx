@@ -125,6 +125,7 @@ export default function StudyBatchesPage() {
                       alt={batchItem.title}
                       fill
                       className="object-cover object-center"
+                      unoptimized={Boolean(typeof batchItem.bannerImg === 'string' && batchItem.bannerImg.startsWith('data:'))}
                     />
                   </div>
 

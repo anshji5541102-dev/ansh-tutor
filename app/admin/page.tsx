@@ -43,6 +43,8 @@ import {
   ArrowRight,
   X,
   Sparkles,
+  UploadCloud,
+  ImageIcon,
 } from "lucide-react";
 
 // ==========================================
@@ -291,6 +293,48 @@ function AdminPortalContent() {
   const [newBatchValidityDate, setNewBatchValidityDate] = useState("31 March 2027");
   const [newBatchBannerBg, setNewBatchBannerBg] = useState("bg-gradient-to-r from-[#5A4BDA] to-[#7B61FF]");
   const [newBatchBannerImg, setNewBatchBannerImg] = useState("/batches/banner_umang_term2.png");
+  const [bannerUploadFileName, setBannerUploadFileName] = useState<string>("");
+  const [bannerUploadFileSize, setBannerUploadFileSize] = useState<string>("");
+  const bannerFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleBannerFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      showToast("Please select a valid image file (PNG, JPG, WebP).");
+      return;
+    }
+
+    if (file.size > 3.5 * 1024 * 1024) {
+      showToast("Image is larger than 3.5MB. Please choose an image under 3.5MB.");
+      return;
+    }
+
+    setBannerUploadFileName(file.name);
+    setBannerUploadFileSize((file.size / 1024).toFixed(0) + " KB");
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const result = event.target?.result as string;
+      if (result) {
+        setNewBatchBannerImg(result);
+        showToast(`Banner "${file.name}" uploaded successfully!`);
+      }
+    };
+    reader.onerror = () => {
+      showToast("Failed to read image file.");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearBanner = () => {
+    setNewBatchBannerImg("");
+    setBannerUploadFileName("");
+    setBannerUploadFileSize("");
+    if (bannerFileInputRef.current) bannerFileInputRef.current.value = "";
+    showToast("Banner removed. You can upload a new one.");
+  };
   const [batchesFilter, setBatchesFilter] = useState<"all" | "active" | "expired">("all");
   const [counselingBookings, setCounselingBookings] = useState<any[]>([]);
 
@@ -651,6 +695,8 @@ function AdminPortalContent() {
     setBatchesList((prev) => [newBatch, ...prev]);
     setNewBatchTitle("");
     setNewBatchFaculty("");
+    setBannerUploadFileName("");
+    setBannerUploadFileSize("");
     setAddBatchModalOpen(false);
     showToast(`Batch "${newBatch.title}" published!`);
   };
@@ -749,9 +795,13 @@ function AdminPortalContent() {
 
         {/* MAIN SCROLLABLE CONTENT */}
         <main className="flex-1 overflow-y-auto px-3.5 sm:px-8 lg:px-12 py-4 sm:py-8 bg-[#F8F9FB]">
-          {/* Toast Notification */}
+          {/* Animated Interactive Toast Notification */}
           {toastMessage && (
-            <div className="fixed top-18 right-6 z-50 bg-[#1B212D] text-white text-xs sm:text-sm font-semibold px-4 py-3 rounded-xl shadow-lg border border-gray-700 flex items-center gap-2 animate-in fade-in">
+            <div className="fixed top-18 right-4 sm:right-8 z-50 bg-[#1B212D]/95 text-white text-xs sm:text-sm font-semibold px-4 py-3 rounded-2xl shadow-2xl border border-indigo-500/30 backdrop-blur-md flex items-center gap-2.5 animate-in fade-in slide-in-from-top-3 duration-200">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>{toastMessage}</span>
             </div>
@@ -761,7 +811,7 @@ function AdminPortalContent() {
           {/* TAB 1: OVERVIEW & DASHBOARD                              */}
           {/* ======================================================== */}
           {activeTab === "overview" && (
-            <div className="space-y-6 max-w-6xl pb-12">
+            <div className="space-y-6 max-w-6xl pb-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E7EB]">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-[#1B212D] tracking-tight">
@@ -780,56 +830,123 @@ function AdminPortalContent() {
                 </div>
               </div>
 
-              {/* 5 Admin Stat Cards (NO REVENUE / NO SALES) */}
-              <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
-                <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+              {/* Interactive Animated Admin Stat Cards (Click to Jump to Tab) */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+                {/* 1. Batches Card */}
+                <div
+                  onClick={() => setActiveTab("batches")}
+                  className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-xl hover:border-[#5A4BDA] transition-all duration-300 cursor-pointer group active:scale-[0.98]"
+                >
                   <div className="flex items-center justify-between text-gray-400 mb-1.5">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase">Batches</span>
-                    <GraduationCap className="w-4 h-4 text-[#5A4BDA]" />
+                    <span className="text-[11px] font-bold text-gray-500 uppercase group-hover:text-[#5A4BDA] transition-colors">Batches</span>
+                    <div className="w-7 h-7 rounded-lg bg-indigo-50 text-[#5A4BDA] flex items-center justify-center group-hover:scale-110 group-hover:bg-[#5A4BDA] group-hover:text-white transition-all">
+                      <GraduationCap className="w-4 h-4" />
+                    </div>
                   </div>
-                  <div className="text-2xl font-bold text-[#1B212D]">{batchesList.length}</div>
-                  <div className="text-[10px] text-gray-400 mt-0.5">Active running</div>
+                  <div className="text-2xl font-black text-[#1B212D]">{batchesList.length}</div>
+                  <div className="text-[10px] text-gray-400 mt-0.5 flex items-center justify-between">
+                    <span>Active running</span>
+                    <span className="text-[#5A4BDA] font-bold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
+                  </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                {/* 2. Lectures & DPPs */}
+                <div
+                  onClick={() => setActiveTab("batch-content")}
+                  className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-xl hover:border-indigo-400 transition-all duration-300 cursor-pointer group active:scale-[0.98]"
+                >
                   <div className="flex items-center justify-between text-gray-400 mb-1.5">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase">Lectures &amp; DPPs</span>
-                    <FolderPlus className="w-4 h-4 text-indigo-500" />
+                    <span className="text-[11px] font-bold text-gray-500 uppercase group-hover:text-indigo-600 transition-colors">Lectures &amp; DPPs</span>
+                    <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                      <FolderPlus className="w-4 h-4" />
+                    </div>
                   </div>
-                  <div className="text-2xl font-bold text-[#1B212D]">{lecturesList.length + dppsList.length}</div>
-                  <div className="text-[10px] text-gray-400 mt-0.5">{notesList.length} Notes uploaded</div>
+                  <div className="text-2xl font-black text-[#1B212D]">{lecturesList.length + dppsList.length}</div>
+                  <div className="text-[10px] text-gray-400 mt-0.5 flex items-center justify-between">
+                    <span>{notesList.length} Notes</span>
+                    <span className="text-indigo-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
+                  </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                {/* 3. Test Series */}
+                <div
+                  onClick={() => setActiveTab("tests")}
+                  className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-xl hover:border-emerald-400 transition-all duration-300 cursor-pointer group active:scale-[0.98]"
+                >
                   <div className="flex items-center justify-between text-gray-400 mb-1.5">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase">Test Series</span>
-                    <FileCheck className="w-4 h-4 text-emerald-600" />
+                    <span className="text-[11px] font-bold text-gray-500 uppercase group-hover:text-emerald-600 transition-colors">Test Series</span>
+                    <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                      <FileCheck className="w-4 h-4" />
+                    </div>
                   </div>
-                  <div className="text-2xl font-bold text-[#1B212D]">{testSeriesList.length}</div>
-                  <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">CBT Tests live</div>
+                  <div className="text-2xl font-black text-[#1B212D]">{testSeriesList.length}</div>
+                  <div className="text-[10px] text-emerald-600 font-semibold mt-0.5 flex items-center justify-between">
+                    <span>CBT Tests live</span>
+                    <span className="text-emerald-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
+                  </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+                {/* 4. Library Books */}
+                <div
+                  onClick={() => setActiveTab("library")}
+                  className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-xl hover:border-purple-400 transition-all duration-300 cursor-pointer group active:scale-[0.98]"
+                >
                   <div className="flex items-center justify-between text-gray-400 mb-1.5">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase">Library Books</span>
-                    <BookOpen className="w-4 h-4 text-purple-600" />
+                    <span className="text-[11px] font-bold text-gray-500 uppercase group-hover:text-purple-600 transition-colors">Library</span>
+                    <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all">
+                      <BookOpen className="w-4 h-4" />
+                    </div>
                   </div>
-                  <div className="text-2xl font-bold text-[#1B212D]">{libraryList.length}</div>
-                  <div className="text-[10px] text-gray-400 mt-0.5">Question Banks</div>
+                  <div className="text-2xl font-black text-[#1B212D]">{libraryList.length}</div>
+                  <div className="text-[10px] text-gray-400 mt-0.5 flex items-center justify-between">
+                    <span>Question Banks</span>
+                    <span className="text-purple-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">&rarr;</span>
+                  </div>
                 </div>
 
-                <div className={`bg-white rounded-2xl border p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] col-span-2 lg:col-span-1 ${overdueCount > 0 ? 'border-red-300 bg-red-50/20' : 'border-[#E5E7EB]'}`}>
+                {/* 5. Offline Bookings & Counselor Sessions */}
+                <div
+                  onClick={() => {
+                    const el = document.getElementById("counseling-bookings-section");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-xl hover:border-amber-400 transition-all duration-300 cursor-pointer group active:scale-[0.98]"
+                >
+                  <div className="flex items-center justify-between text-gray-400 mb-1.5">
+                    <span className="text-[11px] font-bold text-gray-500 uppercase group-hover:text-amber-600 transition-colors">Bookings</span>
+                    <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition-all">
+                      <Phone className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-black text-[#1B212D]">{counselingBookings.length}</div>
+                  <div className="text-[10px] text-amber-700 font-semibold mt-0.5 flex items-center justify-between">
+                    <span>Demo &amp; Counselor</span>
+                    <span className="text-amber-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">&darr;</span>
+                  </div>
+                </div>
+
+                {/* 6. Overdue Fees */}
+                <div
+                  onClick={() => setActiveTab("paylater")}
+                  className={`bg-white rounded-2xl border p-4 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer group active:scale-[0.98] ${
+                    overdueCount > 0
+                      ? "border-red-300 bg-red-50/30 hover:border-red-500"
+                      : "border-[#E5E7EB] hover:border-gray-400"
+                  }`}
+                >
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[11px] font-bold text-red-600 uppercase">Overdue Fees</span>
-                    <Lock className="w-4 h-4 text-red-600" />
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
+                      overdueCount > 0 ? "bg-red-100 text-red-600 group-hover:bg-red-600 group-hover:text-white" : "bg-gray-100 text-gray-500"
+                    }`}>
+                      <Lock className="w-4 h-4" />
+                    </div>
                   </div>
-                  <div className="text-2xl font-bold text-red-700">{overdueCount}</div>
-                  <button
-                    onClick={() => setActiveTab("paylater")}
-                    className="text-[10px] text-red-600 hover:underline font-bold mt-0.5 flex items-center gap-1 cursor-pointer"
-                  >
-                    Send Notice / Block &rarr;
-                  </button>
+                  <div className="text-2xl font-black text-red-700">{overdueCount}</div>
+                  <div className="text-[10px] text-red-600 font-bold mt-0.5 flex items-center justify-between">
+                    <span>Notice / Block</span>
+                    <span>&rarr;</span>
+                  </div>
                 </div>
               </div>
 
@@ -965,7 +1082,7 @@ function AdminPortalContent() {
           {/* TAB 2: BATCH CONTENT MANAGER (VIDEOS, NOTES, DPPS)       */}
           {/* ======================================================== */}
           {activeTab === "batch-content" && (
-            <div className="space-y-6 max-w-6xl pb-12">
+            <div className="space-y-6 max-w-6xl pb-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E7EB]">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-[#1B212D] tracking-tight">
@@ -1292,7 +1409,7 @@ function AdminPortalContent() {
           {/* TAB 3: TEST SERIES & CBT EXAMINATION MANAGER             */}
           {/* ======================================================== */}
           {activeTab === "tests" && (
-            <div className="space-y-6 max-w-6xl pb-12">
+            <div className="space-y-6 max-w-6xl pb-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E7EB]">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-[#1B212D] tracking-tight">
@@ -1405,7 +1522,7 @@ function AdminPortalContent() {
           {/* TAB 4: DIGITAL LIBRARY & QUESTION BANKS                  */}
           {/* ======================================================== */}
           {activeTab === "library" && (
-            <div className="space-y-6 max-w-6xl pb-12">
+            <div className="space-y-6 max-w-6xl pb-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E7EB]">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-[#1B212D] tracking-tight">
@@ -1759,7 +1876,7 @@ function AdminPortalContent() {
           {/* TAB 6: BATCHES                                           */}
           {/* ======================================================== */}
           {activeTab === "batches" && (
-            <div className="space-y-6 max-w-6xl pb-12">
+            <div className="space-y-6 max-w-6xl pb-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E7EB]">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-[#1B212D] tracking-tight">
@@ -1862,22 +1979,37 @@ function AdminPortalContent() {
                               )}
                             </div>
 
-                            {/* Banner Display */}
-                            <div
-                              className={`w-full h-32 rounded-xl ${batch.bannerBg || "bg-[#EAE5FC]"} relative overflow-hidden flex flex-col items-center justify-between p-3 select-none mb-3 shadow-2xs`}
-                            >
-                              <div
-                                className={`text-[10px] font-extrabold ${batch.bannerTextColor || "text-white"} uppercase tracking-wider text-center leading-tight whitespace-pre-line pt-1`}
-                              >
-                                {batch.bannerLabel || batch.title}
-                              </div>
-                              <div className="relative w-14 h-14 -mb-1">
+                            {/* Banner Display with Custom Upload Graphic */}
+                            <div className="w-full h-32 rounded-xl relative overflow-hidden flex flex-col justify-between p-3 select-none mb-3 shadow-2xs bg-gray-900 border border-gray-100 group">
+                              {batch.bannerImg ? (
                                 <Image
-                                  src="/batches/user_avatar.png"
-                                  alt="Faculty"
+                                  src={batch.bannerImg}
+                                  alt={batch.title}
                                   fill
-                                  className="object-cover rounded-full border border-white"
+                                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                  unoptimized={Boolean(typeof batch.bannerImg === "string" && batch.bannerImg.startsWith("data:"))}
                                 />
+                              ) : (
+                                <div className={`absolute inset-0 ${batch.bannerBg || "bg-[#5A4BDA]"}`} />
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/20" />
+
+                              <div className="relative z-10 flex items-center justify-between text-[10px] font-black text-white">
+                                <span className="px-2 py-0.5 bg-black/50 backdrop-blur-xs rounded uppercase tracking-wider border border-white/20">
+                                  {batch.grade}
+                                </span>
+                                <span className="px-2 py-0.5 bg-white/20 backdrop-blur-xs rounded font-bold border border-white/10">
+                                  {batch.targetYear}
+                                </span>
+                              </div>
+
+                              <div className="relative z-10">
+                                <div className="text-xs font-black text-white line-clamp-1 drop-shadow-sm">
+                                  {batch.bannerLabel || batch.title}
+                                </div>
+                                <div className="text-[10px] text-white/90">
+                                  Faculty: {batch.faculty}
+                                </div>
                               </div>
                             </div>
 
@@ -1960,7 +2092,7 @@ function AdminPortalContent() {
           {/* TAB 7: LIVE CLASSES STUDIO                               */}
           {/* ======================================================== */}
           {activeTab === "live" && (
-            <div className="space-y-6 max-w-6xl pb-12">
+            <div className="space-y-6 max-w-6xl pb-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E7EB]">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-[#1B212D] tracking-tight">
@@ -2051,7 +2183,7 @@ function AdminPortalContent() {
           {/* TAB 8: STUDENTS DIRECTORY                                */}
           {/* ======================================================== */}
           {activeTab === "students" && (
-            <div className="space-y-6 max-w-6xl pb-12">
+            <div className="space-y-6 max-w-6xl pb-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E7EB]">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-[#1B212D] tracking-tight">
@@ -2142,7 +2274,7 @@ function AdminPortalContent() {
           {/* TAB 9: ANNOUNCEMENTS BROADCAST                           */}
           {/* ======================================================== */}
           {activeTab === "announcements" && (
-            <div className="space-y-6 max-w-6xl pb-12">
+            <div className="space-y-6 max-w-6xl pb-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E7EB]">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-[#1B212D] tracking-tight">
@@ -2228,7 +2360,7 @@ function AdminPortalContent() {
           {/* TAB 10: HELPDESK & SUPPORT TICKETS                       */}
           {/* ======================================================== */}
           {activeTab === "helpdesk" && (
-            <div className="space-y-6 max-w-6xl pb-12">
+            <div className="space-y-6 max-w-6xl pb-12 animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E7EB]">
                 <div>
                   <h1 className="text-xl sm:text-2xl font-bold text-[#1B212D] tracking-tight">
@@ -2311,7 +2443,7 @@ function AdminPortalContent() {
               </div>
 
               {/* SECTION: 1-on-1 Academic Counseling & Offline Campus Bookings */}
-              <div className="pt-8 border-t border-gray-200">
+              <div id="counseling-bookings-section" className="pt-8 border-t border-gray-200 scroll-mt-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -2900,32 +3032,52 @@ function AdminPortalContent() {
             </div>
 
             {/* Live Interactive Card Preview */}
-            <div className="rounded-2xl border border-gray-200/80 p-3 bg-gray-50/70 space-y-2">
-              <div className="text-[10px] font-black uppercase tracking-wider text-gray-400 flex items-center justify-between">
-                <span>Live Card Preview (As Seen by Students)</span>
-                <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                  ● Visible on Website
+            <div className="rounded-2xl border border-indigo-100 p-3.5 bg-gradient-to-b from-indigo-50/50 to-white space-y-2.5">
+              <div className="text-[10px] font-black uppercase tracking-wider text-gray-500 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3 text-[#5A4BDA]" />
+                  <span>Live Student Card Preview</span>
+                </span>
+                <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Visible on Website</span>
                 </span>
               </div>
-              <div className={`w-full h-28 rounded-xl ${newBatchBannerBg} p-3.5 flex flex-col justify-between text-white shadow-sm relative overflow-hidden transition-all duration-300`}>
-                <div className="flex items-center justify-between text-[10px] font-black">
-                  <span className="px-2 py-0.5 bg-black/30 rounded backdrop-blur-xs uppercase tracking-wider">
+
+              {/* Banner Card Graphic with Custom Upload Preview */}
+              <div className="w-full h-32 rounded-xl relative overflow-hidden shadow-md flex flex-col justify-between p-3.5 text-white bg-gray-900 border border-gray-200 group">
+                {newBatchBannerImg ? (
+                  <Image
+                    src={newBatchBannerImg}
+                    alt="Uploaded Custom Banner"
+                    fill
+                    className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    unoptimized={Boolean(typeof newBatchBannerImg === "string" && newBatchBannerImg.startsWith("data:"))}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#5A4BDA] to-[#7B61FF]" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/20" />
+
+                <div className="relative z-10 flex items-center justify-between text-[10px] font-black">
+                  <span className="px-2.5 py-0.5 bg-black/50 backdrop-blur-md rounded-md uppercase tracking-wider border border-white/20">
                     {newBatchGrade}
                   </span>
-                  <span className="px-2 py-0.5 bg-white/20 rounded backdrop-blur-xs font-semibold">
+                  <span className="px-2.5 py-0.5 bg-white/20 backdrop-blur-md rounded-md font-semibold border border-white/10">
                     {newBatchTargetYear || "Session 2026-27"}
                   </span>
                 </div>
-                <div>
-                  <div className="text-sm font-black tracking-tight line-clamp-1">
+                <div className="relative z-10">
+                  <div className="text-sm font-black tracking-tight line-clamp-1 drop-shadow-md">
                     {newBatchTitle || "Batch Title Preview"}
                   </div>
-                  <div className="text-[11px] opacity-90 mt-0.5">
+                  <div className="text-[11px] text-white/90 mt-0.5 drop-shadow-xs">
                     Faculty: {newBatchFaculty || "Expert Faculty"}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-[11px] text-gray-600 px-1 pt-1">
+
+              <div className="flex items-center justify-between text-[11px] text-gray-600 px-1">
                 <span>Validity: <strong className="text-gray-900">{newBatchValidityDate || "31 March 2027"}</strong></span>
                 <span className="text-amber-700 text-[10px] bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                   Auto-Hides On Expiry
@@ -2979,46 +3131,86 @@ function AdminPortalContent() {
                 </div>
               </div>
 
-              {/* Banner Theme Color Presets */}
-              <div>
-                <label className="font-bold text-gray-800 block mb-1.5">
-                  Choose Batch Banner Theme *
-                </label>
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                  {[
-                    { label: "Cosmic", class: "bg-gradient-to-r from-[#5A4BDA] to-[#7B61FF]" },
-                    { label: "Ocean", class: "bg-gradient-to-r from-[#1E40AF] to-[#3B82F6]" },
-                    { label: "Emerald", class: "bg-gradient-to-r from-[#065F46] to-[#10B981]" },
-                    { label: "Ruby", class: "bg-gradient-to-r from-[#881337] to-[#F43F5E]" },
-                    { label: "Sunset", class: "bg-gradient-to-r from-[#9A3412] to-[#F59E0B]" },
-                    { label: "Slate", class: "bg-gradient-to-r from-[#0F172A] to-[#334155]" },
-                  ].map((theme) => (
+              {/* Custom Banner Upload Option (Designed by You) */}
+              <div className="space-y-2 p-3.5 bg-indigo-50/40 rounded-2xl border border-indigo-100">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-gray-900 flex items-center gap-1.5 text-xs">
+                    <ImageIcon className="w-4 h-4 text-[#5A4BDA]" />
+                    <span>Upload Custom Batch Banner (Designed by You) *</span>
+                  </label>
+                  {newBatchBannerImg && (
                     <button
-                      key={theme.label}
                       type="button"
-                      onClick={() => setNewBatchBannerBg(theme.class)}
-                      className={`h-9 rounded-xl ${theme.class} text-white font-bold text-[10px] flex items-center justify-center border-2 transition-all cursor-pointer ${
-                        newBatchBannerBg === theme.class ? "border-black scale-105 shadow-md" : "border-transparent opacity-85 hover:opacity-100"
-                      }`}
+                      onClick={handleClearBanner}
+                      className="text-[11px] text-red-600 hover:text-red-700 font-bold hover:underline cursor-pointer flex items-center gap-1"
                     >
-                      {theme.label}
+                      <Trash2 className="w-3 h-3" />
+                      <span>Remove</span>
                     </button>
-                  ))}
+                  )}
                 </div>
-              </div>
 
-              {/* Banner Image URL (Optional) */}
-              <div>
-                <label className="font-bold text-gray-800 block mb-1">
-                  Batch Banner Image Graphic (Optional Asset URL)
-                </label>
                 <input
-                  type="text"
-                  value={newBatchBannerImg}
-                  onChange={(e) => setNewBatchBannerImg(e.target.value)}
-                  placeholder="/batches/banner_umang_term2.png"
-                  className="w-full px-3.5 py-2 border border-gray-200 rounded-xl focus:outline-none focus:border-[#5A4BDA]"
+                  type="file"
+                  ref={bannerFileInputRef}
+                  onChange={handleBannerFileUpload}
+                  accept="image/png, image/jpeg, image/jpg, image/webp"
+                  className="hidden"
                 />
+
+                <div
+                  onClick={() => bannerFileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all ${
+                    newBatchBannerImg
+                      ? "border-emerald-300 bg-emerald-50/30 hover:bg-emerald-50/50"
+                      : "border-indigo-300 bg-white hover:bg-indigo-50/50 hover:border-[#5A4BDA]"
+                  }`}
+                >
+                  <div className="flex flex-col items-center justify-center gap-1.5">
+                    <div className="w-10 h-10 rounded-full bg-indigo-100/80 text-[#5A4BDA] flex items-center justify-center">
+                      <UploadCloud className="w-5 h-5" />
+                    </div>
+                    {bannerUploadFileName ? (
+                      <div className="space-y-0.5">
+                        <div className="font-bold text-xs text-gray-900 truncate max-w-xs">
+                          {bannerUploadFileName}
+                        </div>
+                        <div className="text-[10px] text-emerald-700 font-semibold">
+                          Custom Banner Loaded ({bannerUploadFileSize}) &bull; Click to change
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-0.5">
+                        <div className="font-bold text-xs text-gray-800">
+                          Click here to browse &amp; upload your banner graphic
+                        </div>
+                        <div className="text-[10px] text-gray-500">
+                          PNG, JPG, WebP supported &bull; Recommended ratio 16:9 or 2:1
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Optional URL quick paste */}
+                <div className="pt-1 flex items-center justify-between text-[11px] text-gray-500">
+                  <span>Banner designed by you will be shown on student batch cards.</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = prompt("Enter banner image URL or path:", newBatchBannerImg);
+                      if (url && url.trim()) {
+                        setNewBatchBannerImg(url.trim());
+                        setBannerUploadFileName("Custom URL Asset");
+                        setBannerUploadFileSize("Remote");
+                        showToast("Banner image URL updated!");
+                      }
+                    }}
+                    className="text-[#5A4BDA] hover:underline font-bold cursor-pointer"
+                  >
+                    Paste URL instead
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
