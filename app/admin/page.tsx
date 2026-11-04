@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminSidebar, { AdminTab } from "@/components/admin/AdminSidebar";
 import { isBatchValid, getDaysRemaining, defaultAcademicBatches } from "@/lib/batchValidity";
+import { defaultQuestions, QuestionItem } from "@/lib/test-data";
 import {
   LayoutDashboard,
   ShieldAlert,
@@ -45,6 +46,10 @@ import {
   Sparkles,
   UploadCloud,
   ImageIcon,
+  Sliders,
+  CheckSquare,
+  Settings,
+  Edit3,
 } from "lucide-react";
 
 // ==========================================
@@ -118,6 +123,10 @@ interface DppRecord {
   dppFile: string;
   solutionFile: string;
   date: string;
+  durationMins?: number;
+  positiveMarks?: number;
+  negativeMarks?: number;
+  questions?: QuestionItem[];
 }
 
 // TEST SERIES & CBT
@@ -131,6 +140,10 @@ interface TestSeriesRecord {
   totalQuestions: number;
   status: "Published" | "Draft";
   scheduledDate: string;
+  positiveMarks?: number;
+  negativeMarks?: number;
+  batchId?: string;
+  questions?: QuestionItem[];
 }
 
 // DIGITAL LIBRARY
@@ -237,6 +250,274 @@ function AdminPortalContent() {
   const [supportTickets, setSupportTickets] = useState<SupportTicketItem[]>([]);
 
   // ==========================================
+  // ==========================================
+  // REAL EDTECH ASSESSMENT & QUESTION STUDIO STATE (PW / NextToppers Model)
+  // ==========================================
+  const [questionStudioOpen, setQuestionStudioOpen] = useState(false);
+  const [activeAssessment, setActiveAssessment] = useState<{
+    type: "test" | "dpp";
+    item: any;
+  } | null>(null);
+  const [isQuestionFormOpen, setIsQuestionFormOpen] = useState(false);
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
+
+  // Question Form Fields
+  const [qText, setQText] = useState("");
+  const [qOpt1, setQOpt1] = useState("");
+  const [qOpt2, setQOpt2] = useState("");
+  const [qOpt3, setQOpt3] = useState("");
+  const [qOpt4, setQOpt4] = useState("");
+  const [qCorrectKey, setQCorrectKey] = useState("1");
+  const [qExplanation, setQExplanation] = useState("");
+  const [qConcept, setQConcept] = useState("");
+
+  // Assessment Settings & Marking Scheme Modal State
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [editingAssessment, setEditingAssessment] = useState<{
+    type: "test" | "dpp";
+    item: any;
+  } | null>(null);
+  const [setModalTitle, setSetModalTitle] = useState("");
+  const [setModalSubject, setSetModalSubject] = useState("Mathematics");
+  const [setModalChapter, setSetModalChapter] = useState("Chapter 01");
+  const [setModalDuration, setSetModalDuration] = useState<number>(20);
+  const [setModalPositiveMarks, setSetModalPositiveMarks] = useState<number>(4);
+  const [setModalNegativeMarks, setSetModalNegativeMarks] = useState<number>(1);
+  const [setModalStatus, setSetModalStatus] = useState<"Published" | "Draft">("Published");
+
+  // Create Modal Extra Fields for Marking Scheme
+  const [newDppDuration, setNewDppDuration] = useState("20");
+  const [newDppPositiveMarks, setNewDppPositiveMarks] = useState("4");
+  const [newDppNegativeMarks, setNewDppNegativeMarks] = useState("1");
+
+  const [newTestPositiveMarks, setNewTestPositiveMarks] = useState("4");
+  const [newTestNegativeMarks, setNewTestNegativeMarks] = useState("1");
+
+  // Handler: Open Question Studio
+  const handleOpenQuestionStudio = (type: "test" | "dpp", item: any) => {
+    const questions = Array.isArray(item.questions) && item.questions.length > 0
+      ? item.questions
+      : defaultQuestions.slice(0, 5).map((q, idx) => ({ ...q, id: Date.now() + idx, questionNumber: idx + 1 }));
+
+    const updatedItem = {
+      ...item,
+      positiveMarks: item.positiveMarks || 4,
+      negativeMarks: item.negativeMarks !== undefined ? item.negativeMarks : 1,
+      durationMins: item.durationMins || (type === "dpp" ? 20 : 180),
+      questions,
+      questionsCount: questions.length,
+      totalQuestions: questions.length,
+      totalMarks: questions.length * (item.positiveMarks || 4),
+    };
+
+    setActiveAssessment({ type, item: updatedItem });
+    setIsQuestionFormOpen(false);
+    setEditingQuestionIndex(null);
+    setQuestionStudioOpen(true);
+  };
+
+  // Handler: Open Question Form (Add New)
+  const handleOpenAddQuestion = () => {
+    setQText("");
+    setQOpt1("");
+    setQOpt2("");
+    setQOpt3("");
+    setQOpt4("");
+    setQCorrectKey("1");
+    setQExplanation("");
+    setQConcept("");
+    setEditingQuestionIndex(null);
+    setIsQuestionFormOpen(true);
+  };
+
+  // Handler: Open Question Form (Edit Existing)
+  const handleOpenEditQuestion = (index: number) => {
+    if (!activeAssessment) return;
+    const q = activeAssessment.item.questions[index];
+    if (!q) return;
+
+    setQText(q.text || "");
+    setQOpt1(q.options?.[0]?.text || "");
+    setQOpt2(q.options?.[1]?.text || "");
+    setQOpt3(q.options?.[2]?.text || "");
+    setQOpt4(q.options?.[3]?.text || "");
+    setQCorrectKey(q.correctOptionKey || "1");
+    setQExplanation(
+      Array.isArray(q.explanation?.steps)
+        ? q.explanation.steps.join("\n")
+        : typeof q.explanation === "string"
+        ? q.explanation
+        : ""
+    );
+    setQConcept(q.explanation?.concept || "");
+    setEditingQuestionIndex(index);
+    setIsQuestionFormOpen(true);
+  };
+
+  // Handler: Save Question (Add or Update)
+  const handleSaveQuestion = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeAssessment || !qText.trim()) return;
+
+    const currentQuestions: QuestionItem[] = activeAssessment.item.questions || [];
+    const questionId =
+      editingQuestionIndex !== null && currentQuestions[editingQuestionIndex]
+        ? currentQuestions[editingQuestionIndex].id
+        : Date.now();
+
+    const qNumber =
+      editingQuestionIndex !== null
+        ? editingQuestionIndex + 1
+        : currentQuestions.length + 1;
+
+    const newQ: QuestionItem = {
+      id: questionId,
+      subject: activeAssessment.item.subject || "Mathematics",
+      questionNumber: qNumber,
+      text: qText.trim(),
+      options: [
+        { key: "1", text: qOpt1.trim() || "Option 1" },
+        { key: "2", text: qOpt2.trim() || "Option 2" },
+        { key: "3", text: qOpt3.trim() || "Option 3" },
+        { key: "4", text: qOpt4.trim() || "Option 4" },
+      ],
+      correctOptionKey: qCorrectKey,
+      explanation: {
+        steps: qExplanation.trim().split("\n").filter(Boolean),
+        concept: qConcept.trim() || "Core Curriculum Concept",
+        conclusion: `Therefore, Option ${qCorrectKey} is correct.`,
+      },
+    };
+
+    let updatedQuestions: QuestionItem[];
+    if (editingQuestionIndex !== null) {
+      updatedQuestions = [...currentQuestions];
+      updatedQuestions[editingQuestionIndex] = newQ;
+    } else {
+      updatedQuestions = [...currentQuestions, newQ];
+    }
+
+    const updatedItem = {
+      ...activeAssessment.item,
+      questions: updatedQuestions,
+      questionsCount: updatedQuestions.length,
+      totalQuestions: updatedQuestions.length,
+      totalMarks: updatedQuestions.length * (activeAssessment.item.positiveMarks || 4),
+    };
+
+    setActiveAssessment({ type: activeAssessment.type, item: updatedItem });
+
+    if (activeAssessment.type === "test") {
+      setTestSeriesList((prev) => prev.map((t) => (t.id === updatedItem.id ? updatedItem : t)));
+    } else {
+      setDppsList((prev) => prev.map((d) => (d.id === updatedItem.id ? updatedItem : d)));
+    }
+
+    setIsQuestionFormOpen(false);
+    setEditingQuestionIndex(null);
+    showToast(editingQuestionIndex !== null ? "Question updated successfully!" : "New question added to assessment!");
+  };
+
+  // Handler: Delete Question
+  const handleDeleteQuestion = (index: number) => {
+    if (!activeAssessment) return;
+    const updatedQuestions = activeAssessment.item.questions
+      .filter((_: any, i: number) => i !== index)
+      .map((q: QuestionItem, i: number) => ({ ...q, questionNumber: i + 1 }));
+
+    const updatedItem = {
+      ...activeAssessment.item,
+      questions: updatedQuestions,
+      questionsCount: updatedQuestions.length,
+      totalQuestions: updatedQuestions.length,
+      totalMarks: updatedQuestions.length * (activeAssessment.item.positiveMarks || 4),
+    };
+
+    setActiveAssessment({ type: activeAssessment.type, item: updatedItem });
+
+    if (activeAssessment.type === "test") {
+      setTestSeriesList((prev) => prev.map((t) => (t.id === updatedItem.id ? updatedItem : t)));
+    } else {
+      setDppsList((prev) => prev.map((d) => (d.id === updatedItem.id ? updatedItem : d)));
+    }
+    showToast("Question removed from test");
+  };
+
+  // Handler: Seed 5 curriculum questions
+  const handleSeedQuestions = () => {
+    if (!activeAssessment) return;
+    const currentQuestions: QuestionItem[] = activeAssessment.item.questions || [];
+    const sample = defaultQuestions.slice(0, 5).map((q, i) => ({
+      ...q,
+      id: Date.now() + i,
+      questionNumber: currentQuestions.length + i + 1,
+      subject: activeAssessment.item.subject || "Mathematics",
+    }));
+
+    const updatedQuestions = [...currentQuestions, ...sample];
+    const updatedItem = {
+      ...activeAssessment.item,
+      questions: updatedQuestions,
+      questionsCount: updatedQuestions.length,
+      totalQuestions: updatedQuestions.length,
+      totalMarks: updatedQuestions.length * (activeAssessment.item.positiveMarks || 4),
+    };
+
+    setActiveAssessment({ type: activeAssessment.type, item: updatedItem });
+
+    if (activeAssessment.type === "test") {
+      setTestSeriesList((prev) => prev.map((t) => (t.id === updatedItem.id ? updatedItem : t)));
+    } else {
+      setDppsList((prev) => prev.map((d) => (d.id === updatedItem.id ? updatedItem : d)));
+    }
+    showToast("Added 5 curriculum practice questions!");
+  };
+
+  // Handler: Open Assessment Settings & Marking Scheme Modal
+  const handleOpenSettings = (type: "test" | "dpp", item: any) => {
+    setEditingAssessment({ type, item });
+    setSetModalTitle(item.title || item.dppNumber || "");
+    setSetModalSubject(item.subject || "Mathematics");
+    setSetModalChapter(item.chapter || "Chapter 01");
+    setSetModalDuration(item.durationMins || (type === "dpp" ? 20 : 180));
+    setSetModalPositiveMarks(item.positiveMarks || 4);
+    setSetModalNegativeMarks(item.negativeMarks !== undefined ? item.negativeMarks : 1);
+    setSetModalStatus(item.status || "Published");
+    setSettingsModalOpen(true);
+  };
+
+  // Handler: Save Assessment Settings & Marking Scheme
+  const handleSaveAssessmentSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAssessment) return;
+
+    const qCount = editingAssessment.item.questions?.length || editingAssessment.item.questionsCount || 10;
+    const pos = Number(setModalPositiveMarks) || 4;
+    const neg = Number(setModalNegativeMarks) || 0;
+    const dur = Number(setModalDuration) || 20;
+
+    const updated = {
+      ...editingAssessment.item,
+      title: setModalTitle.trim(),
+      subject: setModalSubject,
+      chapter: setModalChapter,
+      durationMins: dur,
+      positiveMarks: pos,
+      negativeMarks: neg,
+      totalMarks: qCount * pos,
+      status: setModalStatus,
+    };
+
+    if (editingAssessment.type === "test") {
+      setTestSeriesList((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+    } else {
+      setDppsList((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+    }
+
+    setSettingsModalOpen(false);
+    showToast(`Marking scheme & settings updated for "${updated.title}"!`);
+  };
+
   // MODALS STATE
   // ==========================================
   const [addBatchModalOpen, setAddBatchModalOpen] = useState(false);
@@ -436,7 +717,56 @@ function AdminPortalContent() {
         }
 
         const storedTests = localStorage.getItem("ansh_admin_tests");
-        if (storedTests) setTestSeriesList(JSON.parse(storedTests));
+        if (storedTests && JSON.parse(storedTests).length > 0) {
+          setTestSeriesList(JSON.parse(storedTests));
+        } else {
+          const defaultTestsInit: TestSeriesRecord[] = [
+            {
+              id: "permutations-and-combinations",
+              title: "Permutations & Combinations All-India Mock Test",
+              type: "FULL_MOCK",
+              subject: "Mathematics",
+              durationMins: 180,
+              totalMarks: 100,
+              totalQuestions: 25,
+              positiveMarks: 4,
+              negativeMarks: 1,
+              status: "Published",
+              scheduledDate: "Active Now",
+              questions: defaultQuestions,
+            },
+            {
+              id: "relations-and-functions",
+              title: "Relations and Functions Chapter CBT Exam",
+              type: "CHAPTER_TEST",
+              subject: "Mathematics",
+              durationMins: 60,
+              totalMarks: 40,
+              totalQuestions: 10,
+              positiveMarks: 4,
+              negativeMarks: 1,
+              status: "Published",
+              scheduledDate: "Active Now",
+              questions: defaultQuestions.slice(0, 10),
+            },
+            {
+              id: "vectors",
+              title: "Vectors & 3D Geometry Sectional Test",
+              type: "CHAPTER_TEST",
+              subject: "Mathematics",
+              durationMins: 45,
+              totalMarks: 40,
+              totalQuestions: 10,
+              positiveMarks: 4,
+              negativeMarks: 1,
+              status: "Published",
+              scheduledDate: "Active Now",
+              questions: defaultQuestions.slice(0, 10),
+            },
+          ];
+          setTestSeriesList(defaultTestsInit);
+          localStorage.setItem("ansh_admin_tests", JSON.stringify(defaultTestsInit));
+        }
 
         const storedLib = localStorage.getItem("ansh_admin_library");
         if (storedLib) setLibraryList(JSON.parse(storedLib));
@@ -451,7 +781,48 @@ function AdminPortalContent() {
         if (storedLec) setLecturesList(JSON.parse(storedLec));
 
         const storedDpp = localStorage.getItem("ansh_admin_dpps");
-        if (storedDpp) setDppsList(JSON.parse(storedDpp));
+        if (storedDpp && JSON.parse(storedDpp).length > 0) {
+          setDppsList(JSON.parse(storedDpp));
+        } else {
+          const defaultDppsInit: DppRecord[] = [
+            {
+              id: "dpp-1",
+              batchId: "batch-1",
+              subject: "Mathematics",
+              chapter: "CH - 01 Relations & Functions",
+              dppNumber: "DPP 01",
+              title: "Relations and Functions Daily Quiz",
+              questionsCount: 5,
+              durationMins: 20,
+              positiveMarks: 4,
+              negativeMarks: 1,
+              totalMarks: 20,
+              dppFile: "DPP_01_Relations.pdf",
+              solutionFile: "DPP_01_Solutions.pdf",
+              date: "Today",
+              questions: defaultQuestions.slice(0, 5),
+            },
+            {
+              id: "dpp-2",
+              batchId: "batch-1",
+              subject: "Mathematics",
+              chapter: "CH - 02 Quadratic Equations",
+              dppNumber: "DPP 02",
+              title: "Quadratic Equations Problem Set",
+              questionsCount: 5,
+              durationMins: 25,
+              positiveMarks: 4,
+              negativeMarks: 1,
+              totalMarks: 20,
+              dppFile: "DPP_02_Quadratic.pdf",
+              solutionFile: "DPP_02_Solutions.pdf",
+              date: "Yesterday",
+              questions: defaultQuestions.slice(2, 7),
+            },
+          ];
+          setDppsList(defaultDppsInit);
+          localStorage.setItem("ansh_admin_dpps", JSON.stringify(defaultDppsInit));
+        }
 
         const storedNotes = localStorage.getItem("ansh_admin_notes");
         if (storedNotes) setNotesList(JSON.parse(storedNotes));
@@ -609,6 +980,18 @@ function AdminPortalContent() {
     e.preventDefault();
     if (!newDppTitle.trim()) return;
 
+    const qCount = parseInt(newDppQuestions, 10) || 5;
+    const pos = parseInt(newDppPositiveMarks, 10) || 4;
+    const neg = parseInt(newDppNegativeMarks, 10) || 0;
+    const dur = parseInt(newDppDuration, 10) || 20;
+
+    const initialQuestions: QuestionItem[] = defaultQuestions.slice(0, Math.min(qCount, 5)).map((q, idx) => ({
+      ...q,
+      id: Date.now() + idx,
+      questionNumber: idx + 1,
+      subject: selectedSubject,
+    }));
+
     const newDpp: DppRecord = {
       id: `dpp-${Date.now()}`,
       batchId: selectedBatchId,
@@ -616,39 +999,58 @@ function AdminPortalContent() {
       chapter: newDppChapter,
       dppNumber: newDppNumber,
       title: newDppTitle.trim(),
-      questionsCount: parseInt(newDppQuestions, 10) || 15,
-      totalMarks: parseInt(newDppMarks, 10) || 60,
+      questionsCount: initialQuestions.length,
+      durationMins: dur,
+      positiveMarks: pos,
+      negativeMarks: neg,
+      totalMarks: initialQuestions.length * pos,
       dppFile: `${newDppNumber}_Question_Sheet.pdf`,
       solutionFile: `${newDppNumber}_Solutions.pdf`,
       date: "Today",
+      questions: initialQuestions,
     };
 
     setDppsList((prev) => [newDpp, ...prev]);
     setNewDppTitle("");
     setUploadDppModalOpen(false);
-    showToast(`Daily Practice Problem "${newDpp.dppNumber}" published!`);
+    showToast(`DPP "${newDpp.dppNumber}" created with ${pos}/-${neg} marking scheme! Click "Manage Questions" to modify questions.`);
   };
 
   const handleCreateTest = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTestTitle.trim()) return;
 
+    const qCount = parseInt(newTestQuestions, 10) || 5;
+    const pos = parseInt(newTestPositiveMarks, 10) || 4;
+    const neg = parseInt(newTestNegativeMarks, 10) || 1;
+    const dur = parseInt(newTestDuration, 10) || 90;
+
+    const initialQuestions: QuestionItem[] = defaultQuestions.slice(0, Math.min(qCount, 5)).map((q, idx) => ({
+      ...q,
+      id: Date.now() + idx,
+      questionNumber: idx + 1,
+      subject: selectedSubject,
+    }));
+
     const newTest: TestSeriesRecord = {
       id: `test-${Date.now()}`,
       title: newTestTitle.trim(),
       type: newTestType,
       subject: selectedSubject,
-      durationMins: parseInt(newTestDuration, 10) || 90,
-      totalMarks: parseInt(newTestMarks, 10) || 100,
-      totalQuestions: parseInt(newTestQuestions, 10) || 25,
+      durationMins: dur,
+      positiveMarks: pos,
+      negativeMarks: neg,
+      totalQuestions: initialQuestions.length,
+      totalMarks: initialQuestions.length * pos,
       status: "Published",
       scheduledDate: "Active Now",
+      questions: initialQuestions,
     };
 
     setTestSeriesList((prev) => [newTest, ...prev]);
     setNewTestTitle("");
     setCreateTestModalOpen(false);
-    showToast(`Test "${newTest.title}" published to Test Series!`);
+    showToast(`Test "${newTest.title}" published with ${pos}/-${neg} scheme! Click "Manage Questions" to customize questions.`);
   };
 
   const handleUploadLibrary = (e: React.FormEvent) => {
@@ -1331,74 +1733,119 @@ function AdminPortalContent() {
                 <div className="space-y-4">
                   {currentBatchDpps.length === 0 ? (
                     <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center text-gray-500 text-xs">
-                      No DPP sheets uploaded for {selectedSubject} yet.
+                      No DPP practice tests uploaded for {selectedSubject} yet.
                       <div className="mt-3">
                         <button
                           onClick={() => setUploadDppModalOpen(true)}
-                          className="px-4 py-2 bg-[#5A4BDA] text-white font-bold rounded-xl"
+                          className="px-5 py-2.5 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold rounded-xl transition-all cursor-pointer shadow-md shadow-[#5A4BDA]/20"
                         >
-                          Upload First DPP
+                          + Create First DPP Test
                         </button>
                       </div>
                     </div>
                   ) : (
-                    currentBatchDpps.map((dpp) => (
-                      <div
-                        key={dpp.id}
-                        className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                      >
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold">
-                              {dpp.dppNumber}
-                            </span>
-                            <span className="text-xs font-semibold text-gray-400">•</span>
-                            <span className="text-xs font-bold text-gray-600">{dpp.chapter}</span>
+                    currentBatchDpps.map((dpp) => {
+                      const qCount = dpp.questions?.length || dpp.questionsCount || 0;
+                      const posMarks = dpp.positiveMarks || 4;
+                      const negMarks = dpp.negativeMarks !== undefined ? dpp.negativeMarks : 1;
+                      const duration = dpp.durationMins || 20;
+
+                      return (
+                        <div
+                          key={dpp.id}
+                          className="bg-white rounded-2xl border border-[#E5E7EB] hover:border-indigo-300 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-200 flex flex-col md:flex-row md:items-center justify-between gap-4 group"
+                        >
+                          <div className="space-y-1.5 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="px-2.5 py-0.5 rounded-md bg-[#5A4BDA]/10 text-[#5A4BDA] text-[11px] font-black tracking-wide uppercase">
+                                {dpp.dppNumber}
+                              </span>
+                              <span className="text-xs font-semibold text-gray-300">•</span>
+                              <span className="text-xs font-bold text-gray-700 bg-gray-50 px-2 py-0.5 rounded border border-gray-200">
+                                {dpp.chapter}
+                              </span>
+                              <span className="text-xs font-semibold text-gray-300">•</span>
+                              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                                <span>+{posMarks} / -{negMarks} Scheme</span>
+                              </span>
+                            </div>
+
+                            <h3 className="text-base font-bold text-[#1B212D] group-hover:text-[#5A4BDA] transition-colors">
+                              {dpp.title}
+                            </h3>
+
+                            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                              <span className="font-semibold text-gray-700">{qCount} Questions</span>
+                              <span>•</span>
+                              <span>{qCount * posMarks} Total Marks</span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3.5 h-3.5 text-gray-400" />
+                                <span>{duration} Mins CBT Test</span>
+                              </span>
+                              <span>•</span>
+                              <span className="text-emerald-700 font-bold bg-emerald-50/80 px-1.5 py-0.5 rounded">
+                                Interactive CBT Active
+                              </span>
+                            </div>
                           </div>
 
-                          <h3 className="text-base font-bold text-[#1B212D]">
-                            {dpp.title}
-                          </h3>
+                          {/* Action Buttons: Manage Questions, Scheme, Preview, Delete */}
+                          <div className="flex flex-wrap items-center gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-gray-100">
+                            {/* Manage Questions Button */}
+                            <button
+                              onClick={() => handleOpenQuestionStudio("dpp", dpp)}
+                              className="px-3.5 py-2 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-sm shadow-[#5A4BDA]/20 active:scale-95"
+                              title="Add, Edit & Modify Questions"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>Manage Questions ({qCount})</span>
+                            </button>
 
-                          <div className="flex items-center gap-3 text-xs text-gray-500">
-                            <span>{dpp.questionsCount} Questions</span>
-                            <span>•</span>
-                            <span>{dpp.totalMarks} Marks</span>
-                            <span>•</span>
-                            <span className="text-emerald-700 font-medium">Solutions Attached</span>
+                            {/* Edit Marking Scheme & Settings Button */}
+                            <button
+                              onClick={() => handleOpenSettings("dpp", dpp)}
+                              className="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-[#5A4BDA] font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+                              title="Edit Marking Scheme & Duration"
+                            >
+                              <Sliders className="w-3.5 h-3.5" />
+                              <span>Scheme &amp; Time</span>
+                            </button>
+
+                            {/* Attempt CBT Preview */}
+                            <a
+                              href={`/study_v2/test/${dpp.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors"
+                              title="Preview student CBT player"
+                            >
+                              <Play className="w-3.5 h-3.5" />
+                              <span>Attempt CBT</span>
+                            </a>
+
+                            <button
+                              onClick={() => {
+                                askConfirmation({
+                                  title: "Delete Daily Practice Problem?",
+                                  description: `Are you sure you want to delete DPP "${dpp.dppNumber}: ${dpp.title}"?`,
+                                  confirmText: "Yes, Delete DPP",
+                                  isDanger: true,
+                                  onConfirm: () => {
+                                    setDppsList((prev) => prev.filter((d) => d.id !== dpp.id));
+                                    showToast(`DPP "${dpp.dppNumber}" removed`);
+                                  },
+                                });
+                              }}
+                              className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+                              title="Delete DPP"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </div>
                         </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          <Link
-                            href="/study_v2/test/permutations-and-combinations"
-                            className="px-4 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-colors"
-                          >
-                            <FileCheck className="w-3.5 h-3.5" />
-                            <span>Preview DPP Test</span>
-                          </Link>
-
-                          <button
-                            onClick={() => {
-                              askConfirmation({
-                                title: "Delete Daily Practice Problem?",
-                                description: `Are you sure you want to delete DPP "${dpp.dppNumber}: ${dpp.title}"?`,
-                                confirmText: "Yes, Delete DPP",
-                                isDanger: true,
-                                onConfirm: () => {
-                                  setDppsList((prev) => prev.filter((d) => d.id !== dpp.id));
-                                  showToast(`DPP "${dpp.dppNumber}" removed`);
-                                },
-                              });
-                            }}
-                            className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
-                            title="Delete DPP"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               )}
@@ -1431,7 +1878,7 @@ function AdminPortalContent() {
                 </div>
               </div>
 
-              {/* Test Series Cards */}
+              {/* Test Series Cards with Real EdTech Question Studio Controls */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {testSeriesList.length === 0 ? (
                   <div className="bg-white rounded-2xl border border-dashed border-gray-300 p-12 text-center text-gray-500 text-xs col-span-3">
@@ -1440,80 +1887,132 @@ function AdminPortalContent() {
                     <p className="text-gray-400 mt-1">Click &quot;Create New Test&quot; above to publish your first CBT Mock Test or DPP Quiz.</p>
                   </div>
                 ) : (
-                  testSeriesList.map((test) => (
-                  <div
-                    key={test.id}
-                    className="bg-white rounded-2xl border border-[#E5E7EB] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between space-y-4"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className={`px-2.5 py-0.5 rounded-[4px] text-[10px] font-extrabold uppercase ${
-                          test.type === "FULL_MOCK" ? "bg-red-50 text-red-700" : "bg-purple-50 text-[#5A4BDA]"
-                        }`}>
-                          {test.type.replace("_", " ")}
-                        </span>
-                        <span className="text-[11px] font-bold text-emerald-600">
-                          {test.status}
-                        </span>
+                  testSeriesList.map((test) => {
+                    const qCount = test.questions?.length || test.totalQuestions || 0;
+                    const posMarks = test.positiveMarks || 4;
+                    const negMarks = test.negativeMarks !== undefined ? test.negativeMarks : 1;
+                    const totalMarks = qCount * posMarks;
+
+                    return (
+                      <div
+                        key={test.id}
+                        className="bg-white rounded-2xl border border-[#E5E7EB] hover:border-indigo-300 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-200 flex flex-col justify-between space-y-4 group"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={`px-2.5 py-0.5 rounded-[6px] text-[10px] font-black uppercase tracking-wider ${
+                              test.type === "FULL_MOCK"
+                                ? "bg-red-50 text-red-700 border border-red-200"
+                                : "bg-purple-50 text-[#5A4BDA] border border-purple-200"
+                            }`}>
+                              {test.type.replace("_", " ")}
+                            </span>
+                            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              <span>{test.status}</span>
+                            </span>
+                          </div>
+
+                          <h3 className="text-base font-bold text-[#1B212D] group-hover:text-[#5A4BDA] transition-colors leading-snug">
+                            {test.title}
+                          </h3>
+
+                          <div className="mt-3 text-xs text-gray-600 space-y-1.5 bg-gray-50/70 p-3 rounded-xl border border-gray-100">
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-500">Subject:</span>
+                              <strong className="text-gray-900">{test.subject}</strong>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-500">Duration &amp; Qs:</span>
+                              <strong className="text-gray-900">{test.durationMins} Mins • {qCount} Questions</strong>
+                            </div>
+                            <div className="flex items-center justify-between pt-1 border-t border-gray-200/60">
+                              <span className="text-gray-500">Marking Scheme:</span>
+                              <span className="font-black text-[#5A4BDA] bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                                +{posMarks} / -{negMarks} ({totalMarks} Marks)
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Interactive Action Hub */}
+                        <div className="pt-3 border-t border-gray-100 space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            {/* Manage Questions Button */}
+                            <button
+                              onClick={() => handleOpenQuestionStudio("test", test)}
+                              className="col-span-2 py-2.5 px-3 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-sm shadow-[#5A4BDA]/20 active:scale-95"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>Manage Questions ({qCount} Qs)</span>
+                            </button>
+
+                            {/* Marking Scheme & Settings */}
+                            <button
+                              onClick={() => handleOpenSettings("test", test)}
+                              className="py-2 px-3 bg-indigo-50 hover:bg-indigo-100 text-[#5A4BDA] font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              <Sliders className="w-3.5 h-3.5" />
+                              <span>Marking Scheme</span>
+                            </button>
+
+                            {/* CBT Player Preview */}
+                            <a
+                              href={`/study_v2/test/${test.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="py-2 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+                            >
+                              <Play className="w-3.5 h-3.5" />
+                              <span>Preview CBT</span>
+                            </a>
+                          </div>
+
+                          <div className="flex items-center justify-between text-xs text-gray-500 pt-1">
+                            <div className="flex items-center gap-3">
+                              <a
+                                href={`/study_v2/test/${test.id}/solutions`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-bold text-gray-600 hover:text-[#5A4BDA] hover:underline"
+                              >
+                                Solutions Key
+                              </a>
+                              <span>•</span>
+                              <a
+                                href={`/study_v2/test/${test.id}/result`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-bold text-[#5A4BDA] hover:underline"
+                              >
+                                Student Results
+                              </a>
+                            </div>
+
+                            <button
+                              onClick={() => {
+                                askConfirmation({
+                                  title: "Delete Mock Test?",
+                                  description: `Are you sure you want to delete test "${test.title}"?`,
+                                  confirmText: "Yes, Delete Test",
+                                  isDanger: true,
+                                  onConfirm: () => {
+                                    setTestSeriesList((prev) => prev.filter((t) => t.id !== test.id));
+                                    showToast(`Test "${test.title}" removed`);
+                                  },
+                                });
+                              }}
+                              className="text-gray-400 hover:text-red-600 p-1 cursor-pointer"
+                              title="Delete Test"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-
-                      <h3 className="text-base font-bold text-[#1B212D] leading-snug">
-                        {test.title}
-                      </h3>
-
-                      <div className="mt-2 text-xs text-gray-500 space-y-1">
-                        <div>Subject: <strong className="text-gray-800">{test.subject}</strong></div>
-                        <div>Duration: <strong>{test.durationMins} Mins</strong> • <strong>{test.totalQuestions} Questions</strong></div>
-                        <div>Total Marks: <strong>{test.totalMarks} Marks (+4/-1 Scheme)</strong></div>
-                      </div>
-                    </div>
-
-                    <div className="pt-3 border-t border-gray-100 flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/study_v2/test/${test.id}`}
-                          className="flex-1 py-2 bg-[#F0EEFF] text-[#5A4BDA] hover:bg-[#E5E0FF] font-bold text-xs rounded-xl text-center transition-colors"
-                        >
-                          Preview CBT Screen
-                        </Link>
-                        <Link
-                          href={`/study_v2/test/${test.id}/solutions`}
-                          className="py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl text-center transition-colors"
-                          title="Answer Key & Solutions"
-                        >
-                          Keys
-                        </Link>
-                      </div>
-
-                      <div className="flex items-center justify-between text-xs text-gray-500 pt-1">
-                        <Link
-                          href={`/study_v2/test/${test.id}/result`}
-                          className="font-bold text-[#5A4BDA] hover:underline"
-                        >
-                          View Results &rarr;
-                        </Link>
-
-                        <button
-                          onClick={() => {
-                            askConfirmation({
-                              title: "Delete Mock Test?",
-                              description: `Are you sure you want to delete test "${test.title}"?`,
-                              confirmText: "Yes, Delete Test",
-                              isDanger: true,
-                              onConfirm: () => {
-                                setTestSeriesList((prev) => prev.filter((t) => t.id !== test.id));
-                                showToast(`Test "${test.title}" removed`);
-                              },
-                            });
-                          }}
-                          className="text-gray-400 hover:text-red-600 p-1 cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )))}
+                    );
+                  })
+                )}
               </div>
             </div>
           )}
@@ -2772,7 +3271,18 @@ function AdminPortalContent() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-gray-700 block mb-1">Total Questions</label>
+                  <label className="font-bold text-gray-700 block mb-1">Test Duration (Mins) *</label>
+                  <input
+                    type="number"
+                    value={newDppDuration}
+                    onChange={(e) => setNewDppDuration(e.target.value)}
+                    placeholder="e.g. 20"
+                    className="w-full px-3.5 py-2 border rounded-xl"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-gray-700 block mb-1">Initial Questions *</label>
                   <input
                     type="number"
                     value={newDppQuestions}
@@ -2781,15 +3291,35 @@ function AdminPortalContent() {
                     required
                   />
                 </div>
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">Total Marks</label>
-                  <input
-                    type="number"
-                    value={newDppMarks}
-                    onChange={(e) => setNewDppMarks(e.target.value)}
-                    className="w-full px-3.5 py-2 border rounded-xl"
-                    required
-                  />
+              </div>
+
+              {/* Marking Scheme Setup */}
+              <div className="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
+                <div className="font-bold text-gray-900 text-xs flex items-center justify-between">
+                  <span>Marking Scheme</span>
+                  <span className="text-[10px] text-indigo-700 font-semibold">Configurable per question</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-gray-700 block mb-1">Marks for Correct (+)</label>
+                    <input
+                      type="number"
+                      value={newDppPositiveMarks}
+                      onChange={(e) => setNewDppPositiveMarks(e.target.value)}
+                      className="w-full px-3 py-1.5 border rounded-lg bg-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-gray-700 block mb-1">Penalty for Wrong (-)</label>
+                    <input
+                      type="number"
+                      value={newDppNegativeMarks}
+                      onChange={(e) => setNewDppNegativeMarks(e.target.value)}
+                      className="w-full px-3 py-1.5 border rounded-lg bg-white"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -2866,7 +3396,7 @@ function AdminPortalContent() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-gray-700 block mb-1">Questions Count</label>
+                  <label className="font-bold text-gray-700 block mb-1">Initial Questions *</label>
                   <input
                     type="number"
                     value={newTestQuestions}
@@ -2876,14 +3406,43 @@ function AdminPortalContent() {
                   />
                 </div>
                 <div>
-                  <label className="font-bold text-gray-700 block mb-1">Total Marks</label>
+                  <label className="font-bold text-gray-700 block mb-1">Test Subject *</label>
                   <input
-                    type="number"
-                    value={newTestMarks}
-                    onChange={(e) => setNewTestMarks(e.target.value)}
-                    className="w-full px-3.5 py-2 border rounded-xl"
-                    required
+                    type="text"
+                    value={selectedSubject}
+                    readOnly
+                    className="w-full px-3.5 py-2 border rounded-xl bg-gray-50 text-gray-700"
                   />
+                </div>
+              </div>
+
+              {/* Marking Scheme Setup */}
+              <div className="p-3 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-2">
+                <div className="font-bold text-gray-900 text-xs flex items-center justify-between">
+                  <span>Marking Scheme Configuration</span>
+                  <span className="text-[10px] text-indigo-700 font-semibold">Standard +4 / -1</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-gray-700 block mb-1">Marks per Correct (+)</label>
+                    <input
+                      type="number"
+                      value={newTestPositiveMarks}
+                      onChange={(e) => setNewTestPositiveMarks(e.target.value)}
+                      className="w-full px-3 py-1.5 border rounded-lg bg-white"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-gray-700 block mb-1">Negative Penalty (-)</label>
+                    <input
+                      type="number"
+                      value={newTestNegativeMarks}
+                      onChange={(e) => setNewTestNegativeMarks(e.target.value)}
+                      className="w-full px-3 py-1.5 border rounded-lg bg-white"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -3636,6 +4195,608 @@ Ansh Tutor`;
                 </a>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 11. REAL EDTECH QUESTION STUDIO MODAL (PW / NextToppers Model) */}
+      {/* ======================================================== */}
+      {questionStudioOpen && activeAssessment && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-3 sm:p-5 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl border border-gray-200 w-full max-w-5xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="px-5 sm:px-7 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-gray-50 to-white">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-[#5A4BDA] text-white">
+                    {activeAssessment.type === "dpp" ? "DPP Question Studio" : "CBT Test Studio"}
+                  </span>
+                  <span className="text-xs font-bold text-gray-500">•</span>
+                  <span className="text-xs font-bold text-gray-800">{activeAssessment.item.subject}</span>
+                  {activeAssessment.item.chapter && (
+                    <>
+                      <span className="text-xs font-bold text-gray-300">•</span>
+                      <span className="text-xs text-gray-600 font-medium">{activeAssessment.item.chapter}</span>
+                    </>
+                  )}
+                  <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    +{activeAssessment.item.positiveMarks || 4} / -{activeAssessment.item.negativeMarks !== undefined ? activeAssessment.item.negativeMarks : 1} Scheme
+                  </span>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+                    ⏱ {activeAssessment.item.durationMins || 20} Mins
+                  </span>
+                </div>
+                <h2 className="text-base sm:text-lg font-bold text-gray-950">
+                  {activeAssessment.item.title || activeAssessment.item.dppNumber}
+                </h2>
+              </div>
+
+              {/* Action Buttons in Header */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleOpenAddQuestion}
+                  className="px-4 py-2 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm shadow-[#5A4BDA]/25 cursor-pointer active:scale-95 transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Question</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSeedQuestions}
+                  className="px-3 py-2 bg-indigo-50 hover:bg-indigo-100 text-[#5A4BDA] font-bold text-xs rounded-xl flex items-center gap-1 transition-colors cursor-pointer"
+                  title="Load 5 curriculum questions"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Add 5 Sample Qs</span>
+                </button>
+
+                <a
+                  href={`/study_v2/test/${activeAssessment.item.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl flex items-center gap-1 transition-colors"
+                  title="Preview in Student CBT Mode"
+                >
+                  <Play className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Preview CBT</span>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => setQuestionStudioOpen(false)}
+                  className="w-8 h-8 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body: Scrollable Question Manager */}
+            <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-6">
+              {/* Question Editor Drawer (if adding or editing a question) */}
+              {isQuestionFormOpen && (
+                <div className="bg-gradient-to-br from-indigo-50/70 to-purple-50/40 rounded-2xl border-2 border-[#5A4BDA]/30 p-5 sm:p-6 shadow-md space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="flex items-center justify-between pb-3 border-b border-indigo-100">
+                    <div className="flex items-center gap-2">
+                      <span className="w-7 h-7 rounded-lg bg-[#5A4BDA] text-white flex items-center justify-center font-bold text-xs">
+                        {editingQuestionIndex !== null ? editingQuestionIndex + 1 : (activeAssessment.item.questions?.length || 0) + 1}
+                      </span>
+                      <h3 className="font-bold text-sm text-gray-900">
+                        {editingQuestionIndex !== null ? "Edit Question & Marking Scheme" : "Add New Question to Assessment"}
+                      </h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsQuestionFormOpen(false)}
+                      className="text-xs text-gray-500 hover:text-gray-900 font-bold cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleSaveQuestion} className="space-y-4 text-xs">
+                    {/* Question Statement */}
+                    <div>
+                      <label className="font-bold text-gray-800 block mb-1">
+                        Question Statement / Problem Text *
+                      </label>
+                      <textarea
+                        value={qText}
+                        onChange={(e) => setQText(e.target.value)}
+                        placeholder="Type question statement here (Math symbols, LaTeX, equations supported)..."
+                        rows={3}
+                        className="w-full px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#5A4BDA] font-medium"
+                        required
+                      />
+                    </div>
+
+                    {/* 4 Options Grid with Correct Option Radio Toggle */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="font-bold text-gray-800">
+                          Options &amp; Correct Answer Key *
+                        </label>
+                        <span className="text-[11px] text-[#5A4BDA] font-bold">
+                          Click radio circle to mark which option is correct
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {/* Option 1 */}
+                        <div
+                          className={`p-3 rounded-xl border transition-all flex items-start gap-2.5 bg-white ${
+                            qCorrectKey === "1" ? "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/20" : "border-gray-200"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="correctOption"
+                            id="opt1"
+                            checked={qCorrectKey === "1"}
+                            onChange={() => setQCorrectKey("1")}
+                            className="mt-1.5 w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                          />
+                          <div className="flex-1 space-y-1">
+                            <label htmlFor="opt1" className="font-bold text-xs text-gray-700 block cursor-pointer">
+                              Option A (1) {qCorrectKey === "1" && <span className="text-emerald-700 font-black ml-1">✓ Correct Answer</span>}
+                            </label>
+                            <input
+                              type="text"
+                              value={qOpt1}
+                              onChange={(e) => setQOpt1(e.target.value)}
+                              placeholder="Text for Option A"
+                              className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {/* Option 2 */}
+                        <div
+                          className={`p-3 rounded-xl border transition-all flex items-start gap-2.5 bg-white ${
+                            qCorrectKey === "2" ? "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/20" : "border-gray-200"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="correctOption"
+                            id="opt2"
+                            checked={qCorrectKey === "2"}
+                            onChange={() => setQCorrectKey("2")}
+                            className="mt-1.5 w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                          />
+                          <div className="flex-1 space-y-1">
+                            <label htmlFor="opt2" className="font-bold text-xs text-gray-700 block cursor-pointer">
+                              Option B (2) {qCorrectKey === "2" && <span className="text-emerald-700 font-black ml-1">✓ Correct Answer</span>}
+                            </label>
+                            <input
+                              type="text"
+                              value={qOpt2}
+                              onChange={(e) => setQOpt2(e.target.value)}
+                              placeholder="Text for Option B"
+                              className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {/* Option 3 */}
+                        <div
+                          className={`p-3 rounded-xl border transition-all flex items-start gap-2.5 bg-white ${
+                            qCorrectKey === "3" ? "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/20" : "border-gray-200"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="correctOption"
+                            id="opt3"
+                            checked={qCorrectKey === "3"}
+                            onChange={() => setQCorrectKey("3")}
+                            className="mt-1.5 w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                          />
+                          <div className="flex-1 space-y-1">
+                            <label htmlFor="opt3" className="font-bold text-xs text-gray-700 block cursor-pointer">
+                              Option C (3) {qCorrectKey === "3" && <span className="text-emerald-700 font-black ml-1">✓ Correct Answer</span>}
+                            </label>
+                            <input
+                              type="text"
+                              value={qOpt3}
+                              onChange={(e) => setQOpt3(e.target.value)}
+                              placeholder="Text for Option C"
+                              className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {/* Option 4 */}
+                        <div
+                          className={`p-3 rounded-xl border transition-all flex items-start gap-2.5 bg-white ${
+                            qCorrectKey === "4" ? "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/20" : "border-gray-200"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="correctOption"
+                            id="opt4"
+                            checked={qCorrectKey === "4"}
+                            onChange={() => setQCorrectKey("4")}
+                            className="mt-1.5 w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                          />
+                          <div className="flex-1 space-y-1">
+                            <label htmlFor="opt4" className="font-bold text-xs text-gray-700 block cursor-pointer">
+                              Option D (4) {qCorrectKey === "4" && <span className="text-emerald-700 font-black ml-1">✓ Correct Answer</span>}
+                            </label>
+                            <input
+                              type="text"
+                              value={qOpt4}
+                              onChange={(e) => setQOpt4(e.target.value)}
+                              placeholder="Text for Option D"
+                              className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs"
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Step by step Solution & Concept */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="font-bold text-gray-800 block mb-1">
+                          Step-by-step Solution Explanation
+                        </label>
+                        <textarea
+                          value={qExplanation}
+                          onChange={(e) => setQExplanation(e.target.value)}
+                          placeholder="Step 1: Write formula...&#10;Step 2: Substitute values...&#10;Step 3: Arrive at final answer..."
+                          rows={3}
+                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="font-bold text-gray-800 block mb-1">
+                          Applied Core Concept / Chapter Rule
+                        </label>
+                        <input
+                          type="text"
+                          value={qConcept}
+                          onChange={(e) => setQConcept(e.target.value)}
+                          placeholder="e.g. Rational Numbers Closure Property"
+                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs"
+                        />
+                        <div className="mt-3 flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setIsQuestionFormOpen(false)}
+                            className="px-4 py-2 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 font-bold transition-colors cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-5 py-2 bg-[#5A4BDA] hover:bg-[#4939C8] text-white rounded-xl font-bold transition-all shadow-md shadow-[#5A4BDA]/20 cursor-pointer"
+                          >
+                            Save Question
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              {/* Questions List */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-xs font-bold text-gray-700 pb-2 border-b border-gray-100">
+                  <span>Questions in this assessment ({activeAssessment.item.questions?.length || 0})</span>
+                  <span className="text-gray-400 font-normal">
+                    Drag/edit or re-configure questions anytime
+                  </span>
+                </div>
+
+                {!activeAssessment.item.questions || activeAssessment.item.questions.length === 0 ? (
+                  <div className="p-12 text-center border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50 space-y-3">
+                    <FileCheck className="w-10 h-10 text-gray-300 mx-auto" />
+                    <div>
+                      <div className="font-bold text-sm text-gray-800">No Questions Added Yet</div>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        Click &quot;Add Question&quot; above to create your first question, or load 5 sample curriculum questions.
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={handleOpenAddQuestion}
+                        className="px-4 py-2 bg-[#5A4BDA] text-white font-bold text-xs rounded-xl shadow-sm cursor-pointer"
+                      >
+                        + Add Custom Question
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSeedQuestions}
+                        className="px-4 py-2 bg-white border border-gray-300 text-gray-700 font-bold text-xs rounded-xl hover:bg-gray-50 cursor-pointer"
+                      >
+                        ⚡ Seed 5 Sample Questions
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  activeAssessment.item.questions.map((q: QuestionItem, idx: number) => {
+                    const pos = q.positiveMarks || activeAssessment.item.positiveMarks || 4;
+                    const neg = q.negativeMarks !== undefined ? q.negativeMarks : (activeAssessment.item.negativeMarks !== undefined ? activeAssessment.item.negativeMarks : 1);
+
+                    return (
+                      <div
+                        key={q.id || idx}
+                        className="bg-white rounded-2xl border border-gray-200/90 hover:border-indigo-300 p-4 sm:p-5 shadow-2xs hover:shadow-md transition-all duration-200 space-y-3 group"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-2.5">
+                            <span className="w-6 h-6 rounded-lg bg-gray-100 text-gray-700 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-[#5A4BDA] group-hover:text-white transition-colors">
+                              {idx + 1}
+                            </span>
+                            <div className="space-y-1">
+                              <div className="text-sm font-bold text-gray-950 leading-relaxed">
+                                {q.text}
+                              </div>
+                              <div className="flex items-center gap-2 text-[10px] text-gray-500 font-semibold">
+                                <span className="bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200">
+                                  +{pos} / -{neg} Marks
+                                </span>
+                                {q.explanation?.concept && (
+                                  <span className="bg-gray-50 text-gray-600 px-2 py-0.5 rounded border border-gray-200">
+                                    Concept: {q.explanation.concept}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Question Action Buttons */}
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditQuestion(idx)}
+                              className="px-2.5 py-1.5 bg-gray-100 hover:bg-indigo-50 text-gray-700 hover:text-[#5A4BDA] font-bold text-xs rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                              title="Edit question text, options or solution"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>Edit</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteQuestion(idx)}
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                              title="Remove question"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Options Grid */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+                          {q.options?.map((opt, optIdx) => {
+                            const isCorrect = q.correctOptionKey === opt.key || q.correctOptionKey === String(optIdx + 1);
+                            return (
+                              <div
+                                key={opt.key || optIdx}
+                                className={`p-2.5 rounded-xl border flex items-center gap-2.5 transition-all ${
+                                  isCorrect
+                                    ? "bg-emerald-50 border-emerald-300 font-bold text-emerald-950 shadow-2xs"
+                                    : "bg-gray-50/60 border-gray-200 text-gray-700"
+                                }`}
+                              >
+                                <span
+                                  className={`w-5 h-5 rounded-md flex items-center justify-center font-bold text-[10px] shrink-0 ${
+                                    isCorrect ? "bg-emerald-600 text-white" : "bg-gray-200 text-gray-600"
+                                  }`}
+                                >
+                                  {["A", "B", "C", "D"][optIdx] || opt.key}
+                                </span>
+                                <span className="flex-1 truncate">{opt.text}</span>
+                                {isCorrect && (
+                                  <span className="text-[10px] font-black uppercase text-emerald-700 bg-white/80 px-1.5 py-0.5 rounded border border-emerald-300">
+                                    Correct Key
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Solution Steps (if present) */}
+                        {q.explanation && (
+                          <div className="bg-gray-50/80 border border-gray-200/80 rounded-xl p-3 text-[11px] text-gray-700 space-y-1">
+                            <span className="font-bold text-gray-900 block">Step-by-step Solution:</span>
+                            {Array.isArray(q.explanation.steps) ? (
+                              q.explanation.steps.map((st, sIdx) => (
+                                <p key={sIdx} className="text-gray-600 leading-relaxed font-mono">
+                                  {st}
+                                </p>
+                              ))
+                            ) : (
+                              <p className="text-gray-600 font-mono">{String(q.explanation)}</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-3.5 border-t border-gray-200 bg-gray-50/80 flex items-center justify-between">
+              <span className="text-xs text-gray-500 font-medium">
+                Total Marks: <strong className="text-gray-900">{(activeAssessment.item.questions?.length || 0) * (activeAssessment.item.positiveMarks || 4)} Marks</strong> • Questions saved automatically.
+              </span>
+              <button
+                type="button"
+                onClick={() => setQuestionStudioOpen(false)}
+                className="px-5 py-2 bg-[#1B212D] hover:bg-black text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+              >
+                Done / Close Studio
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* 12. REAL EDTECH MARKING SCHEME & TIME SETTINGS MODAL     */}
+      {/* ======================================================== */}
+      {settingsModalOpen && editingAssessment && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-7 w-full max-w-lg shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-[#5A4BDA] flex items-center justify-center font-bold">
+                  <Sliders className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-gray-950">
+                    Edit Marking Scheme &amp; Test Parameters
+                  </h3>
+                  <p className="text-[11px] text-gray-400">PhysicsWallah / NextToppers Assessment Configuration</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSettingsModalOpen(false)}
+                className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-700 font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveAssessmentSettings} className="space-y-4 text-xs">
+              <div>
+                <label className="font-bold text-gray-800 block mb-1">Assessment Title *</label>
+                <input
+                  type="text"
+                  value={setModalTitle}
+                  onChange={(e) => setSetModalTitle(e.target.value)}
+                  className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:border-[#5A4BDA] font-medium"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-gray-800 block mb-1">Subject</label>
+                  <input
+                    type="text"
+                    value={setModalSubject}
+                    onChange={(e) => setSetModalSubject(e.target.value)}
+                    className="w-full px-3.5 py-2 border border-gray-200 rounded-xl"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-gray-800 block mb-1">Duration (Minutes) *</label>
+                  <input
+                    type="number"
+                    value={setModalDuration}
+                    onChange={(e) => setSetModalDuration(Number(e.target.value))}
+                    className="w-full px-3.5 py-2 border border-gray-200 rounded-xl font-bold"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Marking Scheme Settings */}
+              <div className="p-3.5 bg-gradient-to-br from-indigo-50/60 to-purple-50/40 rounded-2xl border border-indigo-100 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-gray-900 text-xs">Marking Scheme Formula</span>
+                  <span className="text-[10px] text-indigo-700 font-bold">Standard EdTech Rules</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-semibold text-gray-700 block mb-1">
+                      Positive Marks per Correct (+) *
+                    </label>
+                    <input
+                      type="number"
+                      value={setModalPositiveMarks}
+                      onChange={(e) => setSetModalPositiveMarks(Number(e.target.value))}
+                      className="w-full px-3.5 py-2 bg-white border border-gray-200 rounded-xl font-bold text-[#5A4BDA]"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-gray-700 block mb-1">
+                      Negative Penalty per Wrong (-) *
+                    </label>
+                    <input
+                      type="number"
+                      value={setModalNegativeMarks}
+                      onChange={(e) => setSetModalNegativeMarks(Number(e.target.value))}
+                      className="w-full px-3.5 py-2 bg-white border border-gray-200 rounded-xl font-bold text-red-600"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] font-bold text-gray-500">Presets:</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSetModalPositiveMarks(4);
+                      setSetModalNegativeMarks(1);
+                    }}
+                    className="px-2 py-0.5 rounded-md bg-white border border-indigo-200 hover:bg-indigo-50 font-bold text-[10px] text-indigo-700 cursor-pointer"
+                  >
+                    +4 / -1 (JEE / NEET)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSetModalPositiveMarks(1);
+                      setSetModalNegativeMarks(0);
+                    }}
+                    className="px-2 py-0.5 rounded-md bg-white border border-gray-200 hover:bg-gray-50 font-bold text-[10px] text-gray-700 cursor-pointer"
+                  >
+                    +1 / 0 (School / Board)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSetModalPositiveMarks(3);
+                      setSetModalNegativeMarks(1);
+                    }}
+                    className="px-2 py-0.5 rounded-md bg-white border border-gray-200 hover:bg-gray-50 font-bold text-[10px] text-gray-700 cursor-pointer"
+                  >
+                    +3 / -1 (Olympiad)
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setSettingsModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold shadow-md shadow-[#5A4BDA]/20 transition-all cursor-pointer"
+                >
+                  Save Marking Scheme &amp; Time
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

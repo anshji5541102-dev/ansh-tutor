@@ -13,6 +13,8 @@ export interface QuestionItem {
     concept: string;
     conclusion: string;
   };
+  positiveMarks?: number;
+  negativeMarks?: number;
 }
 
 export const defaultQuestions: QuestionItem[] = [

@@ -32,7 +32,48 @@ function TestPlayerContent() {
     testTitleMap[testId] ||
     testId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
-  const questions: QuestionItem[] = defaultQuestions;
+  const [testTitle, setTestTitle] = useState(
+    testTitleMap[testId] ||
+    testId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+  );
+  const [questions, setQuestions] = useState<QuestionItem[]>(defaultQuestions);
+  const [positiveMarks, setPositiveMarks] = useState<number>(4);
+  const [negativeMarks, setNegativeMarks] = useState<number>(1);
+
+  // Dynamic Assessment Loader (syncs with Admin Tests and DPPs)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const rawTests = localStorage.getItem("ansh_admin_tests");
+      const rawDpps = localStorage.getItem("ansh_admin_dpps");
+      let found: any = null;
+      if (rawTests) {
+        const tests = JSON.parse(rawTests);
+        found = tests.find((t: any) => t.id === testId || t.title?.toLowerCase().replace(/\s+/g, "-") === testId);
+      }
+      if (!found && rawDpps) {
+        const dpps = JSON.parse(rawDpps);
+        found = dpps.find((d: any) => d.id === testId || d.dppNumber?.toLowerCase().replace(/\s+/g, "-") === testId);
+      }
+      if (found) {
+        if (found.title) setTestTitle(found.title);
+        if (found.durationMins) setTimeLeft(found.durationMins * 60);
+        if (found.positiveMarks) setPositiveMarks(Number(found.positiveMarks));
+        if (found.negativeMarks !== undefined) setNegativeMarks(Number(found.negativeMarks));
+        if (Array.isArray(found.questions) && found.questions.length > 0) {
+          setQuestions(found.questions);
+          setQuestionStatuses({
+            [found.questions[0].id]: "not-answered",
+            ...Object.fromEntries(
+              found.questions.slice(1).map((q: any) => [q.id, "not-visited" as QuestionStatus])
+            ),
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load custom test:", e);
+    }
+  }, [testId]);
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, string>>({});
@@ -271,10 +312,11 @@ function TestPlayerContent() {
       };
     });
 
-    const marksObtained = correctCount * 4;
-    const marksLost = incorrectCount * 1;
-    const marksSkipped = skippedCount * 4;
+    const marksObtained = correctCount * positiveMarks;
+    const marksLost = incorrectCount * negativeMarks;
+    const marksSkipped = skippedCount * positiveMarks;
     const totalScore = Math.max(0, marksObtained - marksLost);
+    const maxScore = questions.length * positiveMarks;
     const accuracy =
       correctCount + incorrectCount > 0
         ? Math.round((correctCount / (correctCount + incorrectCount)) * 100)
@@ -299,10 +341,10 @@ function TestPlayerContent() {
         );
         saved[testId] = {
           attemptedAt: new Date().toISOString(),
-          testTitle: currentTestTitle,
+          testTitle: testTitle,
           totalQuestions: questions.length,
           score: totalScore,
-          totalScore: 100,
+          totalScore: maxScore,
           correct: correctCount,
           incorrect: incorrectCount,
           skipped: skippedCount,
@@ -341,7 +383,7 @@ function TestPlayerContent() {
           <div className="h-4 w-[1px] bg-gray-200 hidden sm:block" />
           <div className="flex items-center gap-2">
             <span className="text-gray-500 text-xs font-semibold">Test Name:</span>
-            <span className="text-gray-900 font-bold text-sm">{currentTestTitle}</span>
+            <span className="text-gray-900 font-bold text-sm">{testTitle}</span>
           </div>
         </div>
 

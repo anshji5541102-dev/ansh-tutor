@@ -29,10 +29,36 @@ function TestSolutionsContent() {
     "dpp-1": "Relations and Functions (i)",
   };
 
-  const currentTestTitle =
+  const [testTitle, setTestTitle] = useState(
     testTitleMap[testId] ||
-    testId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    testId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+  );
+  const [questions, setQuestions] = useState<QuestionItem[]>(defaultQuestions);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const rawTests = localStorage.getItem("ansh_admin_tests");
+      const rawDpps = localStorage.getItem("ansh_admin_dpps");
+      let found: any = null;
+      if (rawTests) {
+        const tests = JSON.parse(rawTests);
+        found = tests.find((t: any) => t.id === testId || t.title?.toLowerCase().replace(/\s+/g, "-") === testId);
+      }
+      if (!found && rawDpps) {
+        const dpps = JSON.parse(rawDpps);
+        found = dpps.find((d: any) => d.id === testId || d.dppNumber?.toLowerCase().replace(/\s+/g, "-") === testId);
+      }
+      if (found) {
+        if (found.title) setTestTitle(found.title);
+        if (Array.isArray(found.questions) && found.questions.length > 0) {
+          setQuestions(found.questions);
+        }
+      }
+    } catch (e) {}
+  }, [testId]);
+
+  const currentTestTitle = testTitle;
   const [currentIdx, setCurrentIdx] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
   const [userStatuses, setUserStatuses] = useState<Record<number, string>>({});
