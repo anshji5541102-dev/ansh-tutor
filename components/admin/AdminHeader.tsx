@@ -32,6 +32,10 @@ export default function AdminHeader({
 
   const handleAdminLogout = async () => {
     try {
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('ansh_admin_session_auth')
+        localStorage.removeItem('ansh_admin_session_auth')
+      }
       await logout()
       router.push('/')
       router.refresh()
