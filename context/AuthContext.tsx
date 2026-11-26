@@ -33,14 +33,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [profile, setProfileState] = useState<UserProfile | null>(null)
   const [selectedClass, setSelectedClassState] = useState<string>('Class 8')
   const [loading, setLoading] = useState(true)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
 
-  // Initialize selected class from localStorage
+  // Initialize profile & selected class from localStorage
   useEffect(() => {
     try {
+      const storedProfile = localStorage.getItem('ansh_auth_profile')
+      if (storedProfile) {
+        setProfileState(JSON.parse(storedProfile))
+      }
       const stored = localStorage.getItem('ansh_selected_class')
       if (stored) {
         setSelectedClassState(stored)
@@ -49,6 +53,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // ignore
     }
   }, [])
+
+  const setProfile = (newProfile: UserProfile | null) => {
+    setProfileState(newProfile)
+    try {
+      if (newProfile) {
+        localStorage.setItem('ansh_auth_profile', JSON.stringify(newProfile))
+      } else {
+        localStorage.removeItem('ansh_auth_profile')
+      }
+    } catch {}
+  }
 
   const setSelectedClass = (cls: string) => {
     setSelectedClassState(cls)
@@ -81,7 +96,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('Failed to sync profile on auth state change:', e)
         }
       } else {
-        setProfile(null)
+        // Fallback to local profile from serverless OTP verification
+        try {
+          const storedProfile = localStorage.getItem('ansh_auth_profile')
+          if (storedProfile) {
+            setProfileState(JSON.parse(storedProfile))
+          } else {
+            setProfileState(null)
+          }
+        } catch {
+          setProfileState(null)
+        }
       }
       setLoading(false)
     })

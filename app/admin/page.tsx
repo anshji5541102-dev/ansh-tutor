@@ -201,304 +201,6 @@ interface SupportTicketItem {
   status: "Open" | "Resolved";
 }
 
-// ==========================================
-// DEFAULT FALLBACK DATASETS (Ensures No Tab is Blank)
-// ==========================================
-const defaultLecturesInit: LectureRecord[] = [
-  {
-    id: "lec-1",
-    batchId: "batch-class-8",
-    subject: "Mathematics",
-    chapter: "CH - 01 Rational Numbers",
-    lectureNumber: "Lec 01",
-    title: "Rational Numbers: Closure, Commutative & Associative Laws",
-    educator: "Ritik Mishra Sir",
-    duration: "48 mins",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    date: "12 Nov 2026",
-  },
-  {
-    id: "lec-2",
-    batchId: "batch-class-8",
-    subject: "Mathematics",
-    chapter: "CH - 01 Rational Numbers",
-    lectureNumber: "Lec 02",
-    title: "Number Line Representation & Finding Numbers Between Two Rationals",
-    educator: "Ritik Mishra Sir",
-    duration: "52 mins",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    date: "13 Nov 2026",
-  },
-  {
-    id: "lec-3",
-    batchId: "batch-class-8",
-    subject: "Mathematics",
-    chapter: "CH - 02 Linear Equations",
-    lectureNumber: "Lec 01",
-    title: "Solving Linear Equations in One Variable (Basics to Advanced)",
-    educator: "Ritik Mishra Sir",
-    duration: "45 mins",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    date: "15 Nov 2026",
-  },
-  {
-    id: "lec-4",
-    batchId: "batch-class-8",
-    subject: "Science",
-    chapter: "CH - 01 Force and Pressure",
-    lectureNumber: "Lec 01",
-    title: "Force: Push & Pull, Contact vs Non-Contact Forces Explained",
-    educator: "Ansh Sir",
-    duration: "50 mins",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    date: "14 Nov 2026",
-  },
-];
-
-const defaultNotesInit: NotesRecord[] = [
-  {
-    id: "note-1",
-    batchId: "batch-class-8",
-    subject: "Mathematics",
-    chapter: "CH - 01 Rational Numbers",
-    title: "Rational Numbers Full Chapter Comprehensive Colored Class Notes",
-    fileName: "Class8_Math_CH01_Rational_Numbers_Notes.pdf",
-    pages: 18,
-    date: "12 Nov 2026",
-  },
-  {
-    id: "note-2",
-    batchId: "batch-class-8",
-    subject: "Mathematics",
-    chapter: "CH - 01 Rational Numbers",
-    title: "Quick Revision Formula & Theorem Cheat Sheet",
-    fileName: "Rational_Numbers_CheatSheet.pdf",
-    pages: 4,
-    date: "13 Nov 2026",
-  },
-  {
-    id: "note-3",
-    batchId: "batch-class-8",
-    subject: "Science",
-    chapter: "CH - 01 Force and Pressure",
-    title: "Force & Pressure Complete Illustrated NCERT Notes",
-    fileName: "Force_and_Pressure_Class8_Notes.pdf",
-    pages: 22,
-    date: "14 Nov 2026",
-  },
-];
-
-const defaultLibraryInit: LibraryResourceRecord[] = [
-  {
-    id: "lib-1",
-    title: "Ansh Tutor Class 8 Mathematics Master Question Bank (150+ Solved)",
-    subject: "Mathematics",
-    category: "Question Bank",
-    classGrade: "Class 8",
-    questionsCount: 150,
-    fileName: "Maths_Class8_Master_Question_Bank.pdf",
-    topics: ["Rational Numbers", "Linear Equations", "Quadrilaterals", "Exponents"],
-    coverBg: "bg-indigo-900",
-    coverAccent: "border-indigo-500",
-  },
-  {
-    id: "lib-2",
-    title: "NCERT Exemplar Complete Solutions & Problem Highlights",
-    subject: "Science",
-    category: "NCERT Exemplar",
-    classGrade: "Class 8",
-    questionsCount: 120,
-    fileName: "Science_NCERT_Exemplar_Class8.pdf",
-    topics: ["Force & Pressure", "Friction", "Sound", "Chemical Effects"],
-    coverBg: "bg-emerald-900",
-    coverAccent: "border-emerald-500",
-  },
-  {
-    id: "lib-3",
-    title: "All Formulas, Definitions & Identities Handbook",
-    subject: "Mathematics",
-    category: "Formula Sheet",
-    classGrade: "Class 8",
-    questionsCount: 45,
-    fileName: "Math_Formulas_Handbook.pdf",
-    topics: ["Algebraic Identities", "Mensuration", "Geometry Rules"],
-    coverBg: "bg-amber-900",
-    coverAccent: "border-amber-500",
-  },
-  {
-    id: "lib-4",
-    title: "Olympiad & NTSE Foundation Previous 5-Year Questions",
-    subject: "Foundation",
-    category: "PYQs",
-    classGrade: "Class 8",
-    questionsCount: 95,
-    fileName: "Olympiad_Foundation_PYQs.pdf",
-    topics: ["Mental Ability", "Higher Order Math", "Physics Reasoning"],
-    coverBg: "bg-purple-900",
-    coverAccent: "border-purple-500",
-  },
-];
-
-const defaultLiveInit: LiveClassRecord[] = [
-  {
-    id: "live-1",
-    title: "Class 8th Math Live Doubt Resolution & NCERT Exemplar Drill",
-    subject: "Mathematics",
-    faculty: "Ritik Mishra Sir",
-    batch: "Class 8th (Umang Batch)",
-    time: "06:00 PM - 07:30 PM",
-    date: "Today",
-    isLive: true,
-  },
-  {
-    id: "live-2",
-    title: "Class 7th Science: Lines & Angles Interactive Concept Masterclass",
-    subject: "Mathematics",
-    faculty: "Expert Faculty",
-    batch: "Class 7th (Sankalp Batch)",
-    time: "05:00 PM - 06:15 PM",
-    date: "Today",
-    isLive: false,
-  },
-  {
-    id: "live-3",
-    title: "Class 6th Science: Motion & Measurement of Distances",
-    subject: "Science",
-    faculty: "Expert Faculty",
-    batch: "Class 6th (Prarambh Batch)",
-    time: "04:30 PM - 05:30 PM",
-    date: "Tomorrow",
-    isLive: false,
-  },
-];
-
-const defaultStudentsInit: StudentDirectoryItem[] = [
-  {
-    id: "std-1",
-    name: "Aarav Sharma",
-    phone: "+91 98765 43210",
-    email: "aarav.sharma@gmail.com",
-    cls: "Class 8",
-    enrolledBatch: "Class 8th (Umang Batch)",
-    status: "Active",
-  },
-  {
-    id: "std-2",
-    name: "Priya Patel",
-    phone: "+91 98234 56789",
-    email: "priya.p@gmail.com",
-    cls: "Class 7",
-    enrolledBatch: "Class 7th (Sankalp Batch)",
-    status: "Active",
-  },
-  {
-    id: "std-3",
-    name: "Rohan Verma",
-    phone: "+91 91234 56780",
-    email: "rohan.v@gmail.com",
-    cls: "Class 8",
-    enrolledBatch: "Class 8th (Umang Batch)",
-    status: "Grace Period",
-  },
-  {
-    id: "std-4",
-    name: "Ananya Singh",
-    phone: "+91 99887 76655",
-    email: "ananya.singh@gmail.com",
-    cls: "Class 6",
-    enrolledBatch: "Class 6th (Prarambh Batch)",
-    status: "Active",
-  },
-];
-
-const defaultAnnouncementsInit: AnnouncementItem[] = [
-  {
-    id: "ann-1",
-    title: "All-India CBT Mega Mock Test Scheduled for this Sunday 10:00 AM",
-    target: "All Batches (Classes 1st - 8th)",
-    date: "Today",
-    priority: "High",
-    content: "All students are requested to join the test series CBT portal 15 minutes prior. The test covers latest term curriculum with instant percentile score card.",
-  },
-  {
-    id: "ann-2",
-    title: "New DPP 02 & Video Solutions Uploaded in Mathematics",
-    target: "Class 8th (Umang Batch)",
-    date: "Yesterday",
-    priority: "Normal",
-    content: "DPP 02 containing 15 challenging problems on Rational Numbers is now published. Check your batch DPP tab and submit solutions before 8 PM.",
-  },
-];
-
-const defaultSupportTicketsInit: SupportTicketItem[] = [
-  {
-    id: "tkt-1",
-    studentName: "Aarav Sharma",
-    phone: "+91 98765 43210",
-    category: "Academic Doubt",
-    message: "Sir, in DPP 01 Question 4, how do we prove closure under division for rational numbers when denominator is zero?",
-    date: "Today, 11:20 AM",
-    status: "Open",
-  },
-  {
-    id: "tkt-2",
-    studentName: "Rohan Verma",
-    phone: "+91 91234 56780",
-    category: "Pay Later Issue",
-    message: "I paid the installment via UPI yesterday. Please verify and restore full batch access.",
-    date: "Yesterday, 04:15 PM",
-    status: "Resolved",
-  },
-];
-
-const defaultPayLaterInit: PayLaterRecord[] = [
-  {
-    id: "pl-1",
-    orderId: "PL-80124",
-    orderDate: "18 Nov 2026",
-    dueDate: "25 Nov 2026",
-    studentName: "Rohan Verma",
-    phone: "+91 91234 56780",
-    email: "rohan.v@gmail.com",
-    address: "Alambagh, Lucknow, UP",
-    batchTitle: "Class 8th (Umang Batch)",
-    amount: 1799,
-    daysRemaining: 1,
-    isBlocked: false,
-    isPaid: false,
-  },
-  {
-    id: "pl-2",
-    orderId: "PL-80119",
-    orderDate: "10 Nov 2026",
-    dueDate: "17 Nov 2026",
-    studentName: "Vikram Malhotra",
-    phone: "+91 98112 23344",
-    email: "vikram.m@gmail.com",
-    address: "Gomti Nagar, Lucknow, UP",
-    batchTitle: "Class 7th (Sankalp Batch)",
-    amount: 1499,
-    daysRemaining: 0,
-    isBlocked: true,
-    isPaid: false,
-  },
-  {
-    id: "pl-3",
-    orderId: "PL-80105",
-    orderDate: "05 Nov 2026",
-    dueDate: "12 Nov 2026",
-    studentName: "Aarav Sharma",
-    phone: "+91 98765 43210",
-    email: "aarav.sharma@gmail.com",
-    address: "Rajajipuram, Lucknow, UP",
-    batchTitle: "Class 8th (Umang Batch)",
-    amount: 1799,
-    daysRemaining: 0,
-    isBlocked: false,
-    isPaid: true,
-  },
-];
-
 function AdminPortalContent() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -506,24 +208,24 @@ function AdminPortalContent() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // ==========================================
-  // 1. PAY LATER QUEUE
+  // 1. PAY LATER QUEUE (Clean dynamic state)
   // ==========================================
-  const [payLaterList, setPayLaterList] = useState<PayLaterRecord[]>(defaultPayLaterInit);
+  const [payLaterList, setPayLaterList] = useState<PayLaterRecord[]>([]);
 
   // ==========================================
-  // 2. BATCHES
+  // 2. BATCHES (Class 1st - 8th)
   // ==========================================
   const [batchesList, setBatchesList] = useState<BatchRecord[]>(defaultAcademicBatches as BatchRecord[]);
 
   // ==========================================
   // 3. BATCH CONTENT (Recorded Videos, Notes, DPPs)
   // ==========================================
-  const [selectedBatchId, setSelectedBatchId] = useState("batch-class-8");
-  const [selectedSubject, setSelectedSubject] = useState("Mathematics");
+  const [selectedBatchId, setSelectedBatchId] = useState(defaultAcademicBatches[0]?.id || "batch-class-8");
+  const [selectedSubject, setSelectedSubject] = useState("All");
   const [contentSubTab, setContentSubTab] = useState<"Lectures" | "Notes" | "DPPs">("Lectures");
 
-  const [lecturesList, setLecturesList] = useState<LectureRecord[]>(defaultLecturesInit);
-  const [notesList, setNotesList] = useState<NotesRecord[]>(defaultNotesInit);
+  const [lecturesList, setLecturesList] = useState<LectureRecord[]>([]);
+  const [notesList, setNotesList] = useState<NotesRecord[]>([]);
   const [dppsList, setDppsList] = useState<DppRecord[]>([]);
 
   // ==========================================
@@ -534,19 +236,19 @@ function AdminPortalContent() {
   // ==========================================
   // 5. DIGITAL LIBRARY (Question Banks & Books)
   // ==========================================
-  const [libraryList, setLibraryList] = useState<LibraryResourceRecord[]>(defaultLibraryInit);
+  const [libraryList, setLibraryList] = useState<LibraryResourceRecord[]>([]);
 
   // ==========================================
   // 6. LIVE CLASSES
   // ==========================================
-  const [liveList, setLiveList] = useState<LiveClassRecord[]>(defaultLiveInit);
+  const [liveList, setLiveList] = useState<LiveClassRecord[]>([]);
 
   // ==========================================
   // 7. STUDENTS & ANNOUNCEMENTS & TICKETS
   // ==========================================
-  const [studentsList, setStudentsList] = useState<StudentDirectoryItem[]>(defaultStudentsInit);
-  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>(defaultAnnouncementsInit);
-  const [supportTickets, setSupportTickets] = useState<SupportTicketItem[]>(defaultSupportTicketsInit);
+  const [studentsList, setStudentsList] = useState<StudentDirectoryItem[]>([]);
+  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
+  const [supportTickets, setSupportTickets] = useState<SupportTicketItem[]>([]);
 
   // ==========================================
   // ==========================================
@@ -1015,7 +717,7 @@ function AdminPortalContent() {
     if (wizardType === "dpp") {
       const newDpp: DppRecord = {
         id: `dpp-${Date.now()}`,
-        batchId: selectedBatchId || "batch-1",
+        batchId: selectedBatchId || batchesList[0]?.id || "batch-class-8",
         subject: wizSubject,
         chapter: wizChapter,
         dppNumber: wizCode.trim() || "DPP",
@@ -1247,170 +949,46 @@ function AdminPortalContent() {
     if (typeof window !== "undefined") {
       try {
         const storedBatches = localStorage.getItem("ansh_admin_batches");
-        if (storedBatches && JSON.parse(storedBatches).length > 0) {
-          const parsed = JSON.parse(storedBatches);
-          setBatchesList(parsed);
-          setSelectedBatchId((prev) => prev || parsed[0]?.id || "batch-class-8");
+        if (storedBatches) {
+          try {
+            const parsed = JSON.parse(storedBatches);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setBatchesList(parsed);
+              setSelectedBatchId((prev) => prev || parsed[0]?.id || "batch-class-8");
+            } else {
+              setBatchesList(defaultAcademicBatches as BatchRecord[]);
+              setSelectedBatchId(defaultAcademicBatches[0]?.id || "batch-class-8");
+            }
+          } catch {
+            setBatchesList(defaultAcademicBatches as BatchRecord[]);
+            setSelectedBatchId(defaultAcademicBatches[0]?.id || "batch-class-8");
+          }
         } else {
           setBatchesList(defaultAcademicBatches as BatchRecord[]);
           setSelectedBatchId(defaultAcademicBatches[0]?.id || "batch-class-8");
           localStorage.setItem("ansh_admin_batches", JSON.stringify(defaultAcademicBatches));
         }
 
-        const storedTests = localStorage.getItem("ansh_admin_tests");
-        if (storedTests && JSON.parse(storedTests).length > 0) {
-          setTestSeriesList(JSON.parse(storedTests));
-        } else {
-          const defaultTestsInit: TestSeriesRecord[] = [
-            {
-              id: "permutations-and-combinations",
-              title: "Permutations & Combinations All-India Mock Test",
-              type: "FULL_MOCK",
-              subject: "Mathematics",
-              durationMins: 180,
-              totalMarks: 100,
-              totalQuestions: 25,
-              positiveMarks: 4,
-              negativeMarks: 1,
-              status: "Published",
-              scheduledDate: "Active Now",
-              questions: defaultQuestions,
-            },
-            {
-              id: "relations-and-functions",
-              title: "Relations and Functions Chapter CBT Exam",
-              type: "CHAPTER_TEST",
-              subject: "Mathematics",
-              durationMins: 60,
-              totalMarks: 40,
-              totalQuestions: 10,
-              positiveMarks: 4,
-              negativeMarks: 1,
-              status: "Published",
-              scheduledDate: "Active Now",
-              questions: defaultQuestions.slice(0, 10),
-            },
-            {
-              id: "vectors",
-              title: "Vectors & 3D Geometry Sectional Test",
-              type: "CHAPTER_TEST",
-              subject: "Mathematics",
-              durationMins: 45,
-              totalMarks: 40,
-              totalQuestions: 10,
-              positiveMarks: 4,
-              negativeMarks: 1,
-              status: "Published",
-              scheduledDate: "Active Now",
-              questions: defaultQuestions.slice(0, 10),
-            },
-          ];
-          setTestSeriesList(defaultTestsInit);
-          localStorage.setItem("ansh_admin_tests", JSON.stringify(defaultTestsInit));
-        }
+        const safeLoad = (key: string, setter: (val: any) => void) => {
+          try {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) setter(parsed);
+            }
+          } catch {}
+        };
 
-        const storedLib = localStorage.getItem("ansh_admin_library");
-        if (storedLib && JSON.parse(storedLib).length > 0) {
-          setLibraryList(JSON.parse(storedLib));
-        } else {
-          setLibraryList(defaultLibraryInit);
-          localStorage.setItem("ansh_admin_library", JSON.stringify(defaultLibraryInit));
-        }
-
-        const storedLive = localStorage.getItem("ansh_admin_live");
-        if (storedLive && JSON.parse(storedLive).length > 0) {
-          setLiveList(JSON.parse(storedLive));
-        } else {
-          setLiveList(defaultLiveInit);
-          localStorage.setItem("ansh_admin_live", JSON.stringify(defaultLiveInit));
-        }
-
-        const storedAnn = localStorage.getItem("ansh_admin_announcements");
-        if (storedAnn && JSON.parse(storedAnn).length > 0) {
-          setAnnouncements(JSON.parse(storedAnn));
-        } else {
-          setAnnouncements(defaultAnnouncementsInit);
-          localStorage.setItem("ansh_admin_announcements", JSON.stringify(defaultAnnouncementsInit));
-        }
-
-        const storedLec = localStorage.getItem("ansh_admin_lectures");
-        if (storedLec && JSON.parse(storedLec).length > 0) {
-          setLecturesList(JSON.parse(storedLec));
-        } else {
-          setLecturesList(defaultLecturesInit);
-          localStorage.setItem("ansh_admin_lectures", JSON.stringify(defaultLecturesInit));
-        }
-
-        const storedDpp = localStorage.getItem("ansh_admin_dpps");
-        if (storedDpp && JSON.parse(storedDpp).length > 0) {
-          setDppsList(JSON.parse(storedDpp));
-        } else {
-          const defaultDppsInit: DppRecord[] = [
-            {
-              id: "dpp-1",
-              batchId: "batch-class-8",
-              subject: "Mathematics",
-              chapter: "CH - 01 Relations & Functions",
-              dppNumber: "DPP 01",
-              title: "Relations and Functions Daily Quiz",
-              questionsCount: 5,
-              durationMins: 20,
-              positiveMarks: 4,
-              negativeMarks: 1,
-              totalMarks: 20,
-              dppFile: "DPP_01_Relations.pdf",
-              solutionFile: "DPP_01_Solutions.pdf",
-              date: "Today",
-              questions: defaultQuestions.slice(0, 5),
-            },
-            {
-              id: "dpp-2",
-              batchId: "batch-class-8",
-              subject: "Mathematics",
-              chapter: "CH - 02 Quadratic Equations",
-              dppNumber: "DPP 02",
-              title: "Quadratic Equations Problem Set",
-              questionsCount: 5,
-              durationMins: 25,
-              positiveMarks: 4,
-              negativeMarks: 1,
-              totalMarks: 20,
-              dppFile: "DPP_02_Quadratic.pdf",
-              solutionFile: "DPP_02_Solutions.pdf",
-              date: "Yesterday",
-              questions: defaultQuestions.slice(2, 7),
-            },
-          ];
-          setDppsList(defaultDppsInit);
-          localStorage.setItem("ansh_admin_dpps", JSON.stringify(defaultDppsInit));
-        }
-
-        const storedNotes = localStorage.getItem("ansh_admin_notes");
-        if (storedNotes && JSON.parse(storedNotes).length > 0) {
-          setNotesList(JSON.parse(storedNotes));
-        } else {
-          setNotesList(defaultNotesInit);
-          localStorage.setItem("ansh_admin_notes", JSON.stringify(defaultNotesInit));
-        }
-
-        const storedStudents = localStorage.getItem("ansh_admin_students");
-        if (storedStudents && JSON.parse(storedStudents).length > 0) {
-          setStudentsList(JSON.parse(storedStudents));
-        } else {
-          setStudentsList(defaultStudentsInit);
-          localStorage.setItem("ansh_admin_students", JSON.stringify(defaultStudentsInit));
-        }
-
-        const storedTickets = localStorage.getItem("ansh_admin_tickets");
-        if (storedTickets && JSON.parse(storedTickets).length > 0) {
-          setSupportTickets(JSON.parse(storedTickets));
-        } else {
-          setSupportTickets(defaultSupportTicketsInit);
-          localStorage.setItem("ansh_admin_tickets", JSON.stringify(defaultSupportTicketsInit));
-        }
-
-        const storedBookings = localStorage.getItem("ansh_counseling_bookings");
-        if (storedBookings) setCounselingBookings(JSON.parse(storedBookings));
+        safeLoad("ansh_admin_tests", setTestSeriesList);
+        safeLoad("ansh_admin_library", setLibraryList);
+        safeLoad("ansh_admin_live", setLiveList);
+        safeLoad("ansh_admin_announcements", setAnnouncements);
+        safeLoad("ansh_admin_lectures", setLecturesList);
+        safeLoad("ansh_admin_dpps", setDppsList);
+        safeLoad("ansh_admin_notes", setNotesList);
+        safeLoad("ansh_admin_students", setStudentsList);
+        safeLoad("ansh_admin_tickets", setSupportTickets);
+        safeLoad("ansh_counseling_bookings", setCounselingBookings);
       } catch {}
       hasMounted.current = true;
     }
@@ -1463,6 +1041,18 @@ function AdminPortalContent() {
       localStorage.setItem("ansh_admin_notes", JSON.stringify(notesList));
     }
   }, [notesList]);
+
+  useEffect(() => {
+    if (hasMounted.current && typeof window !== "undefined") {
+      localStorage.setItem("ansh_admin_students", JSON.stringify(studentsList));
+    }
+  }, [studentsList]);
+
+  useEffect(() => {
+    if (hasMounted.current && typeof window !== "undefined") {
+      localStorage.setItem("ansh_admin_tickets", JSON.stringify(supportTickets));
+    }
+  }, [supportTickets]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -1518,10 +1108,13 @@ function AdminPortalContent() {
     e.preventDefault();
     if (!newLecTitle.trim()) return;
 
+    const targetSubject = !selectedSubject || selectedSubject === "All" ? "Mathematics" : selectedSubject;
+    const targetBatchId = selectedBatchId || batchesList[0]?.id || "batch-class-8";
+
     const newLec: LectureRecord = {
       id: `lec-${Date.now()}`,
-      batchId: selectedBatchId,
-      subject: selectedSubject,
+      batchId: targetBatchId,
+      subject: targetSubject,
       chapter: newLecChapter,
       lectureNumber: newLecNumber,
       title: newLecTitle.trim(),
@@ -1541,10 +1134,13 @@ function AdminPortalContent() {
     e.preventDefault();
     if (!newNoteTitle.trim()) return;
 
+    const targetSubject = !selectedSubject || selectedSubject === "All" ? "Mathematics" : selectedSubject;
+    const targetBatchId = selectedBatchId || batchesList[0]?.id || "batch-class-8";
+
     const newNote: NotesRecord = {
       id: `not-${Date.now()}`,
-      batchId: selectedBatchId,
-      subject: selectedSubject,
+      batchId: targetBatchId,
+      subject: targetSubject,
       chapter: newNoteChapter,
       title: newNoteTitle.trim(),
       fileName: newNoteFileName.trim() || "Lecture_Notes.pdf",
@@ -1562,6 +1158,9 @@ function AdminPortalContent() {
     e.preventDefault();
     if (!newDppTitle.trim()) return;
 
+    const targetSubject = !selectedSubject || selectedSubject === "All" ? "Mathematics" : selectedSubject;
+    const targetBatchId = selectedBatchId || batchesList[0]?.id || "batch-class-8";
+
     const qCount = parseInt(newDppQuestions, 10) || 5;
     const pos = parseInt(newDppPositiveMarks, 10) || 4;
     const neg = parseInt(newDppNegativeMarks, 10) || 0;
@@ -1571,13 +1170,13 @@ function AdminPortalContent() {
       ...q,
       id: Date.now() + idx,
       questionNumber: idx + 1,
-      subject: selectedSubject,
+      subject: targetSubject,
     }));
 
     const newDpp: DppRecord = {
       id: `dpp-${Date.now()}`,
-      batchId: selectedBatchId,
-      subject: selectedSubject,
+      batchId: targetBatchId,
+      subject: targetSubject,
       chapter: newDppChapter,
       dppNumber: newDppNumber,
       title: newDppTitle.trim(),
@@ -1748,21 +1347,21 @@ function AdminPortalContent() {
 
   const activeBatchId = selectedBatchId || batchesList[0]?.id || "batch-class-8";
 
-  // Filtered Batch Content (Resilient against empty or mismatching IDs)
+  // Filtered Batch Content (matches active batch and optional subject)
   const currentBatchLectures = lecturesList.filter(
     (l) =>
-      (!selectedBatchId || l.batchId === activeBatchId || l.batchId === "batch-class-8" || l.batchId === "batch-1" || !l.batchId) &&
-      (!selectedSubject || l.subject === selectedSubject)
+      (!activeBatchId || l.batchId === activeBatchId || !l.batchId) &&
+      (!selectedSubject || selectedSubject === "All" || l.subject === selectedSubject)
   );
   const currentBatchNotes = notesList.filter(
     (n) =>
-      (!selectedBatchId || n.batchId === activeBatchId || n.batchId === "batch-class-8" || n.batchId === "batch-1" || !n.batchId) &&
-      (!selectedSubject || n.subject === selectedSubject)
+      (!activeBatchId || n.batchId === activeBatchId || !n.batchId) &&
+      (!selectedSubject || selectedSubject === "All" || n.subject === selectedSubject)
   );
   const currentBatchDpps = dppsList.filter(
     (d) =>
-      (!selectedBatchId || d.batchId === activeBatchId || d.batchId === "batch-class-8" || d.batchId === "batch-1" || !d.batchId) &&
-      (!selectedSubject || d.subject === selectedSubject)
+      (!activeBatchId || d.batchId === activeBatchId || !d.batchId) &&
+      (!selectedSubject || selectedSubject === "All" || d.subject === selectedSubject)
   );
 
   return (
@@ -2105,7 +1704,7 @@ function AdminPortalContent() {
 
                 {/* Select Subject Pills */}
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  {["Mathematics", "Science", "English", "SST", "Hindi"].map((subj) => (
+                  {["All", "Mathematics", "Science", "English", "SST", "Hindi"].map((subj) => (
                     <button
                       key={subj}
                       onClick={() => setSelectedSubject(subj)}
@@ -5937,130 +5536,125 @@ Ansh Tutor`;
   );
 }
 
-export default function AdminPage() {
-  const { user, profile, loading, openLoginModal, logout } = useAuth();
-  const [passcode, setPasscode] = useState("");
-  const [passcodeError, setPasscodeError] = useState("");
-  const [sessionAuth, setSessionAuth] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
+function AdminPhoneOtpGate({ onAuthorized }: { onAuthorized: () => void }) {
+  const { setProfile } = useAuth();
+  const [phoneNumber, setPhoneNumber] = useState("7525009428");
+  const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [timer, setTimer] = useState(30);
+  const otpInputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    try {
-      const stored =
-        sessionStorage.getItem("ansh_admin_session_auth") ||
-        localStorage.getItem("ansh_admin_session_auth");
-      if (stored === "authorized") {
-        setSessionAuth(true);
-      }
-    } catch {}
-    setCheckingAuth(false);
-  }, []);
+    let interval: NodeJS.Timeout;
+    if (step === "otp" && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => (prev <= 1 ? 0 : prev - 1));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [step, timer]);
 
-  const handlePasscodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const clean = passcode.trim();
-    if (
-      clean === "7525009428" ||
-      clean === "7525" ||
-      clean.toLowerCase() === "ansh7525" ||
-      clean.toLowerCase() === "anshadmin"
-    ) {
-      setPasscodeError("");
-      setSessionAuth(true);
-      try {
-        sessionStorage.setItem("ansh_admin_session_auth", "authorized");
-      } catch {}
-    } else {
-      setPasscodeError("Invalid Administrator Passcode. Please check and try again.");
+  const handleSendOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const cleanDigits = phoneNumber.replace(/\D/g, "").slice(-10);
+    if (cleanDigits.length !== 10) {
+      setError("Please enter a valid 10-digit mobile number");
+      return;
+    }
+    if (cleanDigits !== "7525009428") {
+      setError("Access Restricted: Only the registered Super Admin phone number (+91 75250 09428) is authorized for Admin Console.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setOtp(["", "", "", "", "", ""]);
+
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber: cleanDigits }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send OTP");
+
+      setSessionId(data.sessionId || null);
+      setStep("otp");
+      setTimer(30);
+      setTimeout(() => otpInputsRef.current[0]?.focus(), 150);
+    } catch (err: any) {
+      setError(err?.message || "Failed to send OTP. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading || checkingAuth) {
-    return (
-      <div className="min-h-screen bg-[#F4F6FB] flex flex-col items-center justify-center p-4">
-        <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center animate-spin mb-4">
-          <div className="w-6 h-6 border-2 border-[#5A4BDA] border-t-transparent rounded-full" />
-        </div>
-        <p className="text-sm font-bold text-gray-700">Verifying Admin Security Clearance...</p>
-        <p className="text-xs text-gray-400 mt-1">Ansh Tutor Admin Infrastructure</p>
-      </div>
-    );
-  }
+  const handleOtpChange = (index: number, value: string) => {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    const newOtp = [...otp];
+    newOtp[index] = digit;
+    setOtp(newOtp);
+    if (error) setError(null);
+    if (digit && index < 5) otpInputsRef.current[index + 1]?.focus();
+    if (digit && index === 5 && newOtp.every((d) => d !== "")) {
+      handleVerifyOtp(newOtp.join(""));
+    }
+  };
 
-  const cleanPhone = user?.phoneNumber ? user.phoneNumber.replace(/\D/g, "").slice(-10) : "";
-  const isSuperAdminPhone = cleanPhone === "7525009428";
-  const isAdminRole = profile?.role === "admin";
-  const isAuthorized = sessionAuth || isSuperAdminPhone || isAdminRole;
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      otpInputsRef.current[index - 1]?.focus();
+    }
+  };
 
-  // Case 1: Authorized -> Render the full Admin Portal
-  if (isAuthorized) {
-    return (
-      <Suspense
-        fallback={
-          <div className="min-h-screen bg-white flex items-center justify-center text-sm font-semibold text-gray-600">
-            Loading Admin Portal...
-          </div>
-        }
-      >
-        <AdminPortalContent />
-      </Suspense>
-    );
-  }
+  const handleVerifyOtp = async (codeToVerify?: string) => {
+    const code = codeToVerify || otp.join("");
+    if (code.length !== 6) return;
 
-  // Case 2: Logged in, but as an unauthorized student -> Access Denied (403)
-  if (user && !isAdminRole && !isSuperAdminPhone) {
-    return (
-      <div className="min-h-screen bg-[#F4F6FB] flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl border border-red-200/80 p-8 shadow-xl text-center space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto border border-red-100 shadow-inner">
-            <ShieldAlert className="w-8 h-8" />
-          </div>
-          <div>
-            <span className="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-bold uppercase tracking-wider">
-              Access Restricted • 403 Forbidden
-            </span>
-            <h2 className="text-2xl font-black text-gray-900 mt-3">
-              Administrator Access Required
-            </h2>
-            <p className="text-xs text-gray-600 mt-2 leading-relaxed">
-              You are currently signed in as a student (<strong className="text-gray-900">{profile?.name || user.phoneNumber || "Student"}</strong>).
-              This console is strictly restricted to Ansh Tutor Super Administrators.
-            </p>
-          </div>
+    setLoading(true);
+    setError(null);
 
-          <div className="pt-2 space-y-2.5">
-            <Link
-              href="/"
-              className="w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-[#5A4BDA] hover:bg-[#4939C8] text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-indigo-600/20"
-            >
-              <span>Return to Student Home</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <button
-              onClick={async () => {
-                await logout();
-                openLoginModal();
-              }}
-              className="w-full py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition-colors cursor-pointer"
-            >
-              Sign Out &amp; Login as Super Admin (+91 7525009428)
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    try {
+      const cleanDigits = phoneNumber.replace(/\D/g, "").slice(-10);
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phoneNumber: cleanDigits,
+          otp: code,
+          sessionId,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Invalid OTP code");
 
-  // Case 3: Not logged in at all -> Admin Login & Passcode Gate
+      const userProfile = data.profile;
+      if (cleanDigits.endsWith("7525009428") || userProfile?.role === "admin") {
+        setProfile(userProfile);
+        try {
+          localStorage.setItem("ansh_auth_profile", JSON.stringify(userProfile));
+          sessionStorage.setItem("ansh_admin_auth", "authorized");
+        } catch {}
+        onAuthorized();
+      } else {
+        setError("Access Restricted: Mobile number is not registered as Super Admin.");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Failed to verify OTP.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#0F172A] flex items-center justify-center p-4 sm:p-6 text-white font-sans relative overflow-hidden">
-      {/* Background ambient lighting */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="max-w-md w-full bg-[#1E293B]/90 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative z-10 space-y-6">
-        {/* Header with Owl Logo */}
+    <div className="min-h-screen bg-[#F4F6FB] flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-3xl border border-gray-200/90 p-6 sm:p-8 shadow-xl space-y-6">
         <div className="text-center space-y-3">
-          <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-2.5 mx-auto shadow-lg shadow-indigo-500/20">
+          <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center p-2.5 mx-auto shadow-xs">
             <Image
               src="/owl-logo.png"
               alt="Ansh Tutor"
@@ -6070,81 +5664,198 @@ export default function AdminPage() {
             />
           </div>
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-bold">
-              <Lock className="w-3.5 h-3.5" />
-              <span>Administrative Gateway</span>
-            </div>
-            <h1 className="text-2xl font-black text-white mt-2 tracking-tight">
+            <span className="px-3 py-1 rounded-full bg-indigo-50 text-[#5A4BDA] border border-indigo-100 text-xs font-bold uppercase tracking-wider">
+              Super Admin Verification
+            </span>
+            <h1 className="text-2xl font-black text-gray-950 mt-2 tracking-tight">
               Ansh Tutor Admin Portal
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Protected Management System for Academic Administration
+            <p className="text-xs text-gray-500 mt-1">
+              {step === "phone"
+                ? "Enter registered Super Admin mobile number to receive OTP"
+                : `6-digit verification code sent to +91 ${phoneNumber}`}
             </p>
           </div>
         </div>
 
-        {/* Master Passcode Form */}
-        <form onSubmit={handlePasscodeSubmit} className="space-y-4 pt-2">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
-              Super Admin Passcode / Master PIN
-            </label>
-            <div className="relative">
-              <input
-                type="password"
-                value={passcode}
-                onChange={(e) => {
-                  setPasscode(e.target.value);
-                  setPasscodeError("");
-                }}
-                placeholder="Enter Administrator Passcode"
-                className="w-full px-4 py-3 bg-slate-900/80 border border-slate-700 rounded-xl text-white text-sm placeholder:text-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-                autoFocus
-              />
-            </div>
-            {passcodeError && (
-              <p className="text-xs text-red-400 mt-1.5 flex items-center gap-1 font-medium">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                <span>{passcodeError}</span>
-              </p>
-            )}
+        {error && (
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
           </div>
+        )}
 
-          <button
-            type="submit"
-            className="w-full py-3.5 px-4 bg-gradient-to-r from-[#5A4BDA] to-[#7B61FF] hover:from-[#4939C8] hover:to-[#6A4FE8] text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Unlock className="w-4 h-4" />
-            <span>Verify &amp; Enter Admin Portal</span>
-          </button>
-        </form>
+        {step === "phone" ? (
+          <form onSubmit={handleSendOtp} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
+                Admin Mobile Number
+              </label>
+              <div className="relative flex items-center">
+                <span className="absolute left-3.5 text-sm font-bold text-gray-500">
+                  +91
+                </span>
+                <input
+                  type="tel"
+                  maxLength={10}
+                  value={phoneNumber}
+                  onChange={(e) => {
+                    setPhoneNumber(e.target.value.replace(/\D/g, ""));
+                    if (error) setError(null);
+                  }}
+                  placeholder="7525009428"
+                  className="w-full pl-13 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 font-bold text-sm tracking-wide focus:outline-none focus:border-[#5A4BDA] focus:bg-white"
+                  autoFocus
+                />
+              </div>
+            </div>
 
-        <div className="relative flex items-center justify-center">
-          <div className="border-t border-slate-700 w-full" />
-          <span className="bg-[#1E293B] px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 shrink-0">
-            or via registered mobile
-          </span>
-        </div>
+            <button
+              type="submit"
+              disabled={loading || phoneNumber.length !== 10}
+              className="w-full py-3.5 px-4 bg-[#5A4BDA] hover:bg-[#4939C8] disabled:bg-gray-300 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Sending OTP...</span>
+                </>
+              ) : (
+                <>
+                  <Phone className="w-4 h-4" />
+                  <span>Send Verification OTP</span>
+                </>
+              )}
+            </button>
+          </form>
+        ) : (
+          <div className="space-y-5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-gray-600">Enter 6-Digit OTP:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("phone");
+                  setError(null);
+                }}
+                className="text-xs font-bold text-[#5A4BDA] hover:underline cursor-pointer"
+              >
+                Change Number
+              </button>
+            </div>
 
-        {/* Super Admin Phone OTP Login Button */}
-        <button
-          onClick={openLoginModal}
-          className="w-full py-3 px-4 bg-slate-800 hover:bg-slate-700/80 border border-slate-600 text-slate-200 font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <Phone className="w-3.5 h-3.5 text-indigo-400" />
-          <span>Login via Super Admin Phone (+91 75250 09428)</span>
-        </button>
+            <div className="flex items-center justify-between gap-2">
+              {otp.map((digit, idx) => (
+                <input
+                  key={idx}
+                  ref={(el) => {
+                    otpInputsRef.current[idx] = el;
+                  }}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOtpChange(idx, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(idx, e)}
+                  className="w-12 h-13 text-center text-xl font-bold bg-gray-50 border border-gray-300 rounded-xl text-gray-950 focus:outline-none focus:border-[#5A4BDA] focus:bg-white transition-all shadow-2xs"
+                />
+              ))}
+            </div>
 
-        {/* Return to Public Website */}
-        <div className="text-center pt-2">
+            <button
+              type="button"
+              onClick={() => handleVerifyOtp()}
+              disabled={loading || otp.some((d) => d === "")}
+              className="w-full py-3.5 px-4 bg-[#5A4BDA] hover:bg-[#4939C8] disabled:bg-gray-300 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Verifying OTP...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Verify OTP &amp; Open Admin Panel</span>
+                </>
+              )}
+            </button>
+
+            <div className="text-center">
+              {timer > 0 ? (
+                <p className="text-xs text-gray-500 font-medium">
+                  Resend OTP in <strong className="text-gray-800">{timer}s</strong>
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleSendOtp()}
+                  className="text-xs font-bold text-[#5A4BDA] hover:underline cursor-pointer"
+                >
+                  Resend OTP Code
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="pt-2 text-center border-t border-gray-100">
           <Link
             href="/"
-            className="text-xs text-slate-400 hover:text-white transition-colors inline-flex items-center gap-1"
+            className="text-xs font-medium text-gray-500 hover:text-gray-800 transition-colors inline-flex items-center gap-1"
           >
-            <span>&larr; Return to Public Website</span>
+            <span>&larr; Return to Student Home</span>
           </Link>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminPage() {
+  const { profile, loading } = useAuth();
+  const [authorized, setAuthorized] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("ansh_auth_profile");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const clean = (parsed?.phone || "").replace(/\D/g, "");
+        if (clean.endsWith("7525009428") || parsed?.role === "admin") {
+          setAuthorized(true);
+        }
+      }
+    } catch {}
+    setChecking(false);
+  }, []);
+
+  if (loading || checking) {
+    return (
+      <div className="min-h-screen bg-[#F8F9FB] flex flex-col items-center justify-center p-4">
+        <div className="w-10 h-10 border-3 border-[#5A4BDA] border-t-transparent rounded-full animate-spin mb-3" />
+        <p className="text-xs font-bold text-gray-600">Verifying Admin Access...</p>
+      </div>
+    );
+  }
+
+  const cleanPhone = (profile?.phone || "").replace(/\D/g, "");
+  const isSuperAdmin = authorized || cleanPhone.endsWith("7525009428") || profile?.role === "admin";
+
+  if (!isSuperAdmin) {
+    return <AdminPhoneOtpGate onAuthorized={() => setAuthorized(true)} />;
+  }
+
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-white flex items-center justify-center text-sm font-semibold text-gray-600">
+          Loading Admin Portal...
+        </div>
+      }
+    >
+      <AdminPortalContent />
+    </Suspense>
   );
 }
