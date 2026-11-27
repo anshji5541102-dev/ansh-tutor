@@ -213,14 +213,14 @@ function AdminPortalContent() {
   const [payLaterList, setPayLaterList] = useState<PayLaterRecord[]>([]);
 
   // ==========================================
-  // 2. BATCHES (Class 1st - 8th)
+  // 2. BATCHES (Dynamic State, Stored in LocalStorage)
   // ==========================================
-  const [batchesList, setBatchesList] = useState<BatchRecord[]>(defaultAcademicBatches as BatchRecord[]);
+  const [batchesList, setBatchesList] = useState<BatchRecord[]>([]);
 
   // ==========================================
   // 3. BATCH CONTENT (Recorded Videos, Notes, DPPs)
   // ==========================================
-  const [selectedBatchId, setSelectedBatchId] = useState(defaultAcademicBatches[0]?.id || "batch-class-8");
+  const [selectedBatchId, setSelectedBatchId] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("All");
   const [contentSubTab, setContentSubTab] = useState<"Lectures" | "Notes" | "DPPs">("Lectures");
 
@@ -859,45 +859,92 @@ function AdminPortalContent() {
   const [batchesFilter, setBatchesFilter] = useState<"all" | "active" | "expired">("all");
   const [counselingBookings, setCounselingBookings] = useState<any[]>([]);
 
-  // Reusable Animated Confirmation Modal State for All Sensitive Tasks
+  // Reusable 2-Stage Confirmation Modal State with Safety Delays
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
+    step: 1 | 2;
     title: string;
     description: string;
+    itemName?: string;
     confirmText?: string;
     cancelText?: string;
     isDanger?: boolean;
-    onConfirm: () => void;
+    countdown: number;
+    isProcessing: boolean;
+    onConfirm: () => void | Promise<void>;
   }>({
     isOpen: false,
+    step: 1,
     title: "",
     description: "",
+    itemName: "",
     confirmText: "Confirm",
     cancelText: "Cancel",
     isDanger: true,
+    countdown: 3,
+    isProcessing: false,
     onConfirm: () => {},
   });
+
+  // Countdown timer for Warning Stage 2 (Deliberate safety lock before confirm is enabled)
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (confirmModal.isOpen && confirmModal.step === 2 && confirmModal.countdown > 0) {
+      timer = setInterval(() => {
+        setConfirmModal((prev) => ({
+          ...prev,
+          countdown: Math.max(0, prev.countdown - 1),
+        }));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [confirmModal.isOpen, confirmModal.step, confirmModal.countdown]);
 
   const askConfirmation = (opts: {
     title: string;
     description: string;
+    itemName?: string;
     confirmText?: string;
     cancelText?: string;
     isDanger?: boolean;
-    onConfirm: () => void;
+    onConfirm: () => void | Promise<void>;
   }) => {
     setConfirmModal({
       isOpen: true,
+      step: 1,
       title: opts.title,
       description: opts.description,
+      itemName: opts.itemName || "",
       confirmText: opts.confirmText || "Confirm",
       cancelText: opts.cancelText || "Cancel",
       isDanger: opts.isDanger !== false,
-      onConfirm: () => {
-        opts.onConfirm();
-        setConfirmModal((prev) => ({ ...prev, isOpen: false }));
-      },
+      countdown: 3,
+      isProcessing: false,
+      onConfirm: opts.onConfirm,
     });
+  };
+
+  const handleProceedToStep2 = () => {
+    setConfirmModal((prev) => ({
+      ...prev,
+      step: 2,
+      countdown: 3,
+    }));
+  };
+
+  const handleFinalExecuteConfirm = async () => {
+    setConfirmModal((prev) => ({ ...prev, isProcessing: true }));
+    // Deliberate security execution delay so action does not execute in 0.01ms
+    await new Promise((r) => setTimeout(r, 900));
+    try {
+      await confirmModal.onConfirm();
+    } catch {}
+    setConfirmModal((prev) => ({
+      ...prev,
+      isOpen: false,
+      isProcessing: false,
+      step: 1,
+    }));
   };
 
   const [newLiveTitle, setNewLiveTitle] = useState("");
@@ -949,24 +996,21 @@ function AdminPortalContent() {
     if (typeof window !== "undefined") {
       try {
         const storedBatches = localStorage.getItem("ansh_admin_batches");
-        if (storedBatches) {
+        if (storedBatches !== null) {
           try {
             const parsed = JSON.parse(storedBatches);
-            if (Array.isArray(parsed) && parsed.length > 0) {
+            if (Array.isArray(parsed)) {
               setBatchesList(parsed);
-              setSelectedBatchId((prev) => prev || parsed[0]?.id || "batch-class-8");
-            } else {
-              setBatchesList(defaultAcademicBatches as BatchRecord[]);
-              setSelectedBatchId(defaultAcademicBatches[0]?.id || "batch-class-8");
+              setSelectedBatchId(parsed[0]?.id || "");
             }
           } catch {
-            setBatchesList(defaultAcademicBatches as BatchRecord[]);
-            setSelectedBatchId(defaultAcademicBatches[0]?.id || "batch-class-8");
+            setBatchesList([]);
+            setSelectedBatchId("");
           }
         } else {
-          setBatchesList(defaultAcademicBatches as BatchRecord[]);
-          setSelectedBatchId(defaultAcademicBatches[0]?.id || "batch-class-8");
-          localStorage.setItem("ansh_admin_batches", JSON.stringify(defaultAcademicBatches));
+          setBatchesList([]);
+          setSelectedBatchId("");
+          localStorage.setItem("ansh_admin_batches", JSON.stringify([]));
         }
 
         const safeLoad = (key: string, setter: (val: any) => void) => {
@@ -5481,54 +5525,151 @@ Ansh Tutor`;
         </div>
       )}
 
-      {/* 10. REUSABLE ANIMATED CONFIRMATION MODAL FOR ALL SENSITIVE TASKS */}
+      {/* 10. REUSABLE 2-STAGE CONFIRMATION MODAL WITH DELIBERATE SAFETY DELAY */}
       {confirmModal.isOpen && (
-        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-7 w-full max-w-md shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
-            <div className="flex items-start gap-3.5">
-              <div
-                className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
-                  confirmModal.isDanger
-                    ? "bg-red-50 text-red-600 border border-red-100"
-                    : "bg-indigo-50 text-[#5A4BDA] border border-indigo-100"
-                }`}
-              >
-                {confirmModal.isDanger ? (
-                  <AlertTriangle className="w-5 h-5 animate-pulse" />
-                ) : (
-                  <ShieldAlert className="w-5 h-5" />
-                )}
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-gray-950">
-                  {confirmModal.title}
-                </h3>
-                <p className="text-xs text-gray-600 leading-relaxed">
-                  {confirmModal.description}
-                </p>
-              </div>
-            </div>
+        <div className="fixed inset-0 z-[100] bg-black/65 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl border border-gray-200 p-6 sm:p-7 w-full max-w-lg shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
+            {confirmModal.step === 1 ? (
+              /* ============================================================ */
+              /* WARNING 1 OF 2: Scope & Consequence Assessment              */
+              /* ============================================================ */
+              <>
+                <div className="flex items-start gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-amber-50 text-amber-600 border border-amber-200 shadow-2xs">
+                    <AlertTriangle className="w-6 h-6 animate-pulse" />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black uppercase tracking-wider border border-amber-200">
+                      Warning 1 of 2 • Sensitive Action Check
+                    </span>
+                    <h3 className="text-lg font-black text-gray-950 mt-1">
+                      {confirmModal.title}
+                    </h3>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      {confirmModal.description}
+                    </p>
+                  </div>
+                </div>
 
-            <div className="pt-2 flex items-center justify-end gap-2.5">
-              <button
-                type="button"
-                onClick={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
-                className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-xs font-bold transition-colors cursor-pointer"
-              >
-                {confirmModal.cancelText || "Cancel"}
-              </button>
-              <button
-                type="button"
-                onClick={confirmModal.onConfirm}
-                className={`px-5 py-2 rounded-xl text-white text-xs font-bold transition-all shadow-sm cursor-pointer ${
-                  confirmModal.isDanger
-                    ? "bg-red-600 hover:bg-red-700 shadow-red-500/20"
-                    : "bg-[#5A4BDA] hover:bg-[#4939C8] shadow-indigo-500/20"
-                }`}
-              >
-                {confirmModal.confirmText || "Confirm Action"}
-              </button>
-            </div>
+                <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3.5 space-y-1.5 text-xs text-amber-900">
+                  <div className="font-bold flex items-center gap-1.5 text-amber-950">
+                    <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0" />
+                    <span>Consequences of this Action:</span>
+                  </div>
+                  <ul className="list-disc pl-5 space-y-1 text-gray-700 text-[11px]">
+                    <li>This deletion is permanent and cannot be undone via undo.</li>
+                    <li>Students will instantly lose access on website and mobile apps.</li>
+                    <li>Next step requires a deliberate 3-second security lock verification.</li>
+                  </ul>
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    {confirmModal.cancelText || "Cancel (Keep Safe)"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleProceedToStep2}
+                    className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-black transition-all shadow-md shadow-amber-600/20 flex items-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <span>I Understand the Impact &rarr; Proceed to Warning 2</span>
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* ============================================================ */
+              /* WARNING 2 OF 2: Final Verification & Deliberate Safety Lock  */
+              /* ============================================================ */
+              <>
+                <div className="flex items-start gap-3.5">
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-red-50 text-red-600 border border-red-200 shadow-2xs">
+                    <Trash2 className="w-6 h-6 animate-bounce" />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="px-2.5 py-0.5 rounded-full bg-red-100 text-red-800 text-[10px] font-black uppercase tracking-wider border border-red-200">
+                      Warning 2 of 2 • Final Security Lock
+                    </span>
+                    <h3 className="text-lg font-black text-gray-950 mt-1">
+                      Final Security Verification
+                    </h3>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Confirming irreversible deletion. To guarantee no accidental 0.01ms instant clicks occur, a mandatory security countdown lock is enforced.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Safety Delay Indicator */}
+                <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center space-y-2">
+                  {confirmModal.isProcessing ? (
+                    <div className="flex flex-col items-center justify-center py-2 space-y-2">
+                      <div className="w-7 h-7 border-3 border-red-600 border-t-transparent rounded-full animate-spin" />
+                      <p className="text-xs font-black text-red-900">
+                        Purging records &amp; syncing database... Please wait.
+                      </p>
+                    </div>
+                  ) : confirmModal.countdown > 0 ? (
+                    <div className="space-y-1.5">
+                      <div className="text-xs font-bold text-red-800 flex items-center justify-center gap-1.5">
+                        <Lock className="w-4 h-4 text-red-600 animate-pulse" />
+                        <span>Security Lock Active: Please wait {confirmModal.countdown}s</span>
+                      </div>
+                      <div className="w-full bg-red-200/80 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className="bg-red-600 h-1.5 rounded-full transition-all duration-1000 ease-linear"
+                          style={{ width: `${((3 - confirmModal.countdown) / 3) * 100}%` }}
+                        />
+                      </div>
+                      <p className="text-[11px] text-gray-500">
+                        Accidental double-click protection active. Button will unlock shortly.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="text-xs font-bold text-emerald-800 flex items-center justify-center gap-1.5 py-1">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>Security Lock Disengaged: You may now permanently delete.</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    disabled={confirmModal.isProcessing}
+                    onClick={() => setConfirmModal((prev) => ({ ...prev, isOpen: false, step: 1 }))}
+                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    Abort &amp; Keep Data
+                  </button>
+                  <button
+                    type="button"
+                    disabled={confirmModal.countdown > 0 || confirmModal.isProcessing}
+                    onClick={handleFinalExecuteConfirm}
+                    className="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-black transition-all shadow-md shadow-red-600/20 flex items-center gap-2 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    {confirmModal.isProcessing ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Deleting Records...</span>
+                      </>
+                    ) : confirmModal.countdown > 0 ? (
+                      <>
+                        <Lock className="w-3.5 h-3.5" />
+                        <span>Locked ({confirmModal.countdown}s)</span>
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>{confirmModal.confirmText || "Yes, Delete Permanently"}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
